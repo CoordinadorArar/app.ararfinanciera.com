@@ -417,7 +417,7 @@ class Deterioro extends Model
                 $origen->capital, $oper->capital],
             ['C-INTERES', 'Interés del detalle contra el consolidado por operación',
                 $origen->interes, $oper->interes],
-            ['C-PARTICION', 'Capital corriente más vencido contra el capital total',
+            ['C-PARTIC', 'Capital corriente más vencido contra el capital total',
                 $origen->capital, $origen->corriente + $origen->vencido],
             ['C-BASE', 'Base de deterioro contra capital vencido más interés vencido',
                 $oper->base, $origen->vencido + $origen->ivencido],
@@ -524,6 +524,111 @@ class Deterioro extends Model
             "duración {$duracion} ms", $idUsuario);
 
         return ['duracion_ms' => $duracion, 'pasos' => $pasos, 'cuadres' => $cuadres];
+    }
+
+    /* ---------------------------------------------------------------------
+     | Consultas de presentación
+     |-------------------------------------------------------------------- */
+
+    public static function listarCortes()
+    {
+        return DB::select(
+            "SELECT c.*,
+                    anterior = a.fecha_corte,
+                    operaciones = (SELECT COUNT(*) FROM det_deterioro_operacion o WHERE o.id_corte = c.id_corte),
+                    deterioro = (SELECT SUM(deterioro_contable) FROM det_deterioro_operacion o WHERE o.id_corte = c.id_corte),
+                    cuadres_total = (SELECT COUNT(*) FROM det_corte_cuadre q WHERE q.id_corte = c.id_corte),
+                    cuadres_falla = (SELECT COUNT(*) FROM det_corte_cuadre q WHERE q.id_corte = c.id_corte AND q.estado <> 'OK')
+             FROM det_corte c
+             LEFT JOIN det_corte a ON a.id_corte = c.id_corte_anterior
+             ORDER BY c.fecha_corte DESC");
+    }
+
+    public static function corte($idCorte)
+    {
+        return DB::selectOne('SELECT * FROM det_corte WHERE id_corte = ?', [$idCorte]);
+    }
+
+    /**
+     * Matriz producto x rango con capital, interés, base y deterioro.
+     * Réplica del bloque T14:AB27 del libro.
+     *
+     * Se agrupa por calificacion_abc y no por ISNULL(rango_codigo, 'Corriente'):
+     * rango_codigo es nchar(1) y ISNULL devuelve el tipo del primer argumento,
+     * de modo que 'Corriente' se truncaría a 'C' y se mezclaría con ese rango.
+     */
+    public static function resumenPorProductoRango($idCorte)
+    {
+        return DB::select(
+            "SELECT producto,
+                    rango = ISNULL(calificacion_abc, 'Corriente'),
+                    orden_rango = ISNULL(pr.orden, 0),
+                    operaciones = COUNT(*),
+                    cuotas = SUM(o.cuotas),
+                    capital_corriente = SUM(o.capital_corriente),
+                    capital_vencido = SUM(o.capital_vencido),
+                    interes_corriente = SUM(o.interes_corriente),
+                    interes_vencido = SUM(o.interes_vencido),
+                    base = SUM(o.base_deterioro),
+                    pct = MAX(o.pct_contable),
+                    deterioro = SUM(o.deterioro_contable)
+             FROM det_deterioro_operacion o
+             LEFT JOIN det_corte_param_rango_mora pr
+                    ON pr.id_corte = o.id_corte AND pr.codigo = o.rango_codigo
+             WHERE o.id_corte = ?
+             GROUP BY o.producto, ISNULL(o.calificacion_abc, 'Corriente'), ISNULL(pr.orden, 0)
+             ORDER BY o.producto, ISNULL(pr.orden, 0)", [$idCorte]);
+    }
+
+    public static function cuadres($idCorte)
+    {
+        return DB::select('SELECT * FROM det_corte_cuadre WHERE id_corte = ? ORDER BY codigo', [$idCorte]);
+    }
+
+    /** Detalle por operación. Devuelve datos, no HTML: son ~2.100 filas. */
+    public static function detalleOperaciones($idCorte, $filtros = [])
+    {
+        $sql = "SELECT id_operacion, id_cliente, cliente, producto, nom_operacion,
+                       fec_inicial_mora, cuotas, dias_mora_operacion,
+                       rango = ISNULL(calificacion_abc, 'Corriente'),
+                       capital_corriente, capital_vencido, interes_corriente, interes_vencido,
+                       interes_mora, base_deterioro, pct_contable, deterioro_contable,
+                       capital_mes_anterior, variacion_capital
+                FROM det_deterioro_operacion WHERE id_corte = ?";
+        $bind = [$idCorte];
+
+        if (!empty($filtros['producto'])) {
+            $sql .= ' AND producto = ?';
+            $bind[] = $filtros['producto'];
+        }
+        if (!empty($filtros['rango'])) {
+            $sql .= " AND ISNULL(calificacion_abc, 'Corriente') = ?";
+            $bind[] = $filtros['rango'];
+        }
+        if (!empty($filtros['soloDeterioro'])) {
+            $sql .= ' AND deterioro_contable > 0';
+        }
+        if (!empty($filtros['busqueda'])) {
+            $sql .= ' AND (cliente LIKE ? OR id_cliente LIKE ? OR CAST(id_operacion AS varchar(20)) LIKE ?)';
+            $like = '%'.$filtros['busqueda'].'%';
+            $bind[] = $like; $bind[] = $like; $bind[] = $like;
+        }
+        $sql .= ' ORDER BY deterioro_contable DESC, id_operacion';
+
+        return DB::select($sql, $bind);
+    }
+
+    /** Cuotas de una operación, para el descenso desde el detalle. */
+    public static function cuotasDeOperacion($idCorte, $idOperacion)
+    {
+        return DB::select(
+            'SELECT id_cuota, id_detalle_operacion, fec_inicial_corriente, fec_final_corriente,
+                    dias_mora_cuota, estado_cuota, saldo_capital, saldo_intereses, saldo_admon,
+                    capital_corriente, capital_vencido, interes_corriente, interes_vencido,
+                    interes_mora, capital_mes_anterior
+             FROM det_corte_detalle_cuota
+             WHERE id_corte = ? AND id_operacion = ?
+             ORDER BY id_cuota', [$idCorte, $idOperacion]);
     }
 
     /* ---------------------------------------------------------------------

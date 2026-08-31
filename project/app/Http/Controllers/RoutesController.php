@@ -95,6 +95,18 @@ class RoutesController extends Controller
     public function tableroDigitalizacion(){
         return view('gestion-documental.tablero-digitalizacion');
     }
+    /**Vista de cortes del módulo de deterioro de cartera */
+    public function deterioroCortes(){
+        return view('deterioro.cortes');
+    }
+    /**Vista resumen del corte: matriz producto x rango */
+    public function deterioroResumen(){
+        return view('deterioro.resumen-corte');
+    }
+    /**Vista detalle por operación con descenso a las cuotas */
+    public function deterioroDetalleOperaciones(){
+        return view('deterioro.detalle-operaciones');
+    }
     /**Vista perfil de usuario */
     public function perfilUsuario(){
         $user = Admin::perfilUsuario();

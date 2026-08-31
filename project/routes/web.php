@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 //use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContableController;
+use App\Http\Controllers\DeterioroController;
 use App\Http\Controllers\GestionDocumentalController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PetitionsController;
@@ -52,6 +53,9 @@ Route::group(['middleware'=>['auth','submenu.permiso']],function(){
     Route::get('/digitalizar-facturas', [RoutesController::class, 'digitalizarFacturas'])->name('digitalizar-facturas');
     Route::get('/gestion-cajas', [RoutesController::class, 'gestionCajas'])->name('gestion-cajas');
     Route::get('/tablero-digitalizacion', [RoutesController::class, 'tableroDigitalizacion'])->name('tablero-digitalizacion');
+    Route::get('/deterioro-cortes', [RoutesController::class, 'deterioroCortes'])->name('deterioro-cortes');
+    Route::get('/deterioro-resumen', [RoutesController::class, 'deterioroResumen'])->name('deterioro-resumen');
+    Route::get('/deterioro-detalle-operaciones', [RoutesController::class, 'deterioroDetalleOperaciones'])->name('deterioro-detalle-operaciones');
 });
 
 /**Rutas Gestión Documental */
@@ -160,4 +164,20 @@ Route::group(['middleware'=>'auth'],function(){
     Route::post('/documento-operaciones-filtros', [ContableController::class, 'documentoOperacionesFiltros'])->name('documento-operaciones-filtros');
     Route::post('/documento-operaciones-envio-siesa', [ContableController::class, 'documentoOperacionesEnvioSiesa'])->name('documento-operaciones-envio-siesa');
     Route::post('/generar-cupones-archivo', [ContableController::class, 'generarCuponesArchivo'])->name('generar-cupones-archivo');
+});
+/**Rutas deterioro de cartera
+ * A diferencia del resto del sitio, estas acciones sí verifican permiso por
+ * operación y no solo autenticación: crear, ejecutar o eliminar un corte tiene
+ * efecto contable. */
+Route::group(['middleware'=>['auth','deterioro.permiso:consultar']],function(){
+    Route::post('/deterioro-periodo-origen', [DeterioroController::class, 'periodoOrigen'])->name('deterioro-periodo-origen');
+    Route::post('/deterioro-listar-cortes', [DeterioroController::class, 'listarCortes'])->name('deterioro-listar-cortes');
+    Route::post('/deterioro-resumen-datos', [DeterioroController::class, 'resumenCorte'])->name('deterioro-resumen-datos');
+    Route::post('/deterioro-detalle-datos', [DeterioroController::class, 'detalleOperaciones'])->name('deterioro-detalle-datos');
+    Route::post('/deterioro-cuotas-operacion', [DeterioroController::class, 'cuotasOperacion'])->name('deterioro-cuotas-operacion');
+});
+Route::group(['middleware'=>['auth','deterioro.permiso:calcular']],function(){
+    Route::post('/deterioro-crear-corte', [DeterioroController::class, 'crearCorte'])->name('deterioro-crear-corte');
+    Route::post('/deterioro-ejecutar-corte', [DeterioroController::class, 'ejecutarCorte'])->name('deterioro-ejecutar-corte');
+    Route::post('/deterioro-eliminar-corte', [DeterioroController::class, 'eliminarCorte'])->name('deterioro-eliminar-corte');
 });

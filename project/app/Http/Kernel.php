@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'jwt.verify' => \App\Http\Middleware\JwtMiddleware::class,
         'CORS' => \App\Http\Middleware\CORS::class,
         'submenu.permiso' => \App\Http\Middleware\CheckSubmenuPermission::class,
+        'deterioro.permiso' => \App\Http\Middleware\CheckDeterioroPermiso::class,
     ];
 }

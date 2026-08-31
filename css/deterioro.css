@@ -1,0 +1,250 @@
+/* Módulo de deterioro de cartera. Estilos compartidos por las tres pantallas. */
+
+.det-contenedor {
+    padding: 0 .75rem 2rem;
+}
+
+.det-encabezado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .25rem 0 1rem;
+    border-bottom: 1px solid #e3e7ee;
+    margin-bottom: 1.25rem;
+}
+
+.det-titulo {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #1f2d3d;
+    letter-spacing: -.01em;
+}
+
+.det-subtitulo {
+    margin: .15rem 0 0;
+    font-size: .82rem;
+    color: #6b7a90;
+}
+
+/* --- Tarjetas de cifras --- */
+
+.det-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+}
+
+.det-tarjeta {
+    background: #fff;
+    border: 1px solid #e3e7ee;
+    border-radius: 8px;
+    padding: .8rem .95rem;
+}
+
+.det-tarjeta .et {
+    display: block;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #8593a7;
+    margin-bottom: .3rem;
+}
+
+.det-tarjeta .vl {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2d3d;
+    font-variant-numeric: tabular-nums;
+}
+
+.det-tarjeta.destacada {
+    background: #f4f7fd;
+    border-color: #c8d7f2;
+}
+
+.det-tarjeta.destacada .vl { color: rgb(45, 85, 165); }
+
+/* --- Tablas --- */
+
+.det-panel {
+    background: #fff;
+    border: 1px solid #e3e7ee;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.det-panel > h6 {
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #6b7a90;
+    margin: 0 0 .85rem;
+    font-weight: 600;
+}
+
+.det-scroll { overflow-x: auto; }
+
+table.det-tabla {
+    width: 100%;
+    font-size: .82rem;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+table.det-tabla thead th {
+    background: #f6f8fb;
+    color: #4a5a70;
+    font-weight: 600;
+    font-size: .74rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    padding: .5rem .6rem;
+    border-bottom: 2px solid #e3e7ee;
+    white-space: nowrap;
+}
+
+table.det-tabla tbody td {
+    padding: .42rem .6rem;
+    border-bottom: 1px solid #eef1f6;
+    white-space: nowrap;
+}
+
+table.det-tabla tbody tr:hover { background: #f9fbfe; }
+
+table.det-tabla .num { text-align: right; }
+
+table.det-tabla tfoot td,
+table.det-tabla tr.det-total td {
+    font-weight: 600;
+    background: #f6f8fb;
+    border-top: 2px solid #dfe5ee;
+}
+
+.det-cero { color: #c3cbd8; }
+
+/* --- Distintivos --- */
+
+.det-badge {
+    display: inline-block;
+    min-width: 1.6rem;
+    text-align: center;
+    padding: .12rem .45rem;
+    border-radius: 4px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+.det-rango-corriente { background: #eef2f7; color: #5d6b80; }
+.det-rango-a { background: #e6f4ea; color: #1e7c3a; }
+.det-rango-b { background: #eaf3d9; color: #5c7318; }
+.det-rango-c { background: #fdf3d6; color: #8a6410; }
+.det-rango-d { background: #fde8d4; color: #9a5312; }
+.det-rango-e { background: #fbdcd6; color: #a3391f; }
+.det-rango-f { background: #f6d2d2; color: #952020; }
+
+.det-estado-abierto   { background: #fdf3d6; color: #8a6410; }
+.det-estado-calculado { background: #e2edfb; color: rgb(45, 85, 165); }
+.det-estado-cerrado   { background: #e6f4ea; color: #1e7c3a; }
+
+/* --- Semáforos de cuadre --- */
+
+.det-cuadre {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .45rem .1rem;
+    border-bottom: 1px solid #eef1f6;
+    font-size: .82rem;
+}
+
+.det-cuadre:last-child { border-bottom: 0; }
+
+.det-punto {
+    width: .6rem;
+    height: .6rem;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.det-punto.ok { background: #35a35c; }
+.det-punto.falla { background: #d34848; }
+
+.det-cuadre .dif {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    color: #6b7a90;
+}
+
+/* --- Filtros --- */
+
+.det-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+}
+
+.det-filtros .campo { display: flex; flex-direction: column; gap: .25rem; }
+
+.det-filtros label {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #8593a7;
+    margin: 0;
+}
+
+.det-filtros .form-control,
+.det-filtros .form-select { min-width: 165px; font-size: .84rem; }
+
+/* --- Avisos --- */
+
+.det-aviso {
+    display: flex;
+    gap: .6rem;
+    align-items: flex-start;
+    background: #fdf8e6;
+    border: 1px solid #f0e2b4;
+    border-radius: 8px;
+    padding: .7rem .9rem;
+    font-size: .82rem;
+    color: #6b5a20;
+    margin-bottom: 1.25rem;
+}
+
+.det-aviso.info {
+    background: #f2f7fd;
+    border-color: #cfe0f5;
+    color: #35547f;
+}
+
+/* --- Pasos de la corrida --- */
+
+.det-pasos { list-style: none; margin: 0; padding: 0; font-size: .82rem; }
+
+.det-pasos li {
+    display: flex;
+    gap: .6rem;
+    padding: .3rem 0;
+    border-bottom: 1px solid #eef1f6;
+}
+
+.det-pasos li .ms {
+    margin-left: auto;
+    color: #6b7a90;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 576px) {
+    .det-encabezado { flex-direction: column; align-items: stretch; }
+    .det-filtros .form-control,
+    .det-filtros .form-select { min-width: 100%; }
+    .det-filtros .campo { width: 100%; }
+}
