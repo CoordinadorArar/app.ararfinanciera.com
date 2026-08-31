@@ -1,0 +1,85 @@
+.card{
+    padding: 30px;
+    border-radius: 0;
+}
+
+.card li span, .card h2, .card address{
+    font-family: 'Titulos';
+}
+
+p{
+    font-family: 'Parrafos2' !important;
+    margin: 0;
+}
+
+.img-footer {
+    display: block;
+    margin: 0 auto;
+    margin-top: 15%;
+    width: 300px;
+}
+
+.c-banner-footer {
+    margin-top: 5% !important;
+    font-family: 'Parrafos3';
+    padding: 5px;
+}
+
+.c-banner-footer a {
+    text-decoration: none;
+    color: inherit;
+    font-family: 'Parrafos2';
+    margin: 0;
+    text-align: justify;
+    padding: 5px;
+
+}
+
+.c-banner-footer a.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9;
+}
+
+.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9 !important;
+}
+
+.titulos2-footer {
+    font-family: 'Parrafos2';
+    color: #4073b9;
+}
+
+.line {
+    width: 6px !important;
+    height: 250px;
+    background: #1365d6;
+    clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%);
+}
+
+@media (max-width: 768px) {
+    .contenedor-p-footer {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center;
+    }
+
+    .c-banner-footer {
+        margin-top: 30px !important;
+        font-size: 1rem;
+        margin-left: 25px !important;
+    }
+
+    .c-atencion-texto {
+        margin-top: 30px !important;
+    }
+
+    .c-pie-pagina {
+        height: 60px;
+    }
+
+    .c-imagen-footer {
+        margin-left: 40px !important;
+    }
+}

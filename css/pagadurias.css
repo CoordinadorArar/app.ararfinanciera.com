@@ -1,0 +1,34 @@
+.input-config-drag{
+    width: auto;
+}
+.input-config-drag:hover{
+    cursor: pointer;
+}
+.btn-symbol, .btn-symbol-2{
+    background-color: rgb(249 168 68) !important;
+    border-color: rgb(249 168 68) !important;
+}
+.btn-symbol-2{
+    width: 40px !important;
+    margin-bottom: 3px;
+}
+#eliminarElemento{
+    width: 100px;
+}
+.btn-value{
+    background-color: rgb(65, 145, 195) !important;
+    border-color: rgb(65,145,195) !important;
+}
+#modalEdicion .alert:hover{
+    transform: scale(1.1);
+    cursor: pointer;
+}
+#vistaPreviaEdicion{
+    padding: 15px;
+}
+#btn-guardar-configuracion:hover{
+    transform: scale(1.1);
+}
+#id-configuracion{
+    display: none;
+}

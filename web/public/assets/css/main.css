@@ -1,0 +1,384 @@
+@font-face {
+    font-family: 'Titulos';
+    src: url('/ararfinanciera/public/assets/fonts/Titulos/Montserrat-Bold.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Parrafos';
+    src: url('/ararfinanciera/public/assets/fonts/Parrafos/Montserrat-SemiBoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Parrafos2';
+    src: url('/ararfinanciera/public/assets/fonts/Parrafos/Montserrat-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Parrafos3';
+    src: url('/ararfinanciera/public/assets/fonts/Parrafos/Montserrat-SemiBold.ttf') format('truetype');
+}
+
+.c-inicial {
+    position: relative;
+}
+
+.c-logo-nav {
+    margin-left: 5%;
+}
+
+.logo-principal {
+    width: 350px;
+}
+
+.c-nav-principal {
+    font-size: 1.3em;
+    font-family: 'Titulos';
+    margin-top: 100px;
+}
+
+.c-ararfinanciera {
+    background-color: #cecece;
+    font-family: 'Titulos';
+    color: #4c4c4d !important;
+    width: 45%;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+    font-size: 1.3rem;
+    padding: 10px;
+    position: absolute;
+    right: 0;
+    top: 5%;
+    margin-top: 30px;
+    z-index: 1000;
+}
+
+.c-ararfinanciera .row{
+    align-items: center;
+}
+
+.nav-contenedor {
+    font-size: 1.2rem;
+    font-family: 'Titulos';
+}
+
+.c-pie-pagina {
+    height: 40px;
+    background-color: #4c4c4d;
+    color: white;
+}
+
+.c-politica {
+    font-family: 'Parrafos2';
+}
+
+.iconos-footer-insta {
+    background-color: #4073b9;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+}
+
+.icono-insta {
+    color: white;
+    font-size: 1.2rem;
+}
+
+.icono-face {
+    color: white;
+    font-size: 1.2rem;
+}
+
+.whatsapp-float {
+    position: fixed;
+    width: 78px;
+    height: 78px;
+    bottom: 40px;
+    right: 40px;
+    background-color: #25d366;
+    color: #FFF;
+    border-radius: 65px;
+    text-align: center;
+    font-size: 30px;
+    box-shadow: 2px 2px 3px #999;
+    z-index: 100;
+}
+
+.whatsapp-float img {
+    margin-top: 15px;
+    width: 45.5px;
+    height: 45.5px;
+}
+
+.c-wpp {
+    background-color: #25D366;
+    width: 10%;
+    font-family: 'Parrafos';
+    padding: 15px;
+    border-top-left-radius: 30%; 
+    border-bottom-left-radius: 30%;
+    position: absolute;
+    right: 0;
+    top: 27%;
+}
+
+.icon-wpp {
+    font-size: 50px;
+}
+
+.text-nav {
+    font-family: 'Parrafos3';
+    color: #4c4c4d !important;
+}
+
+.text-nav-footer {
+    color:#4c4c4d;
+}
+
+.line-break {
+    display: block; 
+    height: 1em;
+}
+
+.contenedor-atencion {
+    font-family: 'Parrafos2' !important ;
+    line-height: 1rem !important;
+ }
+
+ .c-banner-footer {
+    font-family: 'Parrafos2' ;
+ }
+
+ .label-icon {
+    display: flex;
+    align-items: center;
+}
+
+.c-pie-pagina .c-politica a.link-politica {
+    color: white !important;
+    text-decoration: none !important;
+}
+
+.titulos2-footer a,
+.titulos2-footer a:hover {
+    text-decoration: none !important;
+    color: inherit !important; /* opcional, para que no se vea azul */
+}
+
+
+.sin-link {
+    text-decoration: none !important;
+    color: inherit !important; /* opcional, para que no se vea azul */
+}
+
+
+
+@media (max-width: 768px) {
+    .c-ararfinanciera {
+        width: 100%;
+        font-size: 0.5rem !important;
+        padding: 1px;
+        top: 2%;
+        margin-top: 0%;
+    }
+
+    .iconos-footer-insta {
+        margin-left: 5px;
+    }
+
+    .nav-contenedor {
+        margin-top: 30px;
+    }
+
+    .c-nav-principal {
+        margin-top: 1px;
+        font-size: 1.1rem !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .logo-principal {
+        width: 150px;
+    }
+
+    #navbarNav {
+        position: absolute;
+        top: 30%;
+        right: 59px;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        background-color: #cecece !important;
+        display: block !important;
+        z-index: 1000;
+    }
+
+    #navbarNav.show {
+        opacity: 1;
+        transform: scaleY(1);
+        height: auto;
+    }
+
+    #navbarNav.saving {
+        opacity: 0.5;
+        transform: scaleY(0.5);
+    }
+
+    .c-imagen-footer {
+        margin-left: 40px !important;
+    }
+
+    .c-banner-footer .row a {
+        display: block;
+        text-align: center;
+        margin: 0 auto;
+        margin-left: -20px;
+        font-size: 5vw;
+    }
+
+    .contenedor-p-footer {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center;
+    }
+
+    .c-banner-footer {
+        margin-top: 30px !important;
+        font-size: 0.8rem;
+    }
+
+    .c-atencion-texto {
+        margin-top: 30px !important;
+    }
+
+    .c-pie-pagina {
+        height: 60px;
+    }
+
+    .text-nav-footer {
+        font-size: 1rem;
+    }
+
+    .label-icon {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .c-ararfinanciera {
+        margin-top: 0% !important;
+        width: 50%;
+        font-size: 1.2rem;
+    }
+
+    .c-nav-principal {
+        margin-top: 5px;
+        font-size: 1.2rem;
+    }
+
+    .c-atencion-texto {
+        margin-top: 20px !important;
+    }
+
+    .c-banner-footer {
+        margin-top: 5px !important;
+        font-size: 3vw !important;
+        text-align: center !important;
+        padding: 10px 50px 10px 50px !important;
+    }
+
+    .img-footer {
+        width: 400px !important;
+        margin-top: 5px !important;
+    }
+
+    .contenedor-atencion {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      
+    }
+
+    .logo-principal {
+        display: block;
+        margin: 0 auto; 
+    }
+
+    .c-atencion-texto {
+        margin-top: 5px !important;
+        font-size: 2.5vw;
+        line-height: 1.5rem;
+        padding: 20px !important;
+    }
+
+    .label-icon {
+        display: flex;
+        align-items: center;
+    }
+
+ 
+    
+    
+
+}
+
+@media (min-width: 1400px) and (max-width: 1600px) {
+    .c-ararfinanciera {
+        top: 3%;
+        width: 50%;
+        font-size: 1.6rem;
+    }
+
+    .logo-principal {
+        width: 400px;
+    }
+
+    .c-wpp {
+        top: 22%;
+        width: 10%;
+    }
+
+    .c-nav-principal {
+        font-size: 1.6rem;
+    }
+
+    .label-icon {
+        display: flex;
+        align-items: center;
+    }
+}
+
+@media (min-width: 1601px) {
+    .c-ararfinanciera {
+        top: 2%;
+        width: 40%;
+        font-size: 1.6rem;
+    }
+
+    .logo-principal {
+        width: 400px;
+    }
+
+    .c-wpp {
+        top: 20%;
+        width: 7%;
+    }
+
+    .c-nav-principal {
+        font-size: 2.6rem;
+    }
+
+    .label-icon {
+        display: flex;
+        align-items: center;
+    }
+}

@@ -1,0 +1,9 @@
+#TableHistoryCupones thead{
+    font-size: 12px !important;
+}
+button:hover{
+    transform: scale(1.1);
+}
+#divGeneracionCupon{
+    display: none;
+}

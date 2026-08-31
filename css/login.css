@@ -1,0 +1,73 @@
+body{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-image: url('../images/building.jpg');
+    background-size: cover;
+}
+#login{
+    border:solid 0.5px #cfcfcf;
+    border-radius: 10px;
+    padding: 15px;
+    width: 340px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    box-shadow: 0px 0px 10px #cfcfcf;
+    background-color: rgb(0,0,0,0.7);
+}
+#login h6, label, h4{
+    color: #fff;
+}
+.card-body{
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+}
+hr{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #fff;
+}
+.invalid-feedback{
+    color: rgb(220, 53, 69) !important;
+    float: left !important;
+}
+.input-group-text{
+    background: #84a1d8;
+    border: solid 0.5px #84a1d8;
+}
+.btn-primary:hover{
+    transform: scale(1.1);
+    background-color: #84a1d8;
+}
+a{
+    text-decoration: none;
+    color: #fff;
+}
+#title-login{
+    z-index: 100;
+    position: relative;
+    animation-name: zoomin;
+    animation-duration: 1.3s;
+}
+img{
+    width: 40%;
+    position: relative;
+    top: -30;
+    z-index: 50;
+    animation-name: zoomin;
+    animation-duration: 1s;
+}
+@keyframes zoomin{
+    0%{transform: scale(1);}
+    40%{transform: scale(1.2);}
+    100%{transform: scale(1.0);}
+}
+@media(max-width: 400px){
+    #login{
+        width: 90%;
+    }
+}

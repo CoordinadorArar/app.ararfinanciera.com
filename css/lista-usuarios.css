@@ -1,0 +1,30 @@
+.user-list{
+    cursor: pointer;
+}
+.user-list:hover{
+    transform: scale(1.03);
+}
+#title-info-user{
+    margin-bottom: 15%;
+    margin-top: 15%;
+    color: rgb(112 112 112);
+}
+#div-form-user{
+    display: none ;
+}
+.line-info{
+    margin-bottom: 5px;
+}
+.line-info >button{
+    border-radius: 15px !important;
+    margin-right: 5px;
+}
+.spinner-grow{
+    line-height: 200px !important;
+}
+#btnAgregarUsuario{
+    border-radius: 15px !important;
+}
+#btnAgregarUsuario:hover{
+    transform: scale(1.1);
+}

@@ -1,0 +1,28 @@
+#calculate-credit, #send-petition{
+    display: none;
+}
+#calculate-credit > .card > .card-body >.container{
+    display: flex;
+    justify-content: center;
+}
+#calculate-credit > .card > .card-body >.container > button{
+    position: absolute;
+    left: 75px;
+    border-radius: 15px;
+}
+#form-calculate > .row > .col-lg-1{
+    display: flex;
+    justify-content: center;
+    align-items: self-end;
+}
+@media(max-width:510px){
+    #calculate-credit > .card > .card-body >.container{
+        display: block;
+        justify-content: center;
+    }
+    #calculate-credit > .card > .card-body >.container > button{
+        position: relative;
+        left: 75px;
+        border-radius: 15px;
+    }
+}

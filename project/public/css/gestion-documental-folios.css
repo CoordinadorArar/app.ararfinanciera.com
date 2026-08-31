@@ -1,0 +1,7 @@
+#divConsultaFolios .card-header {
+    font-weight: bold;
+}
+
+#divConsultaFolios table th {
+    white-space: nowrap;
+}

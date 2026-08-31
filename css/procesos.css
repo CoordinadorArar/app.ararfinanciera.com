@@ -1,0 +1,94 @@
+#aprobacion-creditos, #revision-documentos, #consulta-centrales, #documentos-soporte, #btn-guardar-datos-financieros{
+    display: none;
+    margin-bottom: 10px;
+}
+#botones-filtro-procesos > .btn{
+    border-radius: 15px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+#botones-filtro-procesos > .btn:hover{
+    transform: scale(1.1);
+}
+#btn-centrales{
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+}
+#btn-documentos{
+    background-color: #e96868 !important;
+    border-color: #e96868 !important;
+}
+#btn-aprobados{
+    background-color: #207424 !important;
+    border-color: #207424 !important;
+}
+#div-busqueda-documento{
+    width: 25% !important;
+}
+@media(max-width:768px){
+    #div-busqueda-documento{
+        width: 50% !important;
+    }
+}
+#div-tabla-procesos .table-responsive{
+    max-height: 55vh;
+    height: 55vh;
+}
+#backButton{
+    border-radius: 10px;
+    float: left;
+}
+#btnEnviarDocs:hover{
+    transform: scale(1.1);
+}
+#infoProceso > table th{
+    width: 35% !important;
+}
+#listaDocumentos .alert{
+    padding: 3px !important;
+    margin-bottom: 0 !important;
+}
+#tablaInfoProceso tr{
+    text-align: center !important;
+}
+.btn-acept-docs:hover{
+    transform: scale(1.1);
+}
+.display-5{
+    text-align: center !important;
+    color: #b5b5b5 !important;
+}
+#aprobacion-creditos .title-credit{
+    color: #5a5a5a;
+}
+.btn-credit, .btn-central-aprobar{
+    padding: 15px !important;
+    border-radius: 50% !important;
+    font-size: x-large !important;
+}
+.btn-credit:hover, .btn-central-aprobar:hover{
+    transform: scale(1.1);
+}
+#textoEstado{
+    display: none;
+}
+#tablaInformacion{
+    border: solid 0.5px #cfcfcf;
+    border-radius: 10px !important;
+}
+#tablaInformacion td{
+    padding: 10px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border: solid 0.5px #cfcfcf;
+}
+.table > thead{
+    vertical-align: middle !important;
+}
+#consulta-centrales td{
+    text-align: center;
+}
+.border-r{
+    border-right: solid 1px;
+    border-color: inherit;
+}

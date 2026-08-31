@@ -1,0 +1,603 @@
+.padre-seccion1 {
+    position: relative;
+    background-color: #4c4c4d;
+    height: auto;
+}
+
+.banner1 {
+    position: relative;
+    background-color: #4c4c4d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 7%;
+}
+
+.banner1 img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.tituloLibranza {
+    position: absolute;
+    font-family: 'Titulos';
+    font-size: 3vw;
+    width: 40%;
+    top: 11%;
+    left: 15%;
+    line-height: 2.5rem;
+}
+
+.parrafoLibranza {
+    font-size: 1.7vw;
+    font-family: 'Parrafos2';
+    width: 35%;
+    line-height: 2rem;
+    position: absolute;
+    top: 28%;
+    left: 18%;
+}
+
+.parrafoLibranza p{
+    margin-top: 1rem;
+}
+
+.parrrafoN {
+    font-family: 'Parrafos3';
+    font-weight: bold;
+}
+
+.btn-solicitalo {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: #4c4c4d;
+    background-color: white;
+    border-radius: 9999px;
+    font-size: 3vw;
+    font-family: 'Titulos';
+    padding: 5px 5px 5px 5px;
+    width: 30%;
+    z-index: 2;
+}
+
+.titulo-requisitos {
+    padding: 10px;
+    text-align: center;
+    font-family: 'Titulos';
+    color: #4073b9 !important;
+    margin-top: .5rem;
+}
+
+.parrafo-requisitos {
+    color: #4c4c4d;
+    font-family: 'Parrafos2';
+    font-size: 1.5vw;
+    text-align: center;
+    padding-bottom: 10px;
+
+}
+
+.card-testimonios {
+    width: 100%;
+    height: 280px;
+    background-color: #4073b9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 0;
+    position: relative;
+    padding-top: 75px;
+    overflow: visible;
+    border-color: white;
+    margin-bottom: 30px;
+}
+
+.card-testimonios2 {
+    width: 100%;
+    height: 280px;
+    background: #cecece;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 0;
+    position: relative;
+    padding-top: 75px;
+    overflow: visible;
+    border-color: white;
+    margin-bottom: 30px;
+}
+
+.card-testimonios:last-child {
+    margin-right: 0;
+}
+
+.contenedor-circle {
+    width: 100%;
+    height: 90px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
+    border-color: white;
+
+}
+
+.circle {
+    width: 150px;
+    height: 150px;
+    background-color: white;
+    border-radius: 50%;
+    overflow: hidden;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid black;
+
+}
+
+.circle img {
+    width: 100%;
+    object-fit: cover;
+}
+
+.card-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+    margin-top: 80px;
+
+}
+
+.card-content2 {
+
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+    margin-top: 80px;
+
+}
+
+.card-content p {
+    color: white;
+    margin-top: 30px;
+    font-family: 'Parrafos2';
+    font-size: 24px;
+    text-align: center;
+    flex: 1;
+}
+
+.card-content2 p {
+    color: #4c4c4d;
+    margin-top: 30px;
+    font-family: 'Parrafos2';
+    font-size: 24px;
+    text-align: center;
+    flex: 1;
+}
+
+.titulo-convenio {
+    font-family: 'Titulos';
+    color: #4073b9;
+    padding-bottom: 20px;
+}
+
+
+.slider {
+    background-color: #4c4c4d;
+    overflow: hidden;
+    position: relative;
+    padding: 1px 0;
+}
+
+.slider::before,
+.slider::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    z-index: 2;
+}
+
+.slider::before {
+    left: 0;
+    background: linear-gradient(to left, transparent, #333);
+}
+
+.slider::after {
+    right: 0;
+    background: linear-gradient(to right, transparent, #333);
+}
+
+.slide-track {
+    display: flex;
+    width: calc(200px * 20);
+    /* cantidad visible + duplicado para loop */
+    animation: scroll 30s linear infinite;
+}
+
+.slide {
+    font-family: 'Titulos';
+    font-weight: bold !important;
+    font-size: 24px;
+    width: 300px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 15px;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.slide2 {
+    font-family: 'Titulos';
+    font-weight: bold !important;
+    font-size: 24px;
+    width: 350px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 15px;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(calc(-200px * 10));
+        /* la mitad para que repita */
+    }
+}
+
+.line-container {
+    display: flex;
+    flex-direction: column;
+    /* Cambia de fila a columna */
+    align-items: center;
+    height: 400px;
+    /* Ajusta según tu diseño */
+}
+
+.point {
+    width: 30px;
+    height: 30px;
+    background-color: #1365d6;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+}
+
+.line3 {
+    width: 2.5px;
+    /* Se invierte: ahora el ancho es delgado */
+    background-color: #1365d6;
+    flex-grow: 1;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.faq-item {
+    font-family: 'Parrafos2';
+    padding: 10px;
+    cursor: pointer;
+}
+
+.faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #cecece;
+    padding: 10px;
+}
+
+.faq-question h4 {
+    font-family: 'Titulos';
+    color: #4e4d4d;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+    font-weight: bold;
+}
+
+.faq-item p {
+    margin-top: 20px;
+    text-align: justify;
+    font-family: 'Parrafos2';
+    font-size: 16px;
+    color: #606060;
+    font-weight: bold;
+}
+
+.toggle-arrow {
+    font-size: 18px;
+    color: #4e4d4d;
+    transition: transform 0.3s ease;
+    margin-right: 10px;
+}
+
+.faq-answer {
+    display: block;
+    font-size: 16px;
+    color: #555;
+    margin: 10px 0 0;
+    transition: all 0.3s ease;
+}
+
+.faq-item.active .faq-answer {
+    display: block;
+}
+
+.faq-item:not(.active) .faq-answer {
+    display: none;
+}
+
+.faq-item.active .toggle-arrow {
+    transform: rotate(180deg);
+}
+
+.parrafoObj {
+    display: flex;
+    align-items: center;
+    margin-top: -20px;
+
+}
+
+.columnaPreguntas {
+    margin-bottom: 18px;
+}
+
+.icon-objetivos {
+    width: 40px;
+}
+
+.text-azul {
+    color: #4073b9;
+}
+
+.sin-link {
+    text-decoration: none !important;
+    color: inherit !important; /* opcional, para que no se vea azul */
+}
+
+.linea-azul {
+    background-color: #4073b9;
+    height: 10px;
+}
+
+.linea-gris {
+    background-color: #686868;
+    height: 10px;
+}
+
+.img-footer {
+    display: block;
+    margin: 0 auto;
+    margin-top: 15%;
+    width: 300px;
+}
+
+.c-banner-footer {
+    margin-top: 5% !important;
+    font-family: 'Parrafos3';
+    padding: 5px;
+}
+
+.c-banner-footer a {
+    text-decoration: none;
+    color: inherit;
+    font-family: 'Parrafos2';
+    margin: 0;
+    text-align: justify;
+    padding: 5px;
+}
+
+.c-banner-footer a.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9;
+}
+
+.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9 !important;
+}
+
+.titulos2-footer {
+    font-family: 'Parrafos2';
+    color: #4073b9;
+}
+
+.line {
+    width: 6px !important;
+    height: 250px;
+    background: #1365d6;
+    clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%);
+    /* Corregido: eliminado espacio no estándar */
+}
+
+/* Agregamos una clase para el contenedor de las cards */
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* Eliminamos el espacio entre elementos */
+}
+
+
+
+
+
+
+
+
+.c-textos-simulador {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.parrafo-calcula {
+    width: 80%;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.input-form::placeholder {
+    color: #424141;
+    opacity: 1;
+}
+
+.input-form::-webkit-input-placeholder {
+    color: #424141;
+    opacity: 1;
+}
+
+.input-form::-moz-placeholder {
+    color: #424141;
+    opacity: 1;
+}
+
+.input-form:-ms-input-placeholder {
+    color: #424141;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+
+    .tituloLibranza {
+        font-size: 4vw;
+        width: 65%;
+        top: 11%;
+        left: 12%;
+        line-height: 1rem;
+    }
+
+    .parrafoLibranza {
+        font-size: 4.5vw;
+        width: 45%;
+        line-height: 1rem;
+        top: 28%;
+        left: 25%;
+    }
+    
+    .parrafoLibranza p{
+        margin-top: 0 !important
+    }
+
+    .btn-solicitalo {
+        font-size: 5vw;
+        width: 50%;
+        top: 70%;
+        left: 50%;
+        height: 40px;
+    }
+    
+    .parrafo-requisitos {
+        font-size: 5vw;
+    }
+
+    .c-banner-footer .row a {
+        margin-left: 0px !important;
+    }
+
+
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    .tituloLibranza {
+        font-size: 4vw;
+        width: 65%;
+        top: 11%;
+        left: 12%;
+        line-height: 2.5rem;
+    }
+
+    .parrafoLibranza {
+        font-size: 4.5vw;
+        width: 45%;
+        line-height: 2rem;
+        top: 28%;
+        left: 25%;
+    }
+    
+    .parrafoLibranza p{
+        margin-top: 0 !important
+    }
+
+    .btn-solicitalo {
+        font-size: 5vw;
+        width: 50%;
+        top: 70%;
+        left: 50%;
+        height: 80px;
+    }
+
+    .titulo-requisitos {
+        font-size: 5vw;
+
+    }
+    
+    .parrafo-requisitos {
+        font-size: 4vw;
+    }
+    .card-testimonios2 {
+        height: 350px !important;
+    } 
+    .card-testimonios {
+        height: 350px !important;
+    }
+    .titulo-convenio {
+        font-size: 5vw;
+    }
+    .faq-question h4 {  
+        font-size:5vw;
+    }
+    .faq-item p {
+        font-size:4vw;
+    }
+   
+}
+
+@media (min-width: 1601px) {
+    
+    .tituloLibranza {
+        line-height: 4rem;
+    }
+    .parrafoLibranza { 
+        top: 28%;
+    }
+
+}

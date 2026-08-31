@@ -1,0 +1,31 @@
+#form-datos-financieros, #data-finished, #form-upload-file, #form-tratamiento-datos, #btnEditState{
+    display: none;
+}
+.forms-datos-tercero{
+    zoom: 95%;
+}
+.proccess-forms .btn{
+    border-radius: 20px !important;
+}
+/* .forms-datos-tercero > .container{
+    display: flex;
+    justify-content: center;
+} */
+.forms-datos-tercero > .container > button{
+    position: absolute;
+    left: 75px;
+    border-radius: 15px;
+}
+#form-tratamiento-datos img{
+    height: 150px !important;
+}
+#form-tratamiento-datos .alert:hover{
+    transform: scale(1.1);
+    cursor: pointer;
+}
+.inputs-values-config{
+    width: max-content !important;
+    margin-bottom: 5px !important;
+    display: inline-block !important;
+    margin-right: 5px !important;
+}

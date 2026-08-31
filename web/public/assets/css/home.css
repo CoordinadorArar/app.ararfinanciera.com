@@ -1,0 +1,1256 @@
+.banner1 {
+    position: relative;
+}
+
+.c-text-banner {
+    position: absolute;
+    left: 55%;
+    top: 23%;
+}
+
+.ct-titulo {
+    font-family: 'Titulos';
+    font-size: 4.3rem;
+    line-height: 0;
+}
+
+.line-break2 {
+    display: block;
+    height: 1em;
+}
+
+.ct-parrafo {
+    font-family: 'Parrafos2';
+    font-size: 2rem;
+    line-height: 0;
+}
+
+.ct-boton {
+    position: relative;
+}
+
+.ct-boton a {
+    text-decoration: none;
+}
+
+.ct-boton a:hover {
+    text-decoration: none;
+
+}
+
+.c-text-pasos span a {
+    text-decoration: none !important;
+}
+
+.c-text-pasos span a:hover {
+    text-decoration: none !important;
+}
+
+.btn-solicitalo {
+    position: absolute;
+    background-color: #cecece;
+    font-family: 'Titulos';
+    font-size: 2.5rem;
+    color: #4073b9 !important;
+    width: 67%;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+    border: 4px solid #4073b9;
+    padding: 5px;
+    zoom: 80%;
+}
+
+.img-boton {
+    position: absolute;
+    left: 15%;
+    top: 73%;
+    zoom: 80%;
+}
+
+.img-boton2 {
+    position: absolute;
+    right: 10%;
+    top: 73%;
+    zoom: 80%;
+}
+
+@media (max-width: 1400px ) and (min-width: 1024px) {
+    .img-boton2{
+        right: 5%;
+    }
+}
+
+.img-boton3 {
+    position: absolute;
+    left: 40%;
+    top: 63%;
+    zoom: 80%;
+}
+
+@media (min-width: 1400px){
+    .img-boton3{
+        left: 45%;
+    }
+}
+
+.c-clientes {
+    margin-top: -20px;
+    padding: 40px;
+    position: relative;
+    overflow: visible;
+}
+
+.titulo-clientes {
+    font-family: 'Titulos';
+    font-size: 2.5rem;
+    color: #4073b9;
+}
+
+.cp-clientes {
+    background-color: #cecece;
+}
+
+.c-imagenes {
+    height: 300px;
+    border-radius: 20px;
+    overflow: visible;
+    padding: 10px;
+}
+
+.c-img {
+    height: 350px;
+    margin-top: -50px !important;
+    background-image: url('/ararfinanciera/public/assets/img/Arar-Financiera-Pensionados-desktop.png');
+    background-position-x: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 30px;
+}
+
+.c-img2 {
+    height: 350px;
+    margin-top: -50px !important;
+    background-image: url('/ararfinanciera/public/assets/img/Arar-Financiera-Fuerzas-Armadas-desktop.png');
+    background-position-x: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 30px;
+}
+
+.c-img3 {
+    height: 350px;
+    margin-top: -50px !important;
+    background-image: url('/ararfinanciera/public/assets/img/Arar-Financiera-Policia-desktop.png');
+    background-position-x: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 30px;
+}
+
+.img-clientes {
+    height: 90% !important;
+    width: 90% !important;
+    border-radius: 10%;
+}
+
+.c-cliente-text {
+    font-family: 'Titulos';
+    font-size: 1.4rem;
+    margin-top: -40px !important;
+    border-radius: 9999px;
+    background-color: #4073b9;
+    width: 100%;
+}
+
+.c-cliente-text:hover {
+    background-color: #5a9bd4;
+    cursor: pointer;
+}
+
+.cp-pasos {
+    position: relative;
+    background-color: #f8f8f8;
+}
+
+.c-pasos1 {
+    position: absolute;
+    left: 4%;
+    top: 25%;
+}
+
+.c-pasos2 {
+    position: absolute;
+    left: 29%;
+    top: 25%;
+}
+
+.c-pasos3 {
+    position: absolute;
+    left: 68%;
+    top: 25%;
+}
+
+.c-titulo-pasos {
+    font-family: 'Titulos';
+    font-size: 2.5rem;
+    color: #4073b9;
+}
+
+.c-label-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.label-pasos {
+    font-family: 'Titulos';
+    font-size: 1.7rem;
+    color: hsla(0, 0%, 81%, 0.863);
+}
+
+.label-pasos2 {
+    font-family: 'Titulos';
+    font-size: 1.7rem;
+    color: #4073b9;
+}
+
+.img-icono {
+    width: 70px;
+    height: 70px;
+}
+
+.c-text-pasos {
+    font-family: 'Parrafos3';
+    color: white;
+    font-size: 1.3rem;
+    line-height: 0.2;
+    margin-top: 20px;
+}
+
+.c-text-pasos2 {
+    font-family: 'Parrafos3';
+    color: #4073b9;
+    font-size: 1.3rem;
+    line-height: 0.2;
+    margin-top: 15px;
+}
+
+.c-text-pasos a,
+.c-text-pasos a:hover,
+.c-text-pasos span a,
+.c-text-pasos span a:hover {
+    text-decoration: none !important;
+    color: white;
+}
+
+.cp-simulador {
+    position: relative;
+}
+
+.c-imagen-simulador {
+
+    padding-top: 35px;
+    background-color: #4073b9;
+}
+
+.c-simu-titulo {
+    position: absolute;
+    color: #4073b9;
+    font-family: 'Titulos';
+    line-height: 0;
+    font-size: 2.5rem;
+    top: 35%;
+    left: 4%;
+}
+
+.c-simu-parrafo {
+    position: absolute;
+    color: #4c4c4d;
+    font-family: 'Parrafos3';
+    line-height: 0.1;
+    font-size: 1.5rem;
+    top: 60%;
+    left: 4%;
+
+}
+
+.c-simu-boton {
+    position: absolute;
+    background-color: #4073b9;
+    font-family: 'Titulos';
+    font-size: 1.4rem;
+    color: white !important;
+    width: 10%;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+    border: 4px solid #4073b9;
+    padding: 5px;
+    top: 80%;
+    left: 34%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cp-formulario {
+    position: relative;
+}
+
+.c-gris {
+    background-color: #f8f8f8;
+    height: 220px;
+}
+
+.cp-convenios {
+    position: absolute;
+    left: 6%;
+    top: 60%;
+}
+
+.c-parrafos1 {
+    position: absolute;
+    left: 27%;
+    top: 60%;
+}
+
+.img-convenio {
+    height: 450px !important;
+    width: 100%;
+}
+
+.convenio-titulo {
+    font-family: 'Titulos';
+}
+
+.convenio-parrafos {
+    font-family: 'Parrafos3';
+    font-size: 1.3rem;
+    line-height: 0.5;
+}
+
+.cp-solicita {
+    position: absolute;
+    width: 90%;
+    top: 6%;
+    left: 5%;
+    background-color: white;
+    height: 300px;
+}
+
+.c-textos-solicita {
+    padding: 80px !important;
+}
+
+.titulo-solicita {
+    font-family: 'Titulos';
+    color: #4073b9;
+    line-height: 0.2;
+}
+
+.parrafo-solicita {
+    font-family: 'Parrafos3';
+    color: #686868;
+    line-height: 0.2;
+    font-size: 1.3rem;
+}
+
+.cs-formulario {
+    font-family: 'Parrafos2';
+    position: absolute;
+    font-size: 1rem;
+    top: 16%;
+    right: 9%;
+    background-image: url('/ararfinanciera/public/assets/img/FONDO-FORMULARIO-1-02.jpg');
+    background-size: cover;
+    background-position: center;
+    width: 37%;
+    overflow: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.cs-formulario .px-5 {
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cs-formulario form {
+    width: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.cs-formulario .form-control,
+.cs-formulario .form-select {
+    width: 100%;
+    font-size: 0.9rem;
+    color: #686868;
+}
+
+.f-titulos {
+    font-family: 'Titulos';
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.p-formulario {
+    font-family: 'Parrafos2';
+}
+
+.cs-formulario button {
+    font-family: 'Parrafos2';
+    width: 40%;
+    font-size: 1rem;
+    background-color: white;
+    color: 686868;
+    border: none;
+    padding: 5px;
+    color: #686868;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.cp-maps {
+    height: 200px;
+}
+
+.cp-linea-maps {
+    height: 10px;
+    padding-left: 11px;
+    padding-right: 11px;
+}
+
+.linea-azul {
+    background-color: #4073b9;
+    height: 10px;
+}
+
+.linea-gris {
+    background-color: #686868;
+    height: 10px;
+}
+
+.img-footer {
+    margin-top: 15%;
+    width: 300px;
+}
+
+.c-banner-footer {
+    margin-top: 5% !important;
+    font-family: 'Parrafos3';
+    padding: 5px;
+}
+
+.c-banner-footer a {
+    text-decoration: none;
+    color: inherit;
+    font-family: 'Parrafos2';
+    margin: 0;
+    text-align: justify;
+    padding: 5px;
+
+}
+
+.c-banner-footer a.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9;
+}
+
+.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9 !important;
+}
+
+.titulos2-footer {
+    font-family: 'Parrafos2';
+    color: #4073b9;
+}
+
+.line {
+    width: 6px !important;
+    height: 250px;
+    background: #1365d6;
+    clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%);
+}
+
+
+
+@media (max-width: 768px) {
+    .c-text-banner {
+        left: 20%;
+        top: 20%;
+    }
+
+    .img-boton {
+        left: 24%;
+        top: 39%;
+    }
+
+    .img-boton2 {
+        right: 2%;
+        top: 61%;
+    }
+
+    .img-boton3 {
+        left: 45%;
+        top: 35%;
+    }
+
+    .boton-banner2 {
+        height: 40px !important;
+        width: 210px !important;
+    }
+
+    .boton-banner3 {
+        height: 60px !important;
+        width: 210px !important;
+    }
+
+    #navbarNav {
+        position: absolute;
+        top: 30%;
+        right: 63px;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        background-color: #cecece;
+        display: block !important;
+        z-index: 1000;
+    }
+
+    #navbarNav.show {
+        opacity: 1;
+        transform: scaleY(1);
+        height: auto;
+    }
+
+    #navbarNav.saving {
+        opacity: 0.5;
+        transform: scaleY(0.5);
+    }
+
+    .ct-titulo {
+        margin-left: 40px;
+        font-size: 1.5rem;
+    }
+
+    .ct-parrafo {
+        margin-left: 10px;
+        margin-top: 10px !important;
+        font-size: 1rem;
+    }
+
+    .btn-solicitalo {
+        width: 70%;
+        font-size: 1rem;
+    }
+
+    .c-cli-pensionados {
+        margin-top: 10px !important;
+        margin-bottom: 80px !important;
+    }
+
+    .c-cli-fuerzas {
+        margin-bottom: 80px !important;
+    }
+
+    .cp-solicita {
+        position: relative;
+        width: 100%;
+        top: 0%;
+        left: 0%;
+        height: 200px;
+    }
+
+    .cp-convenios {
+        top: 4%;
+        left: 23%;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center;
+    }
+
+    .convenio-titulo {
+        margin-left: 20px !important;
+    }
+
+    .c-parrafos1 {
+        left: 15%;
+        top: 18%;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center;
+    }
+
+    .cs-formulario {
+        position: relative;
+        right: 0%;
+        width: 100%;
+    }
+
+    .c-textos-solicita {
+        padding: 40px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        text-align: center;
+    }
+
+    .titulo-solicita {
+        font-size: 1.3rem;
+        line-height: 0.2;
+    }
+
+    .parrafo-solicita {
+        font-size: 1rem;
+    }
+
+    .c-pasos1 {
+        top: 15%;
+        left: 3%;
+    }
+
+    .c-pasos2 {
+        top: 43%;
+        left: 0%;
+
+    }
+
+    .c-pasos3 {
+        top: 72%;
+        left: 0%;
+    }
+
+    .c-text-pasos {
+        margin-top: -1px !important;
+
+    }
+
+    .c-imagen-simulador {
+        padding-top: 0px;
+
+    }
+
+    .c-simu-titulo {
+        line-height: 0;
+        font-size: 1.8rem;
+        top: 10%;
+        left: 2%;
+    }
+
+    .c-simu-parrafo {
+        line-height: 1;
+        font-size: 1.1rem;
+        top: 24%;
+        left: 2%;
+        width: 55%;
+        margin-top: 20px;
+
+    }
+
+    .line-break2 {
+        display: block;
+        height: 0.2em;
+    }
+
+
+    .c-simu-boton {
+        font-size: 0.8rem;
+        top: 80%;
+        left: 14%;
+        width: 100px;
+
+    }
+
+    .contenedor-p-footer {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center;
+    }
+
+    .c-banner-footer {
+        margin-top: 30px !important;
+        font-size: 1rem;
+        margin-left: 25px !important;
+    }
+
+    .c-atencion-texto {
+        margin-top: 30px !important;
+    }
+
+    .c-pie-pagina {
+        height: 60px;
+    }
+
+    .c-imagen-footer {
+        margin-left: 40px !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .c-text-banner {
+        left: 55%;
+        top: 33%;
+    }
+
+    .img-boton {
+        left: 10%;
+        top: 70%;
+    }
+
+    .img-boton2 {
+        right: 2%;
+        top: 71%;
+    }
+
+    .img-boton3 {
+        left: 45%;
+        top: 63%;
+    }
+
+    .boton-banner2 {
+        height: 60px !important;
+        width: 250px !important;
+    }
+
+    .boton-banner3 {
+        height: 80px !important;
+        width: 250px !important;
+    }
+
+
+    .boton-banner4 {
+        height: 80px !important;
+        width: 250px !important;
+    }
+
+    .ct-titulo {
+        font-size: 2rem;
+    }
+
+    .ct-parrafo {
+        font-size: 1.2rem;
+    }
+
+    .btn-solicitalo {
+        font-size: 1rem;
+    }
+
+    .c-cliente-text {
+        font-size: 1.2rem;
+    }
+
+    .c-pasos1 {
+        position: absolute;
+        left: 2%;
+        top: 32%;
+    }
+
+    .c-pasos2 {
+        position: absolute;
+        left: 22%;
+        top: 32%;
+    }
+
+    .c-pasos3 {
+        position: absolute;
+        left: 67%;
+        top: 32%;
+    }
+
+    .label-pasos {
+        font-size: 1.5rem;
+    }
+
+    .label-pasos2 {
+        font-size: 1.5rem;
+    }
+
+
+    .img-icono {
+        width: 50px;
+        height: 50px;
+    }
+
+    .c-text-pasos {
+        font-size: 1rem;
+    }
+
+    .c-text-pasos2 {
+        font-size: 1rem;
+    }
+
+
+    .c-imagen-simulador {
+        padding-top: 15px;
+
+    }
+
+    .c-simu-titulo {
+        line-height: 0;
+        font-size: 2rem;
+        top: 20%;
+        left: 2%;
+    }
+
+    .c-simu-parrafo {
+        line-height: 0.1;
+        font-size: 1.2rem;
+        top: 50%;
+        left: 2%;
+
+    }
+
+    .c-simu-boton {
+        font-size: 1rem;
+        padding: 5px;
+        top: 75%;
+        left: 34%;
+        width: 15%;
+
+    }
+
+    .cp-convenios {
+        position: absolute;
+        left: 4%;
+        top: 64%;
+    }
+
+    .c-parrafos1 {
+        position: absolute;
+        left: 25%;
+        top: 64%;
+    }
+
+    .convenio-parrafos {
+        font-size: 0.9rem;
+    }
+
+    .cp-solicita {
+        width: 96%;
+        top: 12%;
+        left: 2%;
+        height: 300px;
+    }
+
+    .c-textos-solicita {
+        padding: 40px !important;
+        margin-top: 50px;
+    }
+
+    .titulo-solicita {
+        font-size: 1.8rem;
+
+    }
+
+    .parrafo-solicita {
+        font-size: 1.1rem;
+    }
+
+    .cs-formulario {
+        font-size: 1rem;
+        top: 16%;
+        right: 4%;
+        width: 45%;
+    }
+
+    .img-footer {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .c-atencion-texto {
+        margin-top: 20px !important;
+    }
+
+    .c-banner-footer {
+        margin-top: 20px !important;
+    }
+
+    .contenedor-atencion {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+}
+
+@media (min-width: 1400px) and (max-width: 1600px) {
+    .c-text-banner {
+        left: 53%;
+        top: 23%;
+    }
+
+    .ct-titulo {
+        font-size: 5.2rem;
+    }
+
+    .ct-parrafo {
+        font-size: 2.4rem;
+    }
+
+    .img-boton {
+        position: absolute;
+        left: 12%;
+        top: 73%;
+    }
+
+    .img-boton2 {
+        position: absolute;
+        right: 3%;
+        top: 73%;
+    }
+
+    .img-boton3 {
+        position: absolute;
+        left: 38%;
+        top: 63%;
+    }
+
+    .c-pasos1 {
+        left: 4%;
+        top: 18%;
+    }
+
+    .c-pasos2 {
+        left: 29%;
+        top: 18%;
+    }
+
+    .c-pasos3 {
+        position: absolute;
+        left: 67%;
+        top: 18%;
+    }
+
+    .label-pasos {
+        font-size: 2.5rem;
+    }
+
+    .label-pasos2 {
+        font-size: 2.5rem;
+    }
+
+    .img-icono {
+        width: 80px;
+        height: 80px;
+    }
+
+    .c-text-pasos {
+        font-size: 1.5rem;
+    }
+
+    .c-text-pasos2 {
+        font-size: 1.5rem;
+    }
+
+
+
+
+
+    .c-simu-titulo {
+        line-height: 0;
+        font-size: 2.7rem;
+
+    }
+
+    .c-simu-parrafo {
+        line-height: 0.1;
+        font-size: 1.8rem;
+
+
+    }
+
+    .c-simu-boton {
+        font-size: 1.5rem;
+        top: 80%;
+
+    }
+
+
+    .c-textos-solicita {
+        margin-left: 60px;
+    }
+
+}
+
+
+@media (min-width: 1601px) {
+    .c-text-banner {
+        left: 55%;
+        top: 27%;
+    }
+
+    .btn-solicitalo {
+        font-size: 3rem;
+        width: 60%;
+        padding: 5px;
+    }
+
+    .titulo-clientes {
+        font-size: 4rem;
+    }
+
+    .c-titulo-pasos {
+
+        font-size: 4rem;
+
+    }
+
+    .ct-titulo {
+        font-size: 6rem;
+    }
+
+    .ct-parrafo {
+        font-size: 3rem;
+    }
+
+    .c-pasos1 {
+        left: 6%;
+        top: 20%;
+    }
+
+    .c-pasos2 {
+        left: 32%;
+        top: 20%;
+    }
+
+    .c-pasos3 {
+        position: absolute;
+        left: 69%;
+        top: 20%;
+    }
+
+    .label-pasos {
+        font-size: 2.6rem;
+    }
+
+    .label-pasos2 {
+        font-size: 2.6rem;
+    }
+
+    .img-icono {
+        width: 80px;
+        height: 80px;
+    }
+
+    .c-text-pasos {
+        font-size: 1.6rem;
+    }
+
+    .c-text-pasos2 {
+        font-size: 1.6rem;
+    }
+
+    .c-simu-titulo {
+        line-height: 0;
+        font-size: 3.5rem;
+
+    }
+
+    .c-simu-parrafo {
+        line-height: 0.1;
+        font-size: 2.3rem;
+
+
+    }
+
+    .c-simu-boton {
+        font-size: 2rem;
+        top: 80%;
+
+    }
+
+    .c-textos-solicita {
+        margin-left: 100px !important;
+    }
+
+}
+
+.modal{
+    --bs-modal-width: 560px !important;
+}
+
+.contenedor-pensiones {
+    position: relative;
+    padding: 10px 0;
+}
+
+.fila-pension {
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.fila-pension-con-linea {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.celda-pension {
+    padding: 5px 10px;
+}
+
+/* Línea vertical en el centro */
+.linea-central {
+    position: absolute;
+    top: 0;
+    bottom: calc(100% - 3 * 47px);
+    left: 50%;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    transform: translateX(-1px);
+    z-index: 0;
+}
+
+#modalPensionados .modal-body {
+    background-image: url('/ararfinanciera/public/assets/img/VENTANA-PENSIONADOS.jpg');
+    min-height: 500px;
+    background-position-y: -25px;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 3%;
+    background-size: 115%;
+    padding-top: 30px;
+}
+
+#modalFuerzasArmadas .modal-body {
+    background-image: url(/ararfinanciera/public/assets/img/VENTANA-FUERZAS-ARMADAS.jpg);
+    min-height: 400px;
+    background-position-y: -50px;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 3%;
+    background-size: 100%;
+    padding-top: 30px;
+}
+
+#modalPolicias .modal-body {
+    background-image: url('/ararfinanciera/public/assets/img/VENTANA-POLICIAS.jpg');
+    min-height: 350px;
+    background-position-y: -110px;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 3%;
+    background-size: 100%;
+    padding-top: 30px;
+}
+
+#modalPensionados p, #modalFuerzasArmadas p, #modalPolicias p{
+    font-family: 'Titulos';
+    font-size: 1rem;
+}
+
+#modalPensionados .row, #modalFuerzasArmadas .row, #modalPolicias .row{
+    /* border-radius: 100% / 40%;
+    border-bottom: solid rgba(66, 65, 65, 0.8) 4px; */
+    padding-bottom: 5px;
+}
+
+/* #modalPensionados .row > div, #modalFuerzasArmadas .row > div, #modalPolicias .row > div {
+    border-bottom: solid 1px rgba(66, 65, 65, 0.8);
+} */
+
+#modalFuerzasArmadas .fila-pension-con-linea{
+    width: max-content;
+    margin-left: 30%;
+    margin-right: auto;
+}
+
+#modalPolicias .fila-pension-con-linea{
+    margin-left: 15%;
+}
+
+#modalFuerzasArmadas .celda-pension, #modalPolicias .celda-pension{
+    width: 100%;
+}
+
+.modal-content {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: none;
+    padding: 30px;
+}
+
+
+.modal-body {
+    font-family: 'Parrafos2';
+    color: white;
+    position: relative;
+    z-index: 1;
+    text-align: justify;
+    gap: 15px;
+}
+
+.modal-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: -1;
+    border-radius: 15px;
+}
+
+.modal-body .titulo-modal{
+    top: -25px; /* Sube para sobresalir */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #cecece; /* o el color de fondo de tu modal */
+    padding: 0 20px;
+    z-index: 1;
+    border-radius: 25px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.modal-body .titulo-modal h2{
+    margin-bottom: 5px;
+    margin-top: 5px;
+    margin-left: 20px;
+    margin-right: 20px;
+    color: #4073b9;
+    font-family: 'Titulos';
+    width: max-content;
+}
+
+.icono-palomita {
+    width: 30px;
+    flex-shrink: 0;
+}
+
+.modal-texto {
+    flex: 1;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .modal-body {
+        background-size: auto !important;
+    }
+}

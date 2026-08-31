@@ -1,0 +1,32 @@
+#cancelRol, #cancelVariable, #inputNuevoRol{
+    display: none;
+}
+#form-rol .form-group{
+    margin-right: 10px;
+    float: left !important;
+}
+#submenusRol{
+    max-height: 120px !important;
+    height: 120px !important;
+    overflow-y: auto;
+    padding: 5px;
+    border: solid 0.1px #cfcfcf;
+    border-radius: 5px;
+}
+#submenusRol::-webkit-scrollbar{
+    -webkit-appearance: none !important;
+}
+#submenusRol::-webkit-scrollbar:vertical{
+    width:10px !important;
+}
+#submenusRol::-webkit-scrollbar-button:increment,#submenusRol::-webkit-scrollbar-button{
+    display: none !important;
+}
+#submenusRol::-webkit-scrollbar-thumb{
+    background-color: #797979 !important;
+    border-radius: 20px !important;
+    border: 2px solid #f1f2f3 !important;
+}
+#submenusRol::-webkit-scrollbar-track{
+    border-radius: 10px !important;
+}

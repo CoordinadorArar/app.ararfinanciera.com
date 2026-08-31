@@ -1,0 +1,32 @@
+.title-no-datos{
+    color: rgb(108, 107, 107);
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+.list-item-asesores:hover{
+    transform: scale(1.04);
+    cursor: pointer;
+}
+#div-info-proceso{
+    display: none;
+}
+#filter-buttons > button{
+    border-radius: 15px;
+}
+.table-responsive::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
+.table-responsive::-webkit-scrollbar:horizontal{
+    width:5px !important;
+}
+.table-responsive::-webkit-scrollbar-button:increment,.table-responsive::-webkit-scrollbar-button {
+    display: none;
+}
+.table-responsive::-webkit-scrollbar-thumb{
+    background-color: #797979;
+    border-radius: 20px;
+    border: 2px solid #f1f2f3;
+}
+.table-responsive::-webkit-scrollbar-track{
+    border-radius: 10px;
+}

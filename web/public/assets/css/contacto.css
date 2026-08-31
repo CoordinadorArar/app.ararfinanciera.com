@@ -1,0 +1,485 @@
+.c-principal {
+    background-color: #cecece;
+    padding-top: 30px;
+
+}
+
+.titulo-contacto {
+    font-family: 'Titulos';
+    font-size: 3vw;
+    color: #4073b9;
+}
+
+.parrafo-contacto {
+    font-family: 'Parrafos3';
+    font-size: 1.5vw;
+    color: #4073b9;
+}
+
+.principal-parrafo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.c-parrafo{
+    width: 80%;
+    margin: 0;
+}
+
+.principal-formulario {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.c-formulario {
+    width: 90%;
+    padding-left: 5%;
+    padding-right: 5%;
+    font-family: 'Parrafos2';
+    font-size: 1rem;
+    background-image: url('/ararfinanciera/public/assets/img/FONDO-FORMULARIO-1-02.jpg'); 
+    background-size: cover; 
+    background-position: center; 
+    overflow: auto; 
+    height: auto; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    margin: 0 auto;
+}
+
+.input-nombre {
+    margin-top: -60px !important;
+}
+
+.btn-formulario {
+    font-family: 'Parrafos3';
+    color: #FFF;
+    font-size: 1.5vw;
+    padding: 5px 20px 5px 20px;
+    background-color: #424141;
+}
+
+
+
+.c-deseasSaldo {
+    background-color: #cecece;
+    padding-left: 100px;
+    padding-right: 100px;
+    padding-bottom: 50px;
+    position: relative;
+
+}
+
+.principal-deseas {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    line-height:1em;
+}
+
+.c-deseas {
+    background-color: white;
+    position: absolute;
+    font-family: 'Titulos';
+    font-size: 1.7rem;
+    color: #4073b9 !important; 
+    width: 25% ;
+    border: 2px solid #eff2f5;
+    padding: 5px;
+    top:0;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+   
+}
+
+.p-deseas1 {
+    font-family: 'Parrafos2';
+    margin-top: 10px;
+
+}
+.p-deseas2 {
+    font-family: 'Titulos';   
+}
+
+.c-libranzaSaldo {
+    background-color: #626262;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+
+.c-libraza {
+    font-family: 'Parrafos2';
+    font-size: 1.5vw;
+    line-height:1em;
+    padding: 100px 20px 20px 20px; /* top, right, bottom, left */
+
+}
+
+.c-saldo {
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Parrafos2';
+    font-size: 1.5vw;
+    line-height:1em;
+    padding: 100px 20px 20px 20px; /* top, right, bottom, left */
+  
+
+}
+
+.text-1 {
+    font-family: 'Parrafos3';
+    line-height:0.5em;
+    
+
+}
+
+.text-2 {
+    font-family: 'Parrafos2';
+    line-height:0.5em;
+
+}
+
+.text-azul {
+    display: flex;
+    justify-content: center;
+}
+
+.text-azul2 {
+    border-radius: 30px;
+    background-color: #4073b9;
+    padding: 5px 15px; /* opcional: espaciado interno para que se vea más elegante */
+    color: white; /* para que el número sea visible sobre el azul */
+    display: inline-block; /* 🟢 asegura que el contenedor se ajuste al contenido */
+}
+
+
+.text-3 {
+    font-family: 'Titulos';
+    line-height:0.7em;
+    font-size: 3.5vw;
+
+}
+
+.icono-mano {
+    width: 70px;
+    height: 70px;
+    margin: 0 !important;
+    left: -35px;
+}
+
+.line2 {
+    width: 3px !important;
+    height: 130px;
+    margin-top: 80px;
+    background: rgb(66, 65, 65, 0.8);
+    /* clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%); */
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5); /* sombra izquierda */
+    border-radius: 40% / 100%;
+    position: relative;
+    border: solid rgb(66, 65, 65, 0.8) 1px;
+  }
+
+  .line2::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 5px;
+    width: 6px;
+    height: 120px;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0%,      /* inicio transparente */
+        rgba(0, 0, 0, 0.2) 10%,   /* empieza a aparecer */
+        rgba(0, 0, 0, 0.4) 50%,   /* más fuerte en el centro */
+        rgba(0, 0, 0, 0.2) 90%,   /* disminuye */
+        rgba(0, 0, 0, 0) 100%     /* final transparente */
+    );
+    filter: blur(2px);
+    border-bottom-left-radius: 90%;
+    border-top-left-radius: 90%;
+}
+  
+.cp-maps {
+    height: 200px;
+}
+
+.linea-azul {
+    background-color: #4073b9;
+    height: 10px;
+}
+
+.linea-gris {
+    background-color: #686868;
+    height: 10px;
+}
+
+.img-footer {
+    margin-top: 15%;
+    width: 300px;
+}
+
+.c-banner-footer{
+    margin-top: 5% !important;
+    font-family: 'Parrafos3';
+    padding: 5px;
+ }
+
+
+.c-banner-footer a {
+    text-decoration: none; 
+    color: inherit;
+    font-family: 'Parrafos2';
+    margin: 0;
+    text-align: justify; 
+    padding: 5px;
+
+}
+
+/* Aplicar estilos cuando el enlace es seleccionado */
+.c-banner-footer a.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9 !important;
+}
+
+ .titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9 !important;
+ }
+
+ .titulos2-footer {
+    font-family: 'Parrafos2';
+    color: #4073b9;
+ }
+
+ .line {
+    width: 6px !important;
+    height: 250px;
+    background: #1365d6;
+    clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%); /* Corregido: eliminado espacio no estándar */
+  }
+
+  @media (max-width: 768px) {
+    #navbarNav {
+        position: absolute;
+        top: 30%;
+        right: 63px;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        background-color: #25D366;
+        display: block !important; 
+        z-index: 1000; 
+    }
+    
+    #navbarNav.show {
+        opacity: 1;
+        transform: scaleY(1);
+        height: auto;
+    }
+    
+    #navbarNav.saving {
+        opacity: 0.5; 
+        transform: scaleY(0.5); 
+    }
+
+
+    .titulo-contacto {
+        font-size: 24px !important;
+    }
+    .parrafo-contacto{
+        font-size: 15px !important;
+        text-align: justify;
+    }
+
+
+    .d-flex.flex-column.align-items-end {
+        width: 100% !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .d-flex.flex-column.align-items-end > div {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .btn-formulario {
+        font-size: 15px !important;
+    }
+    
+    .c-deseasSaldo {
+        padding-left: 35px;
+        padding-right: 35px;
+        padding-bottom: 10px;
+    }
+
+    .c-deseas {
+        top: 0;
+    }
+
+    .c-libraza {
+        font-size: 4vw;
+        line-height:1em;
+        padding: 10px 10px 10px 10px; /* top, right, bottom, left */
+    
+    }  
+    .c-libraza2 {
+        margin-top: 100px !important;
+    
+    }
+
+    .text-3 {
+        line-height:0.7em;
+        font-size: 20px !important;
+    }
+
+    
+    .c-deseas {
+        font-size: 1.7rem;
+        width: 45% ;
+        padding: 5px;
+        top:0;
+      
+    }
+
+    .cp-linea-maps {
+        margin-top: 50px !important;
+    }
+
+    .c-imagen-footer{
+        margin-left: 40px  !important;
+      }
+
+    .c-banner-footer {
+        margin-left: 25px !important;
+    }
+
+    .contenedor-p-footer {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center; 
+    }
+
+    .c-banner-footer {
+        margin-top: 30px !important;
+        font-size: 0.8rem;
+    }
+
+    .c-atencion-texto  {
+        margin-top: 30px !important;
+    }
+
+    .c-pie-pagina  {
+        height: 60px;
+      }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .titulo-contacto {
+        font-size: 34px !important;
+    }
+
+    .parrafo-contacto{
+        font-size: 25px !important;
+        text-align: justify;
+    }
+
+    .c-formulario {
+        font-size: 1.5rem;
+    }
+
+    .d-flex.flex-column.align-items-end {
+        width: 100% !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .d-flex.flex-column.align-items-end > div {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .btn-formulario {
+        font-size: 25px !important;
+    }
+    
+    .c-deseasSaldo {
+        padding-left: 35px;
+        padding-right: 35px;
+        padding-bottom: 10px;
+    }
+
+    .c-deseas {
+        top: 0;
+    }
+
+    .c-libraza {
+        font-size: 4vw;
+        line-height:1em;
+        padding: 10px 10px 10px 10px; /* top, right, bottom, left */
+    
+    }  
+    .c-libraza2 {
+        margin-top: 100px !important;
+    
+    }
+
+    .text-3 {
+        line-height:0.7em;
+        font-size: 20px !important;
+    }
+
+    
+    .c-deseas {
+        font-size: 1.7rem;
+        width: 45% ;
+        padding: 5px;
+        top:0;
+      
+    }
+
+    .img-footer {
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .c-atencion-texto {
+        margin-top: 20px !important;
+    }
+
+    .c-banner-footer {
+        margin-top: 20px !important;
+    }
+
+    .contenedor-atencion {
+        display: flex !important; 
+        justify-content: center !important; 
+        align-items: center !important; 
+    }
+
+}
+
+@media (min-width: 1601px) {
+    .textos-azul {
+        height: 410px;
+
+    }
+}

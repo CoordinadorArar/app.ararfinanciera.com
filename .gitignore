@@ -1,0 +1,34 @@
+# Configuración y secretos
+.env
+.env.*
+!.env.example
+/webservice/config.php
+*.key
+*.pem
+*.rar
+
+# Dependencias
+/project/vendor/
+/project/node_modules/
+/web/vendor/
+node_modules/
+
+# Generados en tiempo de ejecución
+/project/storage/
+/project/bootstrap/cache/
+/web/writable/
+/web/builds/
+
+# Documentos digitalizados (gestión documental)
+/project/folios/
+
+# Clon divergente del proyecto
+/Powerbi/
+
+# Sistema operativo y editores
+Thumbs.db
+Desktop.ini
+.DS_Store
+.idea/
+.vscode/
+*.swp

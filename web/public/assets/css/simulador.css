@@ -1,0 +1,552 @@
+.c-banner{
+    position: relative;
+}
+
+.titulo-simulador2 {
+    font-size: 4vw;
+    font-family: 'Titulos';
+    color: #4073b9;
+}
+
+.titulo-simulador {
+    width: 50%;
+    font-size: 4vw;
+    font-family: 'Titulos';
+    color: #4073b9;
+    position: absolute;
+    top: 30%;
+    left: 5%;
+}
+
+.parrafo-calcula {
+    width: 70%;
+    text-align: center;
+    margin: 0 auto;
+    font-size: 2vw;
+    font-family: 'Parrafos3';
+    color: #686868;
+    line-height:1em;
+}
+
+.c-azul {
+    padding-right: 90px;
+    padding-left: 90px;
+    margin-top: 35px;
+}
+
+.textos-azul {
+    position: relative;
+    background-color: #4073b9;
+    height: 100%;
+}
+
+
+.t-caracte {
+    color: #CFCFCF !important;
+    font-family: 'Titulos';
+    padding: 40px;
+    font-size: 4vw;
+}
+
+.card-caracte {
+    border-radius: 10%;
+    border: 2px solid white; 
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: 20px;    
+    margin-right: 20px;   
+}
+
+.img-icono {
+    margin-top: 15px;
+    height: 80px;
+    width: 80px;
+}
+
+.card-parrafos {
+    line-height:1em;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.text-1 {
+    font-family: 'Parrafos2';
+    font-size: 1.5vw;
+    line-height: normal;
+}
+
+.text-2 {
+    font-family: 'Titulos';
+    font-size: 2vw;
+    color: #CFCFCF !important;
+}
+
+.text-3 {
+    font-family: 'Titulos';
+    font-size: 1.5vw;
+    color: #CFCFCF !important;
+    line-height:1em;
+}
+.c-aprobacion{
+    margin-bottom: 40px;
+}
+
+.btn-continuar {
+    position: absolute;
+    background-color: #4073b9;
+    font-family: 'Titulos';
+    font-size: 1.7rem;
+    color: white !important;
+    width: 15%;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+    border-top-right-radius: 9999px; 
+    border-bottom-right-radius: 9999px;
+    border: 2px solid #eff2f5;
+    padding: 2px;
+    top: 94%;
+}
+
+.btn-continuar:hover{
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.c-form-simulador {
+    margin-top: 60px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.p-formulario {
+    font-family: 'Parrafos3';
+}
+
+select.input-form {
+    color: #6c6a6a !important; 
+    font-size: 18px; 
+    font-family: 'Parrafos3';
+    padding-right: 40px; 
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32' fill='%234073b9'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 45px;
+}
+
+.c-input-form {
+    margin-top: 30px !important;
+}
+
+.input-form {
+    height: 80% !important;
+    border: 2px solid #4073b9 !important;
+    color: #6c6a6a !important; 
+    font-size: 18px; 
+    font-family: 'Parrafos3';
+}
+
+.input-group {
+    height: 80%;  
+}
+
+.hide{
+    display: none;
+}
+
+.input-group-text {
+    width: 70px !important;
+    background-color: #CFCFCF !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100% !important;
+    border-top: 2px solid #4073b9 !important;
+    border-bottom: 2px solid #4073b9 !important;
+    border-left: 2px solid #4073b9 !important;
+    border-right: none !important;
+}
+
+.input-group .form-control {
+    height: 100% !important;
+}
+
+.input-group-text i {
+    color: #4073b9 !important;      
+    font-size: 1.8rem;
+}
+
+.input-form::placeholder {
+    color: #6c6a6a !important; 
+    font-size: 18px; 
+    font-family: 'Parrafos3';
+}
+
+.btn-calcular {
+    width: 130px;
+    height: 60px;
+    background-color: #4073b9;
+    color: white;
+    font-family: 'Parrafos3';
+    font-size: 23px !important;
+    border: none;
+}
+
+.titulo-simulador2 {
+    font-size: 3vw;
+    font-family: 'Titulos';
+    color: #4073b9;
+}
+
+
+table.table thead tr.titulos-tabla th {
+    color: #a39999 !important;
+    font-family: 'Parrafos3';
+}
+
+tbody td:first-child {
+    font-weight: bold; /* Negrita */
+    color: #a39999 !important;
+    font-family: 'Parrafos3';
+}
+
+
+tbody td:not(:first-child) {
+    font-family: 'Parrafos2';
+}
+
+
+.linea-azul {
+    background-color: #4073b9;
+    height: 10px;
+}
+
+.linea-gris {
+    background-color: #686868;
+    height: 10px;
+}
+
+.img-footer {
+    margin-top: 15%;
+    width: 300px;
+}
+
+.c-banner-footer{
+    margin-top: 5% !important;
+    font-family: 'Parrafos3';
+    padding: 5px;
+ }
+
+
+.c-banner-footer a {
+    text-decoration: none; 
+    color: inherit;
+    font-family: 'Parrafos2';
+    margin: 0;
+    text-align: justify; 
+    padding: 5px;
+
+}
+
+/* Aplicar estilos cuando el enlace es seleccionado */
+.c-banner-footer a.titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9;
+}
+
+ .titulos-footer {
+    font-family: 'Titulos';
+    color: #4073b9 !important;
+ }
+
+ .titulos2-footer {
+    font-family: 'Parrafos2';
+    color: #4073b9;
+ }
+
+ .line {
+    width: 6px !important;
+    height: 250px;
+    background: #4073b9;
+    clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%); /* Corregido: eliminado espacio no estándar */
+  }
+
+  @media (max-width: 768px) {
+    #navbarNav {
+        position: absolute;
+        top: 30%;
+        right: 63px;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        background-color: #cecece;
+        display: block !important; 
+        z-index: 1000; 
+    }
+    
+    #navbarNav.show {
+        opacity: 1;
+        transform: scaleY(1);
+        height: auto;
+    }
+    
+    #navbarNav.saving {
+        opacity: 0.5; 
+        transform: scaleY(0.5); 
+    }
+
+    .c-banner{
+        margin-top: 0.7rem !important;
+    }
+
+    .titulo-simulador2 {
+        font-size: 4vw;
+        font-family: 'Titulos';
+        color: #4073b9;
+    }  
+    .titulo-simulador {
+        font-size: 7vw;
+        width: 100%;
+        position: initial;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .parrafo-calcula {
+        font-size: 5vw;
+        line-height:1em;
+        width: 100%;
+        text-align: justify;
+    }
+    
+    .c-azul {
+        position: relative;
+        padding-right: 1px;
+        padding-left: 1px;
+        margin-top: 5px;
+    }
+
+    .titulo-simulador{
+        top: 0 !important;
+    }
+    
+    .textos-azul {
+        background-color: #4073b9;
+        height: 100%;
+    }
+
+    .contenedor-t-caracte {
+        padding: 5px !important;
+    }
+    
+    .t-caracte {
+        margin-top: 1px !important;
+        color: #CFCFCF !important;
+        font-size: 7vw;
+    }
+
+    .contenedor-cards{
+        padding-left: 40px;
+        padding-right: 40px;
+        margin-left: 40px;    
+        margin-right: 40px;   
+    }
+
+    .card-caracte {
+        margin-bottom: 30px!important;
+        border-radius: 10%;
+        border: 2px solid white; 
+    }
+    
+    .img-icono {
+        margin-top: 10px;
+        height: 60px;
+        width: 60px;
+    }
+    
+    .text-1 {
+        font-size: 5vw;
+    }
+    
+    .text-2 {
+        font-size: 5vw;
+    }
+    
+    .text-3 {
+        font-family: 'Titulos';
+        font-size: 5vw;
+        color: #CFCFCF !important;
+        line-height:1em;
+    }
+
+    .c-aprobacion {
+        padding: 20px;
+        margin-top: -20px;
+        font-size: 5vw;
+        margin-bottom: 5px;
+    }
+    
+    .btn-continuar {
+        position: absolute;
+        width: 55% ;
+        top: 97%;
+    }
+
+    .c-form-simulador{
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .titulo-simulador2 {
+        font-size: 6vw;
+    }
+
+    .cp-linea-maps {
+        margin-top: 50px !important;
+    }
+
+    .c-imagen-footer{
+        margin-left: 40px  !important;
+      }
+
+    .c-banner-footer {
+        margin-left: 25px !important;
+    }
+
+    .contenedor-p-footer {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center; 
+    }
+
+    .c-banner-footer {
+        margin-top: 30px !important;
+        font-size: 0.8rem;
+    }
+
+    .c-atencion-texto  {
+        margin-top: 30px !important;
+    }
+
+    .c-pie-pagina  {
+        height: 60px;
+      }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {    
+    .titulo-simulador {
+        font-size: 5vw !important;
+    }
+    
+    .parrafo-calcula {
+        width: 90%  ;
+        font-size: 4vw;
+        line-height:1em;
+        padding: 5%;
+        text-align: justify;
+    }
+    
+    .c-azul {
+        padding-right: 20px;
+        padding-left: 20px;
+        margin-top: 5px;
+    }
+    
+    .textos-azul {
+        background-color: #4073b9;
+        height: 100%;
+    }
+
+    .contenedor-t-caracte {
+        padding: 20px !important;
+    }
+    
+    .t-caracte {
+        margin-top: 1px !important;
+        color: #CFCFCF !important;
+        font-size: 5vw !important;
+    }
+
+    .contenedor-cards{
+        padding-left: 100px !important;
+        padding-right: 100px !important;
+      
+    }
+
+    .card-caracte {
+        margin-bottom: 30px!important;
+        border-radius: 10%;
+        border: 2px solid white; 
+    }
+    
+    .img-icono {
+        margin-top: 10px;
+        height: 60px;
+        width: 60px;
+    }
+    
+    .text-1 {
+        font-size: 5vw;
+    }
+    
+    .text-2 {
+        font-size: 5vw;
+    }
+    
+    .text-3 {
+        font-family: 'Titulos';
+        font-size: 5vw;
+        color: #CFCFCF !important;
+        line-height:1em;
+    }
+
+    .c-aprobacion {
+        padding: 20px;
+        margin-top: -20px;
+        font-size: 5vw;
+        margin-bottom: 5px;
+    }
+    
+    .btn-continuar {
+        position: absolute;
+        font-size: 5vw;
+        width: 55% ;
+        top: 97%;
+    }
+    
+    .titulo-simulador2 {
+        font-size: 6vw;
+    }
+
+    .p-formulario {
+        font-size: 3vw;
+    }
+    
+    .img-footer {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .c-atencion-texto {
+        margin-top: 20px !important;
+    }
+
+    .c-banner-footer {
+        margin-top: 20px !important;
+    }
+
+    .contenedor-atencion {
+        display: flex !important; 
+        justify-content: center !important; 
+        align-items: center !important; 
+    }
+
+}
+
+@media (min-width: 1601px) {
+    
+}
