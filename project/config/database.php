@@ -89,6 +89,10 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+            // Solo entran al DSN si están definidas en .env; sin ellas el
+            // comportamiento es idéntico al anterior.
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
         ],
 
         'protdatos' => [
@@ -102,6 +106,10 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+            // Solo entran al DSN si están definidas en .env; sin ellas el
+            // comportamiento es idéntico al anterior.
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
         ],
 
         'unoeearar' => [
@@ -115,6 +123,10 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+            // Solo entran al DSN si están definidas en .env; sin ellas el
+            // comportamiento es idéntico al anterior.
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
         ],
 
         'faico' => [
@@ -128,6 +140,10 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+            // Solo entran al DSN si están definidas en .env; sin ellas el
+            // comportamiento es idéntico al anterior.
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
         ],
 
         'factoring' => [
