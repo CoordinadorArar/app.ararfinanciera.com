@@ -12,7 +12,7 @@ class Admin extends Model
     use HasFactory;
     /**Obtener menus */
     public static function obtenerMenus(){
-        $sql = "SELECT * FROM Menus ORDER BY IdMenu";
+        $sql = "SELECT * FROM Menus ORDER BY Orden, IdMenu";
         $menus = DB::select($sql);
         return $menus;
     }

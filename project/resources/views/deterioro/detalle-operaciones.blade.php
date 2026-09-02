@@ -47,15 +47,31 @@
             <label>&nbsp;</label>
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="filtroSoloDeterioro" onchange="cargarDetalle()">
-                <label class="form-check-label" for="filtroSoloDeterioro" style="text-transform:none;font-size:.84rem">Solo con deterioro</label>
+                <label class="form-check-label" for="filtroSoloDeterioro" id="etiquetaSoloDeterioro">Solo con deterioro</label>
+            </div>
+        </div>
+        <div class="campo" id="campoSoloTopadas" style="display:none">
+            <label>&nbsp;</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="filtroSoloTopadas" onchange="cargarDetalle()">
+                <label class="form-check-label" for="filtroSoloTopadas">Solo topadas</label>
             </div>
         </div>
         <button class="btn btn-primary btn-sm" onclick="cargarDetalle()"><i class="fas fa-filter"></i>&nbsp; Filtrar</button>
+        <div class="btn-group btn-group-sm det-vistas" role="group">
+            <input type="radio" class="btn-check" name="vistaDetalle" id="vistaContable" checked onchange="cambiarVista()">
+            <label class="btn btn-light" for="vistaContable">Contable</label>
+            <input type="radio" class="btn-check" name="vistaDetalle" id="vistaFiscal" onchange="cambiarVista()">
+            <label class="btn btn-light" for="vistaFiscal">Fiscal</label>
+        </div>
     </div>
 
+    <div id="avisoFiscalDetalle" style="display:none"></div>
+
     <div class="det-panel">
+        <h6>Operaciones <span id="badgeFiscalDetalle"></span></h6>
         <div class="det-scroll">
-            <table class="det-tabla" id="tablaDetalle" style="width:100%">
+            <table class="det-tabla" id="tablaDetalle">
                 <thead>
                     <tr>
                         <th>Operación</th>
@@ -66,9 +82,13 @@
                         <th class="num">Cuotas</th>
                         <th class="num">Capital vencido</th>
                         <th class="num">Interés vencido</th>
-                        <th class="num">Base</th>
+                        <th class="num" title="Capital vencido más interés vencido (RN-03)">Base</th>
                         <th class="num">%</th>
                         <th class="num">Deterioro</th>
+                        <th class="num" title="Base por la tarifa anual del método individual (RN-07)">Individual 33 %</th>
+                        <th class="num" title="Deducciones tomadas en años gravables anteriores">Acum. anterior</th>
+                        <th class="num" title="Tope del acumulado deducible: el menor entre el saldo de SIESA y la base">Saldo topado</th>
+                        <th class="num" title="Individual del año limitado por el tope disponible">Deducción del año</th>
                         <th></th>
                     </tr>
                 </thead>

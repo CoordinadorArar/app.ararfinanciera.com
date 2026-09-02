@@ -173,6 +173,7 @@ Route::group(['middleware'=>['auth','deterioro.permiso:consultar']],function(){
     Route::post('/deterioro-periodo-origen', [DeterioroController::class, 'periodoOrigen'])->name('deterioro-periodo-origen');
     Route::post('/deterioro-listar-cortes', [DeterioroController::class, 'listarCortes'])->name('deterioro-listar-cortes');
     Route::post('/deterioro-resumen-datos', [DeterioroController::class, 'resumenCorte'])->name('deterioro-resumen-datos');
+    Route::post('/deterioro-resumen-fiscal', [DeterioroController::class, 'resumenFiscal'])->name('deterioro-resumen-fiscal');
     Route::post('/deterioro-detalle-datos', [DeterioroController::class, 'detalleOperaciones'])->name('deterioro-detalle-datos');
     Route::post('/deterioro-cuotas-operacion', [DeterioroController::class, 'cuotasOperacion'])->name('deterioro-cuotas-operacion');
 });
