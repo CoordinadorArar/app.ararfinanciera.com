@@ -133,6 +133,23 @@ class DeterioroController extends Controller
         ]);
     }
 
+    /** Totales fiscales por rango: individual, general, acumulado, tope y deducción del año. */
+    public function resumenFiscal(Request $request)
+    {
+        $idCorte = (int) $request->input('idCorte');
+        $corte = Deterioro::corte($idCorte);
+        if (!$corte) {
+            return response()->json(['res' => 'bad', 'text' => 'El corte no existe.']);
+        }
+
+        return response()->json([
+            'res' => 'ok',
+            'corte' => $corte,
+            'resumen' => Deterioro::resumenFiscal($idCorte),
+            'cuadres' => Deterioro::cuadres($idCorte),
+        ]);
+    }
+
     public function detalleOperaciones(Request $request)
     {
         $idCorte = (int) $request->input('idCorte');
@@ -144,6 +161,8 @@ class DeterioroController extends Controller
             'producto' => $request->input('producto'),
             'rango' => $request->input('rango'),
             'soloDeterioro' => $request->input('soloDeterioro'),
+            'soloDeduccion' => $request->input('soloDeduccion'),
+            'soloTopadas' => $request->input('soloTopadas'),
             'busqueda' => $request->input('busqueda'),
         ]);
 

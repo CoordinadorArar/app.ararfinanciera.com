@@ -67,6 +67,33 @@ class DeterioroParametrosSeeder extends Seeder
     }
 
     /**
+     * Método fiscal (RN-07, RN-08). Individual del 33 % anual como método
+     * adoptado (D-04); el general queda cargado pero desactivado.
+     *
+     * dias_minimos_mora traduce a días la condición del libro
+     * `SI(O(L=E; L=F); ...)`: el rango E arranca en 361 días, de modo que
+     * "clasificación E o F" equivale a 361 días o más de mora de la operación.
+     */
+    public static function fiscal()
+    {
+        return [
+            ['metodo' => 'INDIVIDUAL', 'pct_anual' => 0.3300, 'dias_minimos_mora' => 361, 'activo' => 1],
+            ['metodo' => 'GENERAL',    'pct_anual' => null,   'dias_minimos_mora' => 91,  'activo' => 0],
+        ];
+    }
+
+    /** Porcentajes por rango del método general: 5 % (C), 10 % (D), 15 % (E y F). */
+    public static function fiscalRangos()
+    {
+        return [
+            ['metodo' => 'GENERAL', 'rango_codigo' => 'C', 'pct' => 0.0500],
+            ['metodo' => 'GENERAL', 'rango_codigo' => 'D', 'pct' => 0.1000],
+            ['metodo' => 'GENERAL', 'rango_codigo' => 'E', 'pct' => 0.1500],
+            ['metodo' => 'GENERAL', 'rango_codigo' => 'F', 'pct' => 0.1500],
+        ];
+    }
+
+    /**
      * Convenciones generales.
      *
      * siesa_manda_sobre_base queda desactivado hasta que se resuelva el punto
@@ -108,6 +135,16 @@ class DeterioroParametrosSeeder extends Seeder
         if (DB::table('det_param_interes')->count() === 0) {
             foreach (self::intereses() as $fila) {
                 DB::table('det_param_interes')->insert($fila + $comunes);
+            }
+        }
+        if (DB::table('det_param_fiscal')->count() === 0) {
+            foreach (self::fiscal() as $fila) {
+                DB::table('det_param_fiscal')->insert($fila + $comunes);
+            }
+        }
+        if (DB::table('det_param_fiscal_rango')->count() === 0) {
+            foreach (self::fiscalRangos() as $fila) {
+                DB::table('det_param_fiscal_rango')->insert($fila + $comunes);
             }
         }
         if (DB::table('det_param_convencion')->count() === 0) {

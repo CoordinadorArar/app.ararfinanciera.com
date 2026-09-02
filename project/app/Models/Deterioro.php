@@ -124,7 +124,8 @@ class Deterioro extends Model
     {
         foreach (['det_deterioro_operacion', 'det_corte_cuadre', 'det_corte_detalle_cuota',
                   'det_corte_param_rango_mora', 'det_corte_param_producto',
-                  'det_corte_param_interes', 'det_corte_param_convencion'] as $tabla) {
+                  'det_corte_param_interes', 'det_corte_param_convencion',
+                  'det_corte_param_fiscal', 'det_corte_param_fiscal_rango'] as $tabla) {
             DB::table($tabla)->where('id_corte', $idCorte)->delete();
         }
     }
@@ -173,6 +174,20 @@ class Deterioro extends Model
             [$idCorte, $fechaCorte, $fechaCorte]
         );
 
+        DB::insert(
+            "INSERT INTO det_corte_param_fiscal (id_corte, metodo, pct_anual, dias_minimos_mora, activo)
+             SELECT ?, metodo, pct_anual, dias_minimos_mora, activo
+             FROM det_param_fiscal WHERE $vigencia",
+            [$idCorte, $fechaCorte, $fechaCorte]
+        );
+
+        DB::insert(
+            "INSERT INTO det_corte_param_fiscal_rango (id_corte, metodo, rango_codigo, pct)
+             SELECT ?, metodo, rango_codigo, pct
+             FROM det_param_fiscal_rango WHERE $vigencia",
+            [$idCorte, $fechaCorte, $fechaCorte]
+        );
+
         return self::hashParametros($idCorte);
     }
 
@@ -182,11 +197,47 @@ class Deterioro extends Model
         foreach (['det_corte_param_rango_mora' => 'codigo',
                   'det_corte_param_producto' => 'nom_operacion',
                   'det_corte_param_interes' => 'producto',
-                  'det_corte_param_convencion' => 'id_corte'] as $tabla => $orden) {
-            $filas = DB::table($tabla)->where('id_corte', $idCorte)->orderBy($orden)->get();
+                  'det_corte_param_convencion' => 'id_corte',
+                  'det_corte_param_fiscal' => 'metodo',
+                  'det_corte_param_fiscal_rango' => ['metodo', 'rango_codigo']] as $tabla => $orden) {
+            $consulta = DB::table($tabla)->where('id_corte', $idCorte);
+            foreach ((array) $orden as $columna) {
+                $consulta->orderBy($columna);
+            }
+            $filas = $consulta->get();
             $partes[] = $tabla . ':' . json_encode($filas);
         }
         return hash('sha256', implode('|', $partes));
+    }
+
+    /**
+     * El método fiscal adoptado (D-04) es política, no código: se resuelve por
+     * el activo del snapshot. Sin paramétrica congelada o con más de un método
+     * activo el cálculo daría ceros silenciosos en una deducción de renta, así
+     * que la corrida se detiene antes de producirlos.
+     */
+    public static function validarMetodoFiscal($idCorte)
+    {
+        $conteo = DB::selectOne(
+            'SELECT filas = COUNT(*), activos = SUM(CASE WHEN activo = 1 THEN 1 ELSE 0 END),
+                    con_tarifa = SUM(CASE WHEN activo = 1 AND pct_anual IS NOT NULL THEN 1 ELSE 0 END)
+             FROM det_corte_param_fiscal WHERE id_corte = ?', [$idCorte]);
+
+        if (!$conteo || (int) $conteo->filas === 0) {
+            throw new \RuntimeException(
+                'No hay paramétrica fiscal congelada para el corte: revise la vigencia de det_param_fiscal.');
+        }
+        $activos = (int) $conteo->activos;
+        if ($activos !== 1) {
+            throw new \RuntimeException(
+                "La paramétrica fiscal del corte tiene $activos métodos activos y debe tener exactamente uno.");
+        }
+        if ((int) $conteo->con_tarifa !== 1) {
+            throw new \RuntimeException(
+                'El método fiscal activo del corte no tiene pct_anual definido: sin tarifa la deducción quedaría en cero.');
+        }
+        return DB::table('det_corte_param_fiscal')
+            ->where('id_corte', $idCorte)->where('activo', 1)->value('metodo');
     }
 
     /* ---------------------------------------------------------------------
@@ -388,15 +439,105 @@ class Deterioro extends Model
     }
 
     /* ---------------------------------------------------------------------
-     | Paso 7 · Cuadres
+     | Paso 7 · Deterioro fiscal y tope del acumulado
      |-------------------------------------------------------------------- */
 
     /**
-     * Controles de RN-12 que no dependen de SIESA ni del cálculo fiscal.
-     * Los demás entran en las fases 2 y 6.
+     * Resuelve en una sola pasada O, el general, P, R y N (RN-07 a RN-09).
+     *
+     * O · individual: la condición del libro es `SI(O(L=E; L=F); I*33%; 0)`.
+     * Aquí se evalúa por días de mora contra dias_minimos_mora de la
+     * paramétrica, que es como el documento define el campo; con la semilla en
+     * 361 el resultado es idéntico, porque el rango E arranca en 361 días.
+     *
+     * El método adoptado (D-04) sale del dato, no de una constante: se une por
+     * activo = 1 y validarMetodoFiscal() garantiza que haya exactamente uno.
+     *
+     * R · saldo topado: `SI(Q>=I; I; 0) + SI(Q<I; Q; 0)` es el menor entre el
+     * saldo de SIESA y la base. Mientras saldo_siesa siga nulo —lo puebla la
+     * fase 6— R toma la base, que es el comportamiento neutro; al poblarse, la
+     * misma expresión empieza a topar sin tocar el motor.
+     *
+     * Los cuatro valores se calculan en un CROSS APPLY porque N los necesita ya
+     * resueltos y SET no puede referenciar columnas que se están asignando.
+     */
+    public static function sqlDeterioroFiscal()
+    {
+        return "DECLARE @corte date = ?;
+                DECLARE @idCorte int = ?;
+
+                UPDATE o SET
+                    deterioro_fiscal_individual = v.ind,
+                    deterioro_fiscal_general = v.gen,
+                    fiscal_acumulado_anterior = v.p,
+                    saldo_topado = v.r,
+                    deduccion_fiscal_ano = CASE
+                        WHEN v.p + v.ind > v.r THEN CASE WHEN v.r - v.p > 0 THEN v.r - v.p ELSE 0 END
+                        ELSE CASE WHEN v.ind > 0 THEN v.ind ELSE 0 END END
+                FROM det_deterioro_operacion o
+                LEFT JOIN det_corte_param_fiscal pf
+                       ON pf.id_corte = o.id_corte AND pf.activo = 1
+                LEFT JOIN det_corte_param_fiscal_rango pg
+                       ON pg.id_corte = o.id_corte AND pg.metodo = 'GENERAL'
+                      AND pg.rango_codigo = o.rango_codigo
+                CROSS APPLY (
+                    SELECT acumulado = ISNULL((
+                        SELECT SUM(fa.valor_deducido)
+                        FROM det_fiscal_acumulado fa
+                        WHERE fa.id_operacion = o.id_operacion
+                          AND fa.ano_gravable < YEAR(@corte)), 0)) a
+                CROSS APPLY (
+                    SELECT ind = CASE
+                                    WHEN o.dias_mora_operacion >= pf.dias_minimos_mora
+                                    THEN o.base_deterioro * ISNULL(pf.pct_anual, 0) ELSE 0 END,
+                           gen = o.base_deterioro * ISNULL(pg.pct, 0),
+                           p = a.acumulado,
+                           r = CASE
+                                    WHEN o.saldo_siesa IS NULL OR o.saldo_siesa >= o.base_deterioro
+                                    THEN o.base_deterioro ELSE o.saldo_siesa END) v
+                WHERE o.id_corte = @idCorte";
+    }
+
+    public static function aplicarDeterioroFiscal($idCorte, $fechaCorte)
+    {
+        return DB::update(self::sqlDeterioroFiscal(), [$fechaCorte, $idCorte]);
+    }
+
+    /* ---------------------------------------------------------------------
+     | Paso 8 · Cuadres
+     |-------------------------------------------------------------------- */
+
+    /**
+     * Vía agregada e independiente del individual (AB30 del Anexo A): base de
+     * los rangos que deducen por el porcentaje anual, ambos leídos de la
+     * paramétrica congelada del método activo.
+     *
+     * El motor decide operación por operación con dias_mora_operacion contra
+     * dias_minimos_mora; aquí se decide por rango, con los rangos cuyo
+     * dias_desde alcanza ese mismo mínimo. Son dos caminos distintos sobre dos
+     * paramétricas distintas, de modo que si una se mueve sin la otra el
+     * control lo delata en vez de cuadrar por construcción.
+     */
+    public static function sqlResumenFiscalIndependiente()
+    {
+        return "SELECT individual = ISNULL(SUM(o.base_deterioro * pf.pct_anual), 0)
+                FROM det_deterioro_operacion o
+                INNER JOIN det_corte_param_fiscal pf
+                        ON pf.id_corte = o.id_corte AND pf.activo = 1
+                INNER JOIN det_corte_param_rango_mora pr
+                        ON pr.id_corte = o.id_corte AND pr.codigo = o.rango_codigo
+                       AND pr.dias_desde >= pf.dias_minimos_mora
+                WHERE o.id_corte = ?";
+    }
+
+    /**
+     * Controles de RN-12 que no dependen de SIESA. Los que la requieren
+     * (AC25 y la conciliación) entran en la fase 6.
      */
     public static function verificarCuadres($idCorte)
     {
+        $fechaCorte = DB::table('det_corte')->where('id_corte', $idCorte)->value('fecha_corte');
+
         $origen = DB::selectOne(
             'SELECT filas = COUNT(*), capital = SUM(saldo_capital), interes = SUM(saldo_intereses),
                     corriente = SUM(capital_corriente), vencido = SUM(capital_vencido),
@@ -410,6 +551,30 @@ class Deterioro extends Model
                     base = SUM(base_deterioro), deterioro = SUM(deterioro_contable)
              FROM det_deterioro_operacion WHERE id_corte = ?', [$idCorte]);
 
+        // El exceso se mide contra el tope disponible con piso en cero: si el
+        // acumulado anterior ya superó el saldo topado, lo deducible del año es
+        // cero, no un negativo.
+        $fiscal = DB::selectOne(
+            "SELECT individual = SUM(deterioro_fiscal_individual),
+                    acumulado = SUM(fiscal_acumulado_anterior),
+                    exceso = SUM(CASE
+                        WHEN deduccion_fiscal_ano > CASE WHEN saldo_topado - fiscal_acumulado_anterior > 0
+                                                         THEN saldo_topado - fiscal_acumulado_anterior ELSE 0 END
+                        THEN deduccion_fiscal_ano - CASE WHEN saldo_topado - fiscal_acumulado_anterior > 0
+                                                         THEN saldo_topado - fiscal_acumulado_anterior ELSE 0 END
+                        ELSE 0 END)
+             FROM det_deterioro_operacion WHERE id_corte = ?", [$idCorte]);
+
+        $fiscalResumen = DB::selectOne(self::sqlResumenFiscalIndependiente(), [$idCorte]);
+
+        $fiscalFuente = DB::selectOne(
+            'SELECT acumulado = ISNULL(SUM(fa.valor_deducido), 0)
+             FROM det_fiscal_acumulado fa
+             WHERE fa.ano_gravable < ?
+               AND EXISTS (SELECT 1 FROM det_deterioro_operacion o
+                           WHERE o.id_corte = ? AND o.id_operacion = fa.id_operacion)',
+            [(int) date('Y', strtotime($fechaCorte)), $idCorte]);
+
         $controles = [
             ['C-CUOTAS', 'Cuotas del detalle contra la suma consolidada por operación',
                 $origen->filas, $oper->cuotas],
@@ -421,6 +586,12 @@ class Deterioro extends Model
                 $origen->capital, $origen->corriente + $origen->vencido],
             ['C-BASE', 'Base de deterioro contra capital vencido más interés vencido',
                 $oper->base, $origen->vencido + $origen->ivencido],
+            ['C-FISCAL', 'Deterioro fiscal individual del detalle contra la base de los rangos que deducen por el porcentaje anual',
+                $fiscal->individual, $fiscalResumen->individual],
+            ['C-FISCAL-ACUM', 'Acumulado fiscal del detalle contra los años anteriores del acumulado',
+                $fiscal->acumulado, $fiscalFuente->acumulado],
+            ['C-FISCAL-TOPE', 'Deducción del año por encima del tope disponible',
+                $fiscal->exceso, 0],
         ];
 
         DB::table('det_corte_cuadre')->where('id_corte', $idCorte)->delete();
@@ -476,6 +647,7 @@ class Deterioro extends Model
 
             $t = microtime(true);
             $hash = self::congelarParametros($idCorte, $corte->fecha_corte);
+            self::validarMetodoFiscal($idCorte);
             $pasos[] = ['paso' => 'Congelar paramétricas', 'filas' => null, 'ms' => self::ms($t)];
 
             $t = microtime(true);
@@ -497,6 +669,10 @@ class Deterioro extends Model
             $t = microtime(true);
             self::aplicarDeterioroContable($idCorte);
             $pasos[] = ['paso' => 'Deterioro contable', 'filas' => $operaciones, 'ms' => self::ms($t)];
+
+            $t = microtime(true);
+            self::aplicarDeterioroFiscal($idCorte, $corte->fecha_corte);
+            $pasos[] = ['paso' => 'Deterioro fiscal y tope', 'filas' => $operaciones, 'ms' => self::ms($t)];
 
             $totales = DB::selectOne(
                 'SELECT capital = SUM(saldo_capital), interes = SUM(saldo_intereses)
@@ -571,13 +747,47 @@ class Deterioro extends Model
                     interes_vencido = SUM(o.interes_vencido),
                     base = SUM(o.base_deterioro),
                     pct = MAX(o.pct_contable),
-                    deterioro = SUM(o.deterioro_contable)
+                    deterioro = SUM(o.deterioro_contable),
+                    deterioro_fiscal_individual = SUM(o.deterioro_fiscal_individual),
+                    deterioro_fiscal_general = SUM(o.deterioro_fiscal_general),
+                    fiscal_acumulado_anterior = SUM(o.fiscal_acumulado_anterior),
+                    saldo_topado = SUM(o.saldo_topado),
+                    deduccion_fiscal_ano = SUM(o.deduccion_fiscal_ano),
+                    deduce_fiscal = MAX(CASE WHEN pr.dias_desde >= pf.dias_minimos_mora THEN 1 ELSE 0 END),
+                    pct_fiscal = MAX(CASE WHEN pr.dias_desde >= pf.dias_minimos_mora
+                                          THEN ISNULL(pf.pct_anual, 0) ELSE 0 END)
+             FROM det_deterioro_operacion o
+             LEFT JOIN det_corte_param_rango_mora pr
+                    ON pr.id_corte = o.id_corte AND pr.codigo = o.rango_codigo
+             LEFT JOIN det_corte_param_fiscal pf
+                    ON pf.id_corte = o.id_corte AND pf.activo = 1
+             WHERE o.id_corte = ?
+             GROUP BY o.producto, ISNULL(o.calificacion_abc, 'Corriente'), ISNULL(pr.orden, 0)
+             ORDER BY o.producto, ISNULL(pr.orden, 0)", [$idCorte]);
+    }
+
+    /**
+     * Totales fiscales por rango. Equivale al bloque Z25:AB32 del libro, con
+     * los dos métodos en paralelo y el tope de RN-09 ya aplicado.
+     */
+    public static function resumenFiscal($idCorte)
+    {
+        return DB::select(
+            "SELECT rango = ISNULL(o.calificacion_abc, 'Corriente'),
+                    orden_rango = ISNULL(pr.orden, 0),
+                    operaciones = COUNT(*),
+                    base = SUM(o.base_deterioro),
+                    deterioro_fiscal_individual = SUM(o.deterioro_fiscal_individual),
+                    deterioro_fiscal_general = SUM(o.deterioro_fiscal_general),
+                    fiscal_acumulado_anterior = SUM(o.fiscal_acumulado_anterior),
+                    saldo_topado = SUM(o.saldo_topado),
+                    deduccion_fiscal_ano = SUM(o.deduccion_fiscal_ano)
              FROM det_deterioro_operacion o
              LEFT JOIN det_corte_param_rango_mora pr
                     ON pr.id_corte = o.id_corte AND pr.codigo = o.rango_codigo
              WHERE o.id_corte = ?
-             GROUP BY o.producto, ISNULL(o.calificacion_abc, 'Corriente'), ISNULL(pr.orden, 0)
-             ORDER BY o.producto, ISNULL(pr.orden, 0)", [$idCorte]);
+             GROUP BY ISNULL(o.calificacion_abc, 'Corriente'), ISNULL(pr.orden, 0)
+             ORDER BY ISNULL(pr.orden, 0)", [$idCorte]);
     }
 
     public static function cuadres($idCorte)
@@ -593,6 +803,8 @@ class Deterioro extends Model
                        rango = ISNULL(calificacion_abc, 'Corriente'),
                        capital_corriente, capital_vencido, interes_corriente, interes_vencido,
                        interes_mora, base_deterioro, pct_contable, deterioro_contable,
+                       deterioro_fiscal_individual, deterioro_fiscal_general,
+                       fiscal_acumulado_anterior, saldo_topado, deduccion_fiscal_ano,
                        capital_mes_anterior, variacion_capital
                 FROM det_deterioro_operacion WHERE id_corte = ?";
         $bind = [$idCorte];
@@ -607,6 +819,13 @@ class Deterioro extends Model
         }
         if (!empty($filtros['soloDeterioro'])) {
             $sql .= ' AND deterioro_contable > 0';
+        }
+        if (!empty($filtros['soloDeduccion'])) {
+            $sql .= ' AND deduccion_fiscal_ano > 0';
+        }
+        // Topada: el tope de RN-09 recortó la deducción por debajo del individual.
+        if (!empty($filtros['soloTopadas'])) {
+            $sql .= ' AND deduccion_fiscal_ano < deterioro_fiscal_individual';
         }
         if (!empty($filtros['busqueda'])) {
             $sql .= ' AND (cliente LIKE ? OR id_cliente LIKE ? OR CAST(id_operacion AS varchar(20)) LIKE ?)';

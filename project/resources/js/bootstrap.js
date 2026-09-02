@@ -2,7 +2,7 @@ try {
     window._ = require('lodash');
     window.$ = window.jQuery = require('jquery');
     window.Popper = require('@popperjs/core').default;
-    require('bootstrap');
+    window.bootstrap = require('bootstrap');
 } catch (e) {}
 
 /**

@@ -23,7 +23,8 @@ class AdminController extends Controller
         $menus = Admin::obtenerMenus();
         $rol = User::obtenerRol(auth()->id());
         $submenus = Admin::obtenerSubMenus($rol[0]->IdRol);
-        $arrayMenu = []; $html = ''; $rutaBase = 'http://app.ararfinanciera.com';//explode('project',base_path())[0];
+        //La base se toma de la peticion en curso; el rtrim evita la barra doble porque RutaSubmenu ya trae la barra inicial
+        $arrayMenu = []; $html = ''; $rutaBase = rtrim(url('/'),'/');
         foreach($menus as $dataMenu){//Crear array con todos los menus
             $items = [
                 'IdMenu' => $dataMenu->IdMenu,
@@ -47,35 +48,48 @@ class AdminController extends Controller
                 }
             }
         }
+        //Ruta de la pagina abierta, para marcar el submenu activo. Si no llega, ninguno queda activo
+        $rutaActual = $request->input('rutaActual','');
         foreach($arrayMenu as $key => $data){//Recorrer array de menus para crear el HTML necesario para mostrar en el DOM
-            $submenusHtml = (count($data['submenus']) > 0) ? '<ul class="dropdown-menu text-small shadow" aria-labelledby="dropdown">' : '';
+            //Los submenus se despliegan debajo del menu padre (collapse), no sobrepuestos (dropdown)
+            $idSubmenu = 'menu-collapse-'.$data['IdMenu'];
+            $itemsHtml = ''; $hayActivo = false;
             foreach($data['submenus'] as $items){
-                if($items['RutaSubmenu'] == 'logout'){
-                    $submenusHtml .= '<li>
-                                        <a class="dropdown-item" href="#" onclick="logOut()">'.$items['CodigoSubmenu']. $items['NombreSubmenu'].'</a>
-                                    </li>';
-                }else{
-                    $submenusHtml .= '<li>
-                                        <a class="dropdown-item" href="'.$rutaBase.$items['RutaSubmenu'].'">'.$items['CodigoSubmenu'].' '.$items['NombreSubmenu'].'</a>
-                                    </li>';
-                }
+                $activo = ($rutaActual !== '' && $items['RutaSubmenu'] === $rutaActual) ? ' active' : '';
+                $hayActivo = $hayActivo || ($activo !== '');
+                $hrefSubmenu = ($items['RutaSubmenu'] == 'logout') ? '#' : $rutaBase.$items['RutaSubmenu'];
+                $onclick = ($items['RutaSubmenu'] == 'logout') ? ' onclick="logOut()"' : '';
+                $itemsHtml .= '<li class="nav-item">
+                                <a class="nav-link submenu-item'.$activo.'" href="'.$hrefSubmenu.'"'.$onclick.'>
+                                    <span class="submenu-icon">'.$items['CodigoSubmenu'].'</span>
+                                    <span class="submenu-text">'.$items['NombreSubmenu'].'</span>
+                                </a>
+                            </li>';
             }
             if(count($data['submenus']) > 0){
-                $submenusHtml .= '</ul>';
-                $liClass = 'dropdown';
-                $hrefMenu = '#';
-                $aClass = ' dropdown-toggle';
-                $dataToggle = 'dropdown';
+                //El modulo de la pagina abierta arranca desplegado
+                $submenusHtml = '<div class="collapse submenu-collapse'.($hayActivo ? ' show' : '').'" id="'.$idSubmenu.'" data-bs-parent="#menu">
+                                    <ul class="nav nav-pills flex-column submenu-nav">
+                                        '.$itemsHtml.'
+                                    </ul>
+                                </div>';
+                $liClass = 'nav-item has-submenu';
+                $hrefMenu = '#'.$idSubmenu;
+                $aClass = ' submenu-toggle'.($hayActivo ? '' : ' collapsed');
+                $aExtra = ' data-bs-toggle="collapse" aria-expanded="'.($hayActivo ? 'true' : 'false').'" aria-controls="'.$idSubmenu.'"';
+                $caret = '<i class="fas fa-chevron-down submenu-caret"></i>';
             }else{
-                $submenusHtml .= '';
+                $submenusHtml = '';
                 $liClass = 'nav-item';
                 $hrefMenu = $data['RutaMenu'];
                 $aClass = '';
-                $dataToggle = '';
+                $aExtra = '';
+                $caret = '';
             }
             $html .= '<li class="'.$liClass.'">
-                        <a href="'.$hrefMenu.'" class="nav-link text-truncate'.$aClass.'" data-bs-toggle="'.$dataToggle.'">
+                        <a href="'.$hrefMenu.'" class="nav-link text-truncate'.$aClass.'"'.$aExtra.'>
                             '.$data['CodigoMenu'].' <span class="ms-1 d-none d-sm-inline">'.$data['NombreMenu'].'</span>
+                            '.$caret.'
                         </a>
                         '.$submenusHtml.'
                     </li>';
