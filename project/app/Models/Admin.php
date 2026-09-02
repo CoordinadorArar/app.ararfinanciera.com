@@ -10,10 +10,15 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 class Admin extends Model
 {
     use HasFactory;
+
+    /**Conexión de identidad: usuarios, roles, menús y permisos viven siempre en producción */
+    private static function db(){
+        return DB::connection('identidad');
+    }
     /**Obtener menus */
     public static function obtenerMenus(){
         $sql = "SELECT * FROM Menus ORDER BY Orden, IdMenu";
-        $menus = DB::select($sql);
+        $menus = self::db()->select($sql);
         return $menus;
     }
     /**Obtener submenus según rol del usuario */
@@ -29,14 +34,14 @@ class Admin extends Model
             $bindings[] = $idRol;
         }
         $sql .= " ORDER BY IdMenu";
-        $submenus = DB::select($sql, $bindings);
+        $submenus = self::db()->select($sql, $bindings);
         return $submenus;
     }
 
     public static function perfilUsuario($idUsuario=''){
         $id = $idUsuario != '' ? $idUsuario : auth()->id();
         $sql = "SELECT * FROM users WHERE IdUsuario=?";
-        $user = DB::select($sql, [$id]);
+        $user = self::db()->select($sql, [$id]);
         return $user;
     }
     /**Mostrar información de la pagaduria seleccionada y la configuración usada para hallar el cupo de la misma */
@@ -79,7 +84,7 @@ class Admin extends Model
     }
     /**Actualizar información del usuario seleccionado */
     public static function editarUsuarios($idUsuario,$nombre,$documento,$email){
-        return DB::table('users')->where('IdUsuario',$idUsuario)->update([
+        return self::db()->table('users')->where('IdUsuario',$idUsuario)->update([
             'nombreUsuario' => $nombre,
             'documentoUsuario' => $documento,
             'email' => $email
@@ -88,26 +93,26 @@ class Admin extends Model
     /**Validar si el usuario no tiene rol asignado (sucede al crearse el usuario, se genera sin rol) */
     public static function checkRol($idUsuario){
         $sql = "SELECT * FROM rolusuario WHERE IdUsuario = ?";
-        $rol = DB::select($sql, [$idUsuario]);
+        $rol = self::db()->select($sql, [$idUsuario]);
         return $rol;
     }
     /**Insertar el rol para el usuario seleccionado, si es nuevo pues aun no tiene rol relacionado */
     public static function insertRol($idUsuario,$idRol){
-        return DB::table('rolusuario')->insert([
+        return self::db()->table('rolusuario')->insert([
             'IdUsuario' => $idUsuario,
             'IdRol' => $idRol
         ]);
     }
     /**Cambiar rol de un usuario seleccionado */
     public static function editRol($idUsuario,$idRol){
-        return DB::table('rolusuario')->where('IdUsuario',$idUsuario)->update([
+        return self::db()->table('rolusuario')->where('IdUsuario',$idUsuario)->update([
             'IdRol' => $idRol
         ]);
     }
     /**Activa o inactiva un usuario */
     public static function changeStateUser($idUsuario,$estado){
         $estadoUsuario = ($estado == 0)? false : true ;
-        return DB::table('users')->where('idUsuario',$idUsuario)->update([
+        return self::db()->table('users')->where('idUsuario',$idUsuario)->update([
             'estadoUsuario' => $estadoUsuario
         ]);
     }
@@ -141,14 +146,14 @@ class Admin extends Model
             $sql .= " AND IdSubmenu = ?";
             $bindings[] = $idSubmenu;
         }
-        return DB::select($sql, $bindings);
+        return self::db()->select($sql, $bindings);
     }
     /**Guardar permiso de rol */
     public static function guardarPermisoRol($idRol,$idSubmenu){
         $sql_consultar = "SELECT * FROM PermisosRoles WHERE IdRoles = ? AND IdSubmenu = ?";
-        $consultar = DB::select($sql_consultar, [$idRol, $idSubmenu]);
+        $consultar = self::db()->select($sql_consultar, [$idRol, $idSubmenu]);
         if(!$consultar){
-            return DB::table('PermisosRoles')->insert([
+            return self::db()->table('PermisosRoles')->insert([
                 'IdRoles' => $idRol,
                 'IdSubmenu' => $idSubmenu
             ]);
@@ -157,9 +162,9 @@ class Admin extends Model
     /**Eliminar permiso de rol */
     public static function eliminarPermisoRol($idRol, $idSubmenu){
         $sql_consultar = "SELECT * FROM PermisosRoles WHERE IdRoles = ? AND IdSubmenu = ?";
-        $consultar = DB::select($sql_consultar, [$idRol, $idSubmenu]);
+        $consultar = self::db()->select($sql_consultar, [$idRol, $idSubmenu]);
         if($consultar){
-            return DB::table('PermisosRoles')->where(['IdRoles' => $idRol, 'IdSubmenu' => $idSubmenu])->delete();
+            return self::db()->table('PermisosRoles')->where(['IdRoles' => $idRol, 'IdSubmenu' => $idSubmenu])->delete();
         }
     }
 }

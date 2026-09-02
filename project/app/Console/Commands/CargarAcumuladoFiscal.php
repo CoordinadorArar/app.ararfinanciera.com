@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Deterioro;
+use App\Support\Ambiente;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  */
 class CargarAcumuladoFiscal extends Command
 {
-    protected $signature = 'deterioro:cargar-acumulado-fiscal {archivo} {--origen=EXCEL_1399}';
+    protected $signature = 'deterioro:cargar-acumulado-fiscal {archivo} {--origen=EXCEL_1399} {--ambiente=produccion}';
 
     protected $description = 'Carga el acumulado fiscal por operación y año gravable desde un CSV';
 
@@ -27,6 +28,9 @@ class CargarAcumuladoFiscal extends Command
 
     public function handle()
     {
+        $ambiente = Ambiente::aplicar($this->option('ambiente'));
+        $this->info('Ambiente: '.$ambiente.' · base '.config('database.connections.sqlsrv.database'));
+
         $archivo = $this->argument('archivo');
         if (!is_file($archivo) || !is_readable($archivo)) {
             $this->error("No se puede leer el archivo: $archivo");

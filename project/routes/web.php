@@ -56,6 +56,7 @@ Route::group(['middleware'=>['auth','submenu.permiso']],function(){
     Route::get('/deterioro-cortes', [RoutesController::class, 'deterioroCortes'])->name('deterioro-cortes');
     Route::get('/deterioro-resumen', [RoutesController::class, 'deterioroResumen'])->name('deterioro-resumen');
     Route::get('/deterioro-detalle-operaciones', [RoutesController::class, 'deterioroDetalleOperaciones'])->name('deterioro-detalle-operaciones');
+    Route::get('/deterioro-contable-fiscal', [RoutesController::class, 'deterioroContableFiscal'])->name('deterioro-contable-fiscal');
 });
 
 /**Rutas Gestión Documental */
@@ -80,6 +81,7 @@ Route::group(['middleware'=>'auth'],function(){
     Route::post('/editar-contrasena', [AdminController::class, 'editarContrasena'])->name('editar-contrasena');
     Route::post('/subir-foto-perfil', [AdminController::class, 'subirFotoPerfil'])->name('subir-foto-perfil');
     Route::get('/mostrar-foto-perfil/{imagen}', [AdminController::class, 'mostrarFotoPerfil'])->name('mostrar-foto-perfil');
+    Route::post('/cambiar-ambiente', [AdminController::class, 'cambiarAmbiente'])->name('cambiar-ambiente');
     /**Gestion de usuarios */
     Route::post('/mostrar-info-usuario', [AdminController::class, 'mostrarInfoUsuario'])->name('mostrar-info-usuario');
     Route::post('/editar-usuarios', [AdminController::class, 'editarUsuarios'])->name('editar-usuarios');
@@ -176,6 +178,7 @@ Route::group(['middleware'=>['auth','deterioro.permiso:consultar']],function(){
     Route::post('/deterioro-resumen-fiscal', [DeterioroController::class, 'resumenFiscal'])->name('deterioro-resumen-fiscal');
     Route::post('/deterioro-detalle-datos', [DeterioroController::class, 'detalleOperaciones'])->name('deterioro-detalle-datos');
     Route::post('/deterioro-cuotas-operacion', [DeterioroController::class, 'cuotasOperacion'])->name('deterioro-cuotas-operacion');
+    Route::post('/deterioro-comparativo-datos', [DeterioroController::class, 'comparativoContableFiscal'])->name('deterioro-comparativo-datos');
 });
 Route::group(['middleware'=>['auth','deterioro.permiso:calcular']],function(){
     Route::post('/deterioro-crear-corte', [DeterioroController::class, 'crearCorte'])->name('deterioro-crear-corte');

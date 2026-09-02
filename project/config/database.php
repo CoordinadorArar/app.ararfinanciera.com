@@ -17,6 +17,23 @@ return [
 
     'default' => env('DB_CONNECTION', 'sqlsrv'),
 
+    'ambiente' => 'produccion',
+
+    'faico' => env('DB_FAICO_DATABASE', 'Modulos_Faico'),
+
+    'ambientes' => [
+        'produccion' => [
+            'app' => env('DB_DATABASE', 'ArarFinanciera'),
+            'faico' => env('DB_FAICO_DATABASE', 'Modulos_Faico'),
+        ],
+        'demo' => [
+            'app' => env('DB_DATABASE_DEMO', 'ArarFinanciera_PRUEBAS'),
+            'faico' => env('DB_FAICO_DEMO_DATABASE', 'Modulos_Faico_prueba'),
+        ],
+    ],
+
+    'roles_ambiente' => [1],
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections
@@ -95,6 +112,23 @@ return [
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
         ],
 
+        // Identidad (usuarios, roles, menús, permisos): siempre apunta a la
+        // base de producción, aunque la sesión esté conmutada a demo.
+        'identidad' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST'),
+            'port' => env('DB_PORT'),
+            'database' => env('DB_DATABASE'),
+            'username' => env('DB_USERNAME'),
+            'password' => env('DB_PASSWORD'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
+        ],
+
         'protdatos' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),
@@ -157,6 +191,10 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+            // Solo entran al DSN si están definidas en .env; sin ellas el
+            // comportamiento es idéntico al anterior.
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
         ]
 
     ],

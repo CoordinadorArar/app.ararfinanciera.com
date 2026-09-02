@@ -33,9 +33,16 @@ class Deterioro extends Model
     const ESTADO_CALCULADO = 'CALCULADO';
     const ESTADO_CERRADO = 'CERRADO';
 
-    /** Tabla origen del corte y tabla del corte de comparación. */
-    const ORIGEN_CORTE = 'Modulos_Faico.dbo.ResumenVigentesClientes';
-    const ORIGEN_COMPARACION = 'Modulos_Faico.dbo.ResumenVigentesClientes1';
+    /** Tabla origen del corte y tabla del corte de comparación, según el ambiente. */
+    public static function origenCorte()
+    {
+        return config('database.faico').'.dbo.ResumenVigentesClientes';
+    }
+
+    public static function origenComparacion()
+    {
+        return config('database.faico').'.dbo.ResumenVigentesClientes1';
+    }
 
     /* ---------------------------------------------------------------------
      | Expresiones reutilizables
@@ -66,8 +73,9 @@ class Deterioro extends Model
      |-------------------------------------------------------------------- */
 
     /** Periodo (IdAno, IdPeriodo) que tiene cargado hoy la tabla origen. */
-    public static function periodoDisponible($tabla = self::ORIGEN_CORTE)
+    public static function periodoDisponible($tabla = null)
     {
+        $tabla = $tabla ?: self::origenCorte();
         $sql = "SELECT TOP 1 IdAno, IdPeriodo, filas = COUNT(*)
                 FROM $tabla GROUP BY IdAno, IdPeriodo ORDER BY COUNT(*) DESC";
         return DB::selectOne($sql);
@@ -78,8 +86,9 @@ class Deterioro extends Model
      * procedimiento que la vacía y recarga. Antes de extraer hay que confirmar
      * que lo cargado corresponde al corte que se está pidiendo.
      */
-    public static function validarPeriodoOrigen($fechaCorte, $tabla = self::ORIGEN_CORTE)
+    public static function validarPeriodoOrigen($fechaCorte, $tabla = null)
     {
+        $tabla = $tabla ?: self::origenCorte();
         $periodo = self::periodoDisponible($tabla);
         if (!$periodo) {
             return ['ok' => false, 'mensaje' => "La tabla $tabla está vacía."];
@@ -244,8 +253,9 @@ class Deterioro extends Model
      | Paso 2 · Extracción
      |-------------------------------------------------------------------- */
 
-    public static function sqlExtraccion($tablaOrigen = self::ORIGEN_CORTE)
+    public static function sqlExtraccion($tablaOrigen = null)
     {
+        $tablaOrigen = $tablaOrigen ?: self::origenCorte();
         return "INSERT INTO det_corte_detalle_cuota (
                     id_corte, id_operacion, id_cuota, id_detalle_operacion,
                     id_ano, id_periodo, id_cliente, cliente, id_pagador, pagador,
@@ -268,7 +278,7 @@ class Deterioro extends Model
                         ON o.IdOperacion = r.IdOperacion";
     }
 
-    public static function extraerCartera($idCorte, $tablaOrigen = self::ORIGEN_CORTE)
+    public static function extraerCartera($idCorte, $tablaOrigen = null)
     {
         DB::insert(self::sqlExtraccion($tablaOrigen), [$idCorte]);
         return DB::table('det_corte_detalle_cuota')->where('id_corte', $idCorte)->count();
@@ -504,7 +514,87 @@ class Deterioro extends Model
     }
 
     /* ---------------------------------------------------------------------
-     | Paso 8 · Cuadres
+     | Paso 8 · Comparativo contable contra fiscal e impuesto diferido
+     |-------------------------------------------------------------------- */
+
+    /**
+     * Resuelve §11 en una sola pasada: acumulado fiscal, diferencia temporaria,
+     * impuesto diferido y año proyectado de reversión.
+     *
+     * La diferencia conserva el signo: positiva es activo por impuesto diferido;
+     * negativa es pasivo, y aparece cuando el acumulado fiscal supera al
+     * contable. Netear ambos sentidos sería incorrecto para la revelación.
+     *
+     * La tarifa es tarifa_renta de la convención (art. 240), no el pct_anual del
+     * 33 % (art. 145 ET), que es la provisión deducible del año y ya se aplicó
+     * en el paso anterior. La convención entra por INNER JOIN porque su llave es
+     * id_corte, no multiplica filas, y si faltara el resultado debe fallar en
+     * validarTarifaRenta(), no quedar nulo en silencio.
+     *
+     * La proyección de reversión estima cuántos años de deducción faltan para
+     * agotar el tope: los años de espera hasta alcanzar dias_minimos_mora más lo
+     * pendiente dividido por la deducción anual. Con pf nula, anual da cero y el
+     * año sale nulo, que es el resultado honesto. ISNULL(saldo_topado,
+     * base_deterioro) repite el comportamiento neutro documentado arriba
+     * mientras saldo_siesa siga sin poblarse.
+     *
+     * Esta fase NO escribe en det_fiscal_acumulado: esa tabla la alimenta el
+     * cierre de diciembre (fase 7). Si escribiera aquí, reejecutar un corte
+     * duplicaría el acumulado del año.
+     */
+    public static function sqlImpuestoDiferido()
+    {
+        return "DECLARE @corte date = ?;
+                DECLARE @idCorte int = ?;
+
+                UPDATE o SET
+                    deterioro_fiscal_acumulado = f.fiscal,
+                    diferencia_temporaria      = ISNULL(o.deterioro_contable, 0) - f.fiscal,
+                    impuesto_diferido_activo   = (ISNULL(o.deterioro_contable, 0) - f.fiscal) * pc.tarifa_renta,
+                    ano_reversion_fiscal       = v.ano
+                FROM det_deterioro_operacion o
+                INNER JOIN det_corte_param_convencion pc ON pc.id_corte = o.id_corte
+                LEFT JOIN det_corte_param_fiscal pf ON pf.id_corte = o.id_corte AND pf.activo = 1
+                CROSS APPLY (SELECT fiscal = ISNULL(o.fiscal_acumulado_anterior,0) + ISNULL(o.deduccion_fiscal_ano,0)) f
+                CROSS APPLY (SELECT anual = o.base_deterioro * ISNULL(pf.pct_anual,0),
+                                    pendiente = ISNULL(o.saldo_topado, o.base_deterioro) - f.fiscal,
+                                    espera = CASE WHEN o.dias_mora_operacion >= pf.dias_minimos_mora THEN 0
+                                                  ELSE CEILING((pf.dias_minimos_mora - o.dias_mora_operacion) / 360.0) END) c
+                CROSS APPLY (SELECT ano = CASE
+                        WHEN o.base_deterioro <= 0 OR c.anual <= 0 THEN NULL
+                        WHEN c.pendiente <= 0 THEN YEAR(@corte)
+                        ELSE YEAR(@corte) + c.espera + CEILING(c.pendiente / c.anual)
+                             - CASE WHEN c.espera > 0 THEN 1 ELSE 0 END END) v
+                WHERE o.id_corte = @idCorte";
+    }
+
+    public static function aplicarImpuestoDiferido($idCorte, $fechaCorte)
+    {
+        return DB::update(self::sqlImpuestoDiferido(), [$fechaCorte, $idCorte]);
+    }
+
+    /**
+     * La tarifa de renta congelada multiplica todo el impuesto diferido: sin
+     * ella o en cero el resultado sería un activo nulo, no un error visible.
+     */
+    public static function validarTarifaRenta($idCorte)
+    {
+        $tarifa = DB::table('det_corte_param_convencion')
+            ->where('id_corte', $idCorte)->value('tarifa_renta');
+
+        if ($tarifa === null) {
+            throw new \RuntimeException(
+                'No hay convención congelada para el corte: revise la vigencia de det_param_convencion.');
+        }
+        if ((float) $tarifa <= 0) {
+            throw new \RuntimeException(
+                'La tarifa de renta congelada del corte es cero: el impuesto diferido quedaría anulado.');
+        }
+        return $tarifa;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Paso 9 · Cuadres
      |-------------------------------------------------------------------- */
 
     /**
@@ -575,6 +665,17 @@ class Deterioro extends Model
                            WHERE o.id_corte = ? AND o.id_operacion = fa.id_operacion)',
             [(int) date('Y', strtotime($fechaCorte)), $idCorte]);
 
+        $diferido = DB::selectOne(
+            'SELECT contable = SUM(deterioro_contable),
+                    fiscal = SUM(deterioro_fiscal_acumulado),
+                    temporaria = SUM(diferencia_temporaria),
+                    impuesto = SUM(impuesto_diferido_activo),
+                    sin_proyeccion = SUM(CASE WHEN base_deterioro > 0 AND ano_reversion_fiscal IS NULL THEN 1 ELSE 0 END)
+             FROM det_deterioro_operacion WHERE id_corte = ?', [$idCorte]);
+
+        $tarifa = (float) DB::table('det_corte_param_convencion')
+            ->where('id_corte', $idCorte)->value('tarifa_renta');
+
         $controles = [
             ['C-CUOTAS', 'Cuotas del detalle contra la suma consolidada por operación',
                 $origen->filas, $oper->cuotas],
@@ -592,6 +693,16 @@ class Deterioro extends Model
                 $fiscal->acumulado, $fiscalFuente->acumulado],
             ['C-FISCAL-TOPE', 'Deducción del año por encima del tope disponible',
                 $fiscal->exceso, 0],
+            // SUM ignora los nulos y el ISNULL fila a fila no: si alguna
+            // operación quedó sin comparativo, los dos lados se separan.
+            ['C-DIF-TEMP', 'Diferencia temporaria del detalle contra contable menos fiscal acumulado',
+                $diferido->temporaria, $diferido->contable - $diferido->fiscal],
+            // El motor multiplica y luego suma; el control suma y luego
+            // multiplica: son dos caminos, no la misma cuenta escrita dos veces.
+            ['C-DIFERIDO', 'Impuesto diferido del detalle contra la diferencia temporaria por la tarifa de renta',
+                $diferido->impuesto, $diferido->temporaria * $tarifa],
+            ['C-REVERSION', 'Operaciones con base de deterioro y sin año de reversión proyectado',
+                $diferido->sin_proyeccion, 0],
         ];
 
         DB::table('det_corte_cuadre')->where('id_corte', $idCorte)->delete();
@@ -622,8 +733,9 @@ class Deterioro extends Model
      * Ejecuta el pipeline completo. Reejecutable mientras el corte esté
      * abierto: limpia y rehace desde el principio.
      */
-    public static function ejecutar($idCorte, $idUsuario, $tablaOrigen = self::ORIGEN_CORTE)
+    public static function ejecutar($idCorte, $idUsuario, $tablaOrigen = null)
     {
+        $tablaOrigen = $tablaOrigen ?: self::origenCorte();
         $corte = DB::table('det_corte')->where('id_corte', $idCorte)->first();
         if (!$corte) {
             throw new \RuntimeException("El corte $idCorte no existe.");
@@ -648,6 +760,7 @@ class Deterioro extends Model
             $t = microtime(true);
             $hash = self::congelarParametros($idCorte, $corte->fecha_corte);
             self::validarMetodoFiscal($idCorte);
+            self::validarTarifaRenta($idCorte);
             $pasos[] = ['paso' => 'Congelar paramétricas', 'filas' => null, 'ms' => self::ms($t)];
 
             $t = microtime(true);
@@ -673,6 +786,10 @@ class Deterioro extends Model
             $t = microtime(true);
             self::aplicarDeterioroFiscal($idCorte, $corte->fecha_corte);
             $pasos[] = ['paso' => 'Deterioro fiscal y tope', 'filas' => $operaciones, 'ms' => self::ms($t)];
+
+            $t = microtime(true);
+            self::aplicarImpuestoDiferido($idCorte, $corte->fecha_corte);
+            $pasos[] = ['paso' => 'Impuesto diferido', 'filas' => $operaciones, 'ms' => self::ms($t)];
 
             $totales = DB::selectOne(
                 'SELECT capital = SUM(saldo_capital), interes = SUM(saldo_intereses)
@@ -729,6 +846,10 @@ class Deterioro extends Model
      * Matriz producto x rango con capital, interés, base y deterioro.
      * Réplica del bloque T14:AB27 del libro.
      *
+     * El impuesto diferido se devuelve además desdoblado por signo: neto para
+     * el cuadre, activo y pasivo por separado porque compensarlos entre sí
+     * falsearía la revelación.
+     *
      * Se agrupa por calificacion_abc y no por ISNULL(rango_codigo, 'Corriente'):
      * rango_codigo es nchar(1) y ISNULL devuelve el tipo del primer argumento,
      * de modo que 'Corriente' se truncaría a 'C' y se mezclaría con ese rango.
@@ -753,6 +874,11 @@ class Deterioro extends Model
                     fiscal_acumulado_anterior = SUM(o.fiscal_acumulado_anterior),
                     saldo_topado = SUM(o.saldo_topado),
                     deduccion_fiscal_ano = SUM(o.deduccion_fiscal_ano),
+                    deterioro_fiscal_acumulado = SUM(o.deterioro_fiscal_acumulado),
+                    diferencia_temporaria = SUM(o.diferencia_temporaria),
+                    impuesto_diferido_activo = SUM(o.impuesto_diferido_activo),
+                    diferido_activo = SUM(CASE WHEN o.diferencia_temporaria > 0 THEN o.impuesto_diferido_activo ELSE 0 END),
+                    diferido_pasivo = SUM(CASE WHEN o.diferencia_temporaria < 0 THEN -o.impuesto_diferido_activo ELSE 0 END),
                     deduce_fiscal = MAX(CASE WHEN pr.dias_desde >= pf.dias_minimos_mora THEN 1 ELSE 0 END),
                     pct_fiscal = MAX(CASE WHEN pr.dias_desde >= pf.dias_minimos_mora
                                           THEN ISNULL(pf.pct_anual, 0) ELSE 0 END)
@@ -790,6 +916,102 @@ class Deterioro extends Model
              ORDER BY ISNULL(pr.orden, 0)", [$idCorte]);
     }
 
+    /** Tarifa de renta congelada del corte (art. 240). */
+    public static function tarifaRenta($idCorte)
+    {
+        return DB::table('det_corte_param_convencion')->where('id_corte', $idCorte)->value('tarifa_renta');
+    }
+
+    /** Operaciones a las que el tope de RN-09 les recortó deducción, mismo criterio que el filtro soloTopadas. */
+    public static function operacionesTopadas($idCorte)
+    {
+        return DB::table('det_deterioro_operacion')
+            ->where('id_corte', $idCorte)
+            ->whereColumn('deduccion_fiscal_ano', '<', 'deterioro_fiscal_individual')
+            ->count();
+    }
+
+    /**
+     * Puente de movimiento: totales del corte contra los del corte anterior.
+     *
+     * tiene_anterior distingue el primer corte de la serie de uno cuyo anterior
+     * dio cero, para que la pantalla no presente el saldo inicial como variación.
+     */
+    public static function puenteMovimiento($idCorte)
+    {
+        return DB::selectOne(
+            "SELECT tiene_anterior = CASE WHEN c.id_corte_anterior IS NULL OR p.fiscal IS NULL THEN 0 ELSE 1 END,
+                    anterior_sin_fase3 = CASE WHEN c.id_corte_anterior IS NOT NULL AND p.fiscal IS NULL THEN 1 ELSE 0 END,
+                    id_corte_anterior = c.id_corte_anterior,
+                    fecha_anterior = a.fecha_corte,
+                    contable = t.contable, contable_ant = p.contable,
+                    fiscal = t.fiscal, fiscal_ant = p.fiscal,
+                    temporaria = t.temporaria, temporaria_ant = p.temporaria,
+                    diferido = t.diferido, diferido_ant = p.diferido,
+                    deduccion = t.deduccion, deduccion_ant = p.deduccion
+             FROM det_corte c
+             LEFT JOIN det_corte a ON a.id_corte = c.id_corte_anterior
+             CROSS APPLY (SELECT contable = SUM(o.deterioro_contable),
+                                 fiscal = SUM(o.deterioro_fiscal_acumulado),
+                                 temporaria = SUM(o.diferencia_temporaria),
+                                 diferido = SUM(o.impuesto_diferido_activo),
+                                 deduccion = SUM(o.deduccion_fiscal_ano)
+                          FROM det_deterioro_operacion o WHERE o.id_corte = c.id_corte) t
+             CROSS APPLY (SELECT contable = SUM(o.deterioro_contable),
+                                 fiscal = SUM(o.deterioro_fiscal_acumulado),
+                                 temporaria = SUM(o.diferencia_temporaria),
+                                 diferido = SUM(o.impuesto_diferido_activo),
+                                 deduccion = SUM(o.deduccion_fiscal_ano)
+                          FROM det_deterioro_operacion o WHERE o.id_corte = c.id_corte_anterior) p
+             WHERE c.id_corte = ?", [$idCorte]);
+    }
+
+    /** Serie de la diferencia temporaria por corte, hasta la fecha del corte pedido. */
+    public static function evolucionDiferenciaTemporaria($idCorte, $cortes = 24)
+    {
+        return DB::select(
+            "SELECT TOP (?) c.id_corte, c.fecha_corte,
+                    operaciones = COUNT(o.id_operacion),
+                    contable = SUM(o.deterioro_contable),
+                    fiscal = SUM(o.deterioro_fiscal_acumulado),
+                    temporaria = SUM(o.diferencia_temporaria),
+                    diferido = SUM(o.impuesto_diferido_activo)
+             FROM det_corte c
+             INNER JOIN det_deterioro_operacion o ON o.id_corte = c.id_corte
+             WHERE c.fecha_corte <= (SELECT fecha_corte FROM det_corte WHERE id_corte = ?)
+             GROUP BY c.id_corte, c.fecha_corte
+             ORDER BY c.fecha_corte DESC", [(int) $cortes, $idCorte]);
+    }
+
+    /**
+     * Proyección del año gravable en que cada operación completa el 100 %
+     * fiscal. SIN_PROYECCION agrupa las que no alcanzan a deducir con la
+     * paramétrica vigente.
+     */
+    public static function proyeccionReversion($idCorte)
+    {
+        return DB::select(
+            "SELECT ano = o.ano_reversion_fiscal,
+                    tramo = CASE
+                        WHEN o.ano_reversion_fiscal IS NULL THEN 'SIN_PROYECCION'
+                        WHEN o.ano_reversion_fiscal <= YEAR(c.fecha_corte) THEN 'ANO_CORRIENTE'
+                        WHEN o.ano_reversion_fiscal = YEAR(c.fecha_corte) + 1 THEN 'ANO_SIGUIENTE'
+                        ELSE 'POSTERIOR' END,
+                    operaciones = COUNT(*),
+                    base = SUM(o.base_deterioro),
+                    temporaria = SUM(o.diferencia_temporaria),
+                    diferido = SUM(o.impuesto_diferido_activo)
+             FROM det_deterioro_operacion o
+             INNER JOIN det_corte c ON c.id_corte = o.id_corte
+             WHERE o.id_corte = ?
+             GROUP BY o.ano_reversion_fiscal, CASE
+                        WHEN o.ano_reversion_fiscal IS NULL THEN 'SIN_PROYECCION'
+                        WHEN o.ano_reversion_fiscal <= YEAR(c.fecha_corte) THEN 'ANO_CORRIENTE'
+                        WHEN o.ano_reversion_fiscal = YEAR(c.fecha_corte) + 1 THEN 'ANO_SIGUIENTE'
+                        ELSE 'POSTERIOR' END
+             ORDER BY o.ano_reversion_fiscal", [$idCorte]);
+    }
+
     public static function cuadres($idCorte)
     {
         return DB::select('SELECT * FROM det_corte_cuadre WHERE id_corte = ? ORDER BY codigo', [$idCorte]);
@@ -805,6 +1027,8 @@ class Deterioro extends Model
                        interes_mora, base_deterioro, pct_contable, deterioro_contable,
                        deterioro_fiscal_individual, deterioro_fiscal_general,
                        fiscal_acumulado_anterior, saldo_topado, deduccion_fiscal_ano,
+                       deterioro_fiscal_acumulado, diferencia_temporaria,
+                       impuesto_diferido_activo, ano_reversion_fiscal,
                        capital_mes_anterior, variacion_capital
                 FROM det_deterioro_operacion WHERE id_corte = ?";
         $bind = [$idCorte];
@@ -826,6 +1050,10 @@ class Deterioro extends Model
         // Topada: el tope de RN-09 recortó la deducción por debajo del individual.
         if (!empty($filtros['soloTopadas'])) {
             $sql .= ' AND deduccion_fiscal_ano < deterioro_fiscal_individual';
+        }
+        // Pasivo: el acumulado fiscal superó al contable (§11).
+        if (!empty($filtros['soloPasivo'])) {
+            $sql .= ' AND diferencia_temporaria < 0';
         }
         if (!empty($filtros['busqueda'])) {
             $sql .= ' AND (cliente LIKE ? OR id_cliente LIKE ? OR CAST(id_operacion AS varchar(20)) LIKE ?)';

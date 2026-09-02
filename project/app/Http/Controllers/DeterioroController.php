@@ -20,8 +20,8 @@ class DeterioroController extends Controller
     /** Periodo que tiene cargado hoy la tabla origen, para la pantalla de cortes. */
     public function periodoOrigen()
     {
-        $corte = Deterioro::periodoDisponible(Deterioro::ORIGEN_CORTE);
-        $comparacion = Deterioro::periodoDisponible(Deterioro::ORIGEN_COMPARACION);
+        $corte = Deterioro::periodoDisponible();
+        $comparacion = Deterioro::periodoDisponible(Deterioro::origenComparacion());
 
         return response()->json([
             'corte' => $corte,
@@ -150,6 +150,32 @@ class DeterioroController extends Controller
         ]);
     }
 
+    /**
+     * Comparativo contable contra fiscal e impuesto diferido (§11). Devuelve
+     * los cuatro bloques de la pantalla en una sola llamada.
+     */
+    public function comparativoContableFiscal(Request $request)
+    {
+        $idCorte = (int) $request->input('idCorte');
+        $corte = Deterioro::corte($idCorte);
+        if (!$corte) {
+            return response()->json(['res' => 'bad', 'text' => 'El corte no existe.']);
+        }
+
+        $corte->operaciones_topadas = Deterioro::operacionesTopadas($idCorte);
+
+        return response()->json([
+            'res' => 'ok',
+            'corte' => $corte,
+            'tarifaRenta' => Deterioro::tarifaRenta($idCorte),
+            'resumen' => Deterioro::resumenPorProductoRango($idCorte),
+            'movimiento' => Deterioro::puenteMovimiento($idCorte),
+            'evolucion' => Deterioro::evolucionDiferenciaTemporaria($idCorte),
+            'proyeccion' => Deterioro::proyeccionReversion($idCorte),
+            'cuadres' => Deterioro::cuadres($idCorte),
+        ]);
+    }
+
     public function detalleOperaciones(Request $request)
     {
         $idCorte = (int) $request->input('idCorte');
@@ -163,6 +189,7 @@ class DeterioroController extends Controller
             'soloDeterioro' => $request->input('soloDeterioro'),
             'soloDeduccion' => $request->input('soloDeduccion'),
             'soloTopadas' => $request->input('soloTopadas'),
+            'soloPasivo' => $request->input('soloPasivo'),
             'busqueda' => $request->input('busqueda'),
         ]);
 

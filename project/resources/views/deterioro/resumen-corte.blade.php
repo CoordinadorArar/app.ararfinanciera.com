@@ -11,6 +11,7 @@
         </div>
         <div>
             <a class="btn btn-light btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
+            <a class="btn btn-light btn-sm" id="btnComparativo" href="#"><i class="fas fa-scale-balanced"></i>&nbsp; Contable vs. fiscal</a>
             <a class="btn btn-primary btn-sm" id="btnDetalle" href="#"><i class="fas fa-list"></i>&nbsp; Ver detalle</a>
         </div>
     </div>

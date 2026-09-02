@@ -32,3 +32,6 @@ Desktop.ini
 .idea/
 .vscode/
 *.swp
+
+# Router del servidor local de desarrollo
+/router.php
