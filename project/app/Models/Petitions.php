@@ -50,7 +50,7 @@ class Petitions extends Model
             $sql .= " AND u.idUsuario=?";
             $bindings[] = $idUsuario;
         }
-        $users = DB::select($sql, $bindings);
+        $users = DB::connection('identidad')->select($sql, $bindings);
         return $users;
     }
 
@@ -61,14 +61,14 @@ class Petitions extends Model
             $sql .= " WHERE IdRol=? ";
             $bindings[] = $id;
         }
-        $roles = DB::select($sql, $bindings);
+        $roles = DB::connection('identidad')->select($sql, $bindings);
         return $roles;
     }
 
     public static function mostrarAsesores(){
         $sql = "SELECT u.IdUsuario,u.nombreUsuario,u.email,u.documentoUsuario,u.estadoUsuario,u.created_at,r.IdRol,r.NombreRol,r.EstadoRol
                 FROM users u LEFT JOIN rolusuario ru ON u.idUsuario=ru.IdUsuario LEFT JOIN roles r ON ru.IdRol=r.IdRol WHERE r.IdRol=4";
-        $asesores = DB::select($sql);
+        $asesores = DB::connection('identidad')->select($sql);
         return $asesores;
     }
     /**Trae los datos de la tabla de valores variables */

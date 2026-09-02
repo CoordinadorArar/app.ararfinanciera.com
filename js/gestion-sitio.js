@@ -159,23 +159,3 @@ const guardarVariable = async function(e){
         Swal.fire({title:'Oops!',text:'Algo falló al intentar guardara los datos',icon:'error',confirmButtonText:'Entendido'})
     }
 }
-
-const soloNumeros = (event) => {
-  let charCode = event.which ? event.which : event.keyCode;
-  if (charCode < 48 || charCode > 57) {
-      event.preventDefault(); // Bloquea la entrada de caracteres no numéricos
-  }
-}
-
-const noStrangeCharacters = (e)=>{
-  let allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Enter"];
-  let patron = /^[a-zA-Z0-9@ _.,#\-$áéíóúÁÉÍÓÚñÑ]$/; // Expresión corregida
-  let tecla = e.key; // Captura la tecla presionada
-
-  if (allowedKeys.includes(tecla) || patron.test(tecla)) {
-      return true; // Permite la tecla
-  }
-
-  e.preventDefault();
-  return false; // Bloquea la tecla no permitida
-}

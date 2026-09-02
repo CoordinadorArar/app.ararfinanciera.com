@@ -248,3 +248,315 @@ table.det-tabla tr.det-total td {
     .det-filtros .form-select { min-width: 100%; }
     .det-filtros .campo { width: 100%; }
 }
+
+/* --- Bloque fiscal --- */
+
+.det-tarjetas.compacta {
+    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+}
+
+.det-panel > h6 .det-badge { text-transform: none; }
+
+table.det-tabla thead tr.det-grupo th {
+    background: #eef2f7;
+    text-align: center;
+    border-bottom: 1px solid #e3e7ee;
+    font-size: .7rem;
+}
+
+table.det-tabla thead tr.det-grupo th.vacio {
+    background: #fff;
+    border-bottom: 0;
+}
+
+table.det-tabla thead th[title] {
+    cursor: help;
+    text-decoration: underline dotted #b8c2d0;
+    text-underline-offset: 3px;
+}
+
+tr.det-sin-fiscal td { color: #8593a7; background: #fcfdfe; }
+
+/* El recorte por tope se marca dentro de la celda de la deducción: como columna
+   propia quedaría vacía en casi todas las filas. */
+.det-topado { box-shadow: inset 2px 0 0 #d9a520; }
+
+.det-recorte {
+    display: block;
+    font-size: .7rem;
+    color: #9a5312;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Método general, solo de referencia --- */
+
+.det-badge.det-inactivo {
+    background: #eef1f6;
+    color: #8593a7;
+    border: 1px dashed #c8d0dc;
+}
+
+.det-panel.det-referencia {
+    background: #fbfcfd;
+    border-style: dashed;
+}
+
+.det-panel.det-referencia summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    gap: .5rem;
+    align-items: baseline;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #6b7a90;
+}
+
+.det-panel.det-referencia summary::-webkit-details-marker { display: none; }
+
+.det-panel.det-referencia summary .det-subtitulo { font-weight: 400; }
+
+.det-panel.det-referencia .det-caret {
+    font-size: .7rem;
+    color: #8593a7;
+    transition: transform .15s;
+}
+
+.det-panel.det-referencia[open] .det-caret { transform: rotate(90deg); }
+
+.det-panel.det-referencia[open] summary { margin-bottom: .85rem; }
+
+.det-panel.det-referencia table.det-tabla tbody td { color: #7d8a9c; }
+
+/* --- Conmutador de vista del detalle --- */
+
+.det-vistas { margin-left: auto; }
+
+.det-vistas .btn-check:checked + .btn {
+    background: #e2edfb;
+    color: rgb(45, 85, 165);
+    border-color: #c8d7f2;
+}
+
+.det-filtros .form-check-label {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: .84rem;
+    color: #4a5a70;
+}
+
+@media (max-width: 576px) {
+    .det-vistas { width: 100%; margin-left: 0; }
+    .det-vistas .btn { flex: 1; }
+}
+
+/* --- Contable contra fiscal --- */
+
+.det-migas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    font-size: .76rem;
+    color: #a7b2c2;
+    margin-bottom: .35rem;
+}
+
+.det-migas a { color: #6b7a90; text-decoration: none; }
+.det-migas a:hover { color: rgb(45, 85, 165); }
+.det-migas .actual { color: #4a5a70; font-weight: 600; }
+
+.det-titulo .det-badge { font-size: .68rem; vertical-align: middle; }
+
+.det-tarjeta .pie {
+    display: block;
+    font-size: .7rem;
+    color: #8593a7;
+    margin-top: .3rem;
+}
+
+.det-tarjeta .pie .nota { display: block; }
+
+.det-tarjeta.preliminar { border-top: 2px solid #e0b84a; }
+
+.det-tarjeta.entregable {
+    background: rgb(45, 85, 165);
+    border-color: rgb(45, 85, 165);
+}
+
+.det-tarjeta.entregable .et,
+.det-tarjeta.entregable .pie { color: #c8d7f2; }
+.det-tarjeta.entregable .vl { color: #fff; }
+
+/* Franja-ecuación: cuatro cifras encadenadas por sus operadores. */
+.det-puente {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+}
+
+.det-puente .op {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #8593a7;
+    white-space: nowrap;
+}
+
+.det-puente .op i { font-style: normal; }
+.det-puente .op b { display: none; font-weight: 400; }
+
+.det-puente .det-tarjeta.destacada .vl,
+.det-puente .det-tarjeta.entregable .vl { font-size: 1.6rem; }
+
+@media (max-width: 991px) {
+    .det-puente { grid-template-columns: 1fr; gap: .4rem; }
+    .det-puente .op i { display: none; }
+    .det-puente .op b { display: inline; }
+}
+
+/* Encabezado de panel con conmutador a la derecha. */
+.det-panel-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .85rem;
+}
+
+.det-panel-cab h6 {
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #6b7a90;
+    margin: 0;
+    font-weight: 600;
+}
+
+.det-fila { display: grid; grid-template-columns: 1fr; gap: 0 1.25rem; }
+
+@media (min-width: 1400px) {
+    .det-fila { grid-template-columns: 1fr 1fr; }
+}
+
+/* Doce columnas superan el ancho útil: la identidad de la fila queda fija. */
+.det-scroll.det-sombra { box-shadow: inset -9px 0 8px -8px rgba(31, 45, 61, .14); }
+
+table.det-tabla .det-fija {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #fff;
+    box-shadow: inset -1px 0 0 #e3e7ee;
+}
+
+table.det-tabla thead .det-fija,
+table.det-tabla tfoot .det-fija,
+table.det-tabla tr.det-total .det-fija { background: #f6f8fb; }
+
+table.det-tabla tr.det-sin-fiscal .det-fija { background: #fcfdfe; }
+table.det-tabla tbody tr:hover td.det-fija { background: #f9fbfe; }
+
+table.det-tabla thead th.apagado { color: #a7b2c2; }
+
+table.det-tabla thead th[data-bs-toggle="tooltip"] {
+    cursor: help;
+    text-decoration: underline dotted #b8c2d0;
+    text-underline-offset: 3px;
+}
+
+/* --- Barras de reversión --- */
+
+.det-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: .75rem;
+    color: #6b7a90;
+    margin-bottom: .7rem;
+}
+
+.det-leyenda span { display: flex; align-items: center; gap: .35rem; }
+
+.det-leyenda i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #c8d7f2;
+}
+
+.det-leyenda i.corriente { background: rgb(45, 85, 165); }
+.det-leyenda i.siguiente { background: #7d9fd8; }
+
+.det-barra {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .25rem 0;
+    font-size: .8rem;
+}
+
+.det-barra .eti { flex: 0 0 6rem; color: #4a5a70; }
+
+.det-barra .pista {
+    flex: 1 1 auto;
+    height: 14px;
+    background: #f1f4f9;
+    border-radius: 3px;
+    min-width: 60px;
+}
+
+.det-barra .relleno {
+    display: block;
+    height: 14px;
+    border-radius: 3px;
+    background: #c8d7f2;
+}
+
+.det-barra .relleno.corriente { background: rgb(45, 85, 165); }
+.det-barra .relleno.siguiente { background: #7d9fd8; }
+
+.det-barra .cifra {
+    flex: 0 0 9.5rem;
+    text-align: right;
+    color: #1f2d3d;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Evolución --- */
+
+.det-spark { display: block; width: 100%; height: 48px; margin-bottom: .9rem; }
+
+.det-spark-cifra {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2d3d;
+    font-variant-numeric: tabular-nums;
+}
+
+.det-spark-cifra .det-subtitulo { display: inline; }
+
+.det-var { font-variant-numeric: tabular-nums; font-size: .82rem; }
+.det-var.sube { color: #1e7c3a; }
+.det-var.baja { color: #a3391f; }
+
+/* --- Estado vacío --- */
+
+.det-vacio { padding: 2.5rem 1rem; text-align: center; }
+
+.det-vacio i {
+    display: block;
+    font-size: 1.5rem;
+    color: #c3cbd8;
+    margin-bottom: .55rem;
+}
+
+.det-vacio .tit {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #6b7a90;
+    margin-bottom: .2rem;
+}

@@ -8,6 +8,7 @@ use App\Models\Admin;
 use App\Models\Petitions;
 use App\Models\Procesos;
 use App\Models\User;
+use App\Support\Ambiente;
 use ArrayObject;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -166,6 +167,23 @@ class AdminController extends Controller
             return response()->json(['errors'=>'Surgieron errores al intentar subir el archivo']);
         }
         return response()->json(['errors'=>'No se ha seleccionado un archivo válido']);
+    }
+    /**Cambiar el ambiente de datos de la sesión (producción o demo) */
+    public function cambiarAmbiente(Request $request){
+        $rules = ['ambiente'=>'required|in:produccion,demo'];
+        $validate = Validator::make($request->all(),$rules);
+        if($validate->fails()){
+            return response()->json(['errors'=>$validate->errors()]);
+        }
+        //Volver a producción es la acción segura y nunca se bloquea: si no fuera así,
+        //un cambio de rol con la sesión viva dejaría al usuario encerrado en demo.
+        if($request->input('ambiente') == Ambiente::DEMO && !Ambiente::puedeConmutar()){
+            return response()->json(['errors'=>['ambiente'=>['No tienes permiso para cambiar de ambiente.']]]);
+        }
+        $ambiente = Ambiente::aplicar($request->input('ambiente'));
+        $request->session()->put(Ambiente::CLAVE,$ambiente);
+        $mensaje = ($ambiente == Ambiente::DEMO)? 'Ahora estás en el ambiente Demo' : 'Ahora estás en el ambiente de Producción';
+        return response()->json(['success'=>$mensaje,'data'=>['ambiente'=>$ambiente]]);
     }
     /**Mostrar foto de perfil */
     public function mostrarFotoPerfil(){

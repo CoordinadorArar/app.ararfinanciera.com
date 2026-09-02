@@ -42,25 +42,118 @@ body{
     color: rgb(255,255,255) !important;
     font-size: 16px;
 }
-#menu .dropdown-item{
-    color: rgb(0,0,0) !important;
-}
-#menu .dropdown-menu{
-    position: fixed !important;
-    inset: auto auto auto auto !important;
-    margin: 0px !important;
-    transform: translate(0px, 0px) !important;
-    left: 3% !important;
-}
 #menu > li{
     width: 100%;
 }
-#menu > li a:hover{
+#menu > li > a:hover{
     background-color: rgb(255,255,255,0.8);
     color: rgb(65,110,195) !important;
 }
 #menu > li > a > span{
     display: inline !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/**Menu padre que despliega sus submenus debajo */
+#menu .submenu-toggle{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+#menu .submenu-toggle > span{
+    flex: 1 1 auto;
+    min-width: 0;
+}
+#menu .submenu-caret{
+    flex: 0 0 auto;
+    font-size: 11px;
+    transition: transform .2s ease-in-out;
+}
+#menu .submenu-toggle[aria-expanded="true"]{
+    background-color: rgb(255,255,255,0.15);
+}
+#menu .submenu-toggle[aria-expanded="true"] .submenu-caret{
+    transform: rotate(180deg);
+}
+/**Submenus desplegados debajo del menu padre, no sobrepuestos */
+#menu .submenu-collapse{
+    width: 100%;
+    background-color: rgb(0,0,0,0.13);
+    box-shadow: inset 0 7px 6px -7px rgb(0,0,0,0.45), inset 0 -7px 6px -7px rgb(0,0,0,0.45);
+}
+/**Guia vertical que agrupa los items bajo su menu padre */
+#menu .submenu-nav{
+    gap: 2px;
+    margin-left: 21px;
+    padding: 8px 8px 8px 0;
+    border-left: 2px solid rgb(255,255,255,0.22);
+}
+#menu .submenu-item{
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-left: 9px;
+    padding: 6px 12px;
+    font-size: 14.5px;
+    line-height: 1.35;
+    border-radius: 6px;
+    transition: background-color .15s ease-in-out, color .15s ease-in-out;
+}
+#menu .submenu-icon{
+    flex: 0 0 16px;
+    font-size: 13px;
+    text-align: center;
+    opacity: .85;
+}
+#menu .submenu-text{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#menu .submenu-item:hover{
+    background-color: rgb(255,255,255,0.18);
+}
+/**Pagina abierta: pastilla blanca, como un nav-pill activo */
+#menu .submenu-item.active{
+    background-color: rgb(255,255,255) !important;
+    color: rgb(65,110,195) !important;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgb(0,0,0,0.2);
+}
+#menu .submenu-item.active .submenu-icon{
+    opacity: 1;
+}
+/**Franja global visible mientras la sesion trabaja en el ambiente demo */
+.amb-franja{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem .75rem;
+    padding: .35rem .75rem;
+    background: #fdf1cd;
+    border-bottom: 2px solid #e3b341;
+    color: #6b5a20;
+    font-size: .82rem;
+    line-height: 1.25;
+}
+.amb-franja strong{
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.amb-franja .btn{
+    padding: .1rem .5rem;
+    font-size: .76rem;
+    border: 1px solid #c99a2e;
+    color: #6b5a20;
+    background: transparent;
+}
+.amb-franja .btn:hover{
+    background: #e3b341;
+    border-color: #e3b341;
+    color: #fff;
 }
 .btn-primary{
     background-color: rgb(65,110,195) !important;
@@ -90,6 +183,11 @@ footer input{
     text-align: center;
     border: 0;
     border-radius: 15px;
+}
+@media(max-width: 576px){
+    .amb-franja .amb-texto{
+        display: none;
+    }
 }
 @media(max-width: 478px){
     .offcanvas-start {

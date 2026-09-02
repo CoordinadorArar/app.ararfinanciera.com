@@ -129,7 +129,7 @@ class Procesos extends Model
     }
 
     public static function listaProcesos($idUsuario='',$filtro='',$busqueda=''){
-        $rol = DB::select("SELECT * FROM RolUsuario WHERE IdUsuario=?", [$idUsuario]);
+        $rol = DB::connection('identidad')->select("SELECT * FROM RolUsuario WHERE IdUsuario=?", [$idUsuario]);
         $sql = "SELECT p.IdProceso,FechaCreacion=CONVERT(VARCHAR,p.FechaCreacion),p.EstadoProceso,t.NombresTercero,t.ApellidosTercero,
                     t.DocumentoTercero,pa.IdPagaduria,pa.NombrePagaduria,updated_at=CONVERT(VARCHAR,p.updated_at)
                     FROM Procesos p

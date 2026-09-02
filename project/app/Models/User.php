@@ -32,6 +32,7 @@ class User extends Authenticatable implements JWTSubject
         'remember_token',
         'failed_logins'
     ];
+    protected $connection = 'identidad';
     protected $primaryKey = 'idUsuario';
     public $timestamps = false;
 
@@ -71,7 +72,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public static function obtenerRol($idUser){
         $sql = "SELECT * FROM rolusuario WHERE idUsuario=?";
-        $rol = DB::select($sql, [$idUser]);
+        $rol = DB::connection('identidad')->select($sql, [$idUser]);
         return $rol;
     }
 }

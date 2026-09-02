@@ -1,3 +1,24 @@
 #btn-save, #btn-cancel, .invalid-feedback, #div-boton-subida{
     display: none;
 }
+/**Tarjeta del ambiente de trabajo */
+.amb-card{
+    border-left: 4px solid rgb(65,110,195);
+}
+.amb-card.demo{
+    border-left-color: #e3b341;
+    background: #fffdf6;
+}
+#switchAmbiente{
+    width: 2.9rem;
+    height: 1.45rem;
+    cursor: pointer;
+}
+#switchAmbiente:checked{
+    background-color: #e3b341;
+    border-color: #e3b341;
+}
+#switchAmbiente:focus{
+    border-color: #e3b341;
+    box-shadow: 0 0 0 .2rem rgba(227,179,65,.25);
+}

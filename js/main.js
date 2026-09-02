@@ -1,5 +1,5 @@
-let globalUrl = 'http://app.ararfinanciera.com';
-let storageUrl = 'http://app.ararfinanciera.com/project/storage/app/public/';
+let globalUrl = window.location.origin;
+let storageUrl = globalUrl + '/project/storage/app/public/';
 //const salarioMinimoMensual = 1000000;
 let htmlMenu = false;
 // document.oncontextmenu = function(){return false}
@@ -44,6 +44,7 @@ async function validarEstadoUsuario(){
 /**Traer menu y crear html para mostrar en el DOM*/
 async function mostrarMenu(){
     let dataToSend = new FormData();
+    dataToSend.append('rutaActual',window.location.pathname);//Para marcar el submenu de la pagina abierta
     let res = await makeOptionsFetch(`${globalUrl}/menus`,dataToSend,'post',$('meta[name="csrf-token-menus"]').attr('content'));
     //console.log(res);
     document.getElementById('div-menu-content').innerHTML = res.ul;

@@ -57,12 +57,22 @@
                 <label class="form-check-label" for="filtroSoloTopadas">Solo topadas</label>
             </div>
         </div>
+        <div class="campo" id="campoSoloPasivo" style="display:none">
+            <label>&nbsp;</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="filtroSoloPasivo" onchange="cargarDetalle()">
+                <label class="form-check-label" for="filtroSoloPasivo"
+                       title="Operaciones cuyo deterioro fiscal acumulado supera al contable">Solo diferido pasivo</label>
+            </div>
+        </div>
         <button class="btn btn-primary btn-sm" onclick="cargarDetalle()"><i class="fas fa-filter"></i>&nbsp; Filtrar</button>
         <div class="btn-group btn-group-sm det-vistas" role="group">
             <input type="radio" class="btn-check" name="vistaDetalle" id="vistaContable" checked onchange="cambiarVista()">
             <label class="btn btn-light" for="vistaContable">Contable</label>
             <input type="radio" class="btn-check" name="vistaDetalle" id="vistaFiscal" onchange="cambiarVista()">
             <label class="btn btn-light" for="vistaFiscal">Fiscal</label>
+            <input type="radio" class="btn-check" name="vistaDetalle" id="vistaDiferido" onchange="cambiarVista()">
+            <label class="btn btn-light" for="vistaDiferido">Diferido</label>
         </div>
     </div>
 
@@ -89,6 +99,10 @@
                         <th class="num" title="Deducciones tomadas en años gravables anteriores">Acum. anterior</th>
                         <th class="num" title="Tope del acumulado deducible: el menor entre el saldo de SIESA y la base">Saldo topado</th>
                         <th class="num" title="Individual del año limitado por el tope disponible">Deducción del año</th>
+                        <th class="num" title="Acumulado anterior más deducción del año">Fiscal acumulado</th>
+                        <th class="num" title="Deterioro contable menos deterioro fiscal acumulado. Positiva: deducible. Negativa: imponible">Diferencia temporaria</th>
+                        <th class="num" title="Diferencia temporaria por la tarifa de renta. Positivo: activo. Negativo: pasivo">Impuesto diferido</th>
+                        <th class="num" title="Año gravable en que la operación completa el 100 % deducible">Año de reversión</th>
                         <th></th>
                     </tr>
                 </thead>

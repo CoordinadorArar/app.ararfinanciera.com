@@ -18,20 +18,20 @@ class CheckSubmenuPermission
     {
         $ruta = '/'.ltrim($request->path(), '/');
 
-        $submenu = DB::table('Submenus')->where('RutaSubmenu', $ruta)->first();
+        $submenu = DB::connection('identidad')->table('Submenus')->where('RutaSubmenu', $ruta)->first();
 
         if (!$submenu) {
             return $next($request);
         }
 
         $idUsuario = auth()->id();
-        $rol = DB::table('RolUsuario')->where('IdUsuario', $idUsuario)->first();
+        $rol = DB::connection('identidad')->table('RolUsuario')->where('IdUsuario', $idUsuario)->first();
 
         if (!$rol) {
             abort(403, 'No tienes un rol asignado. Contacta al administrador.');
         }
 
-        $tienePermiso = DB::table('PermisosRoles')
+        $tienePermiso = DB::connection('identidad')->table('PermisosRoles')
             ->where('IdRoles', $rol->IdRol)
             ->where('IdSubmenu', $submenu->IdSubmenu)
             ->exists();

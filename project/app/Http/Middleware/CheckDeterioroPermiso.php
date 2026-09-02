@@ -23,25 +23,25 @@ class CheckDeterioroPermiso
 {
     public function handle($request, Closure $next, $accion = 'consultar')
     {
-        $submenu = DB::table('Submenus')
+        $submenu = DB::connection('identidad')->table('Submenus')
             ->where('RutaSubmenu', '/deterioro-accion-'.$accion)
             ->first();
 
         // Si la acción todavía no está registrada, se exige al menos permiso
         // sobre alguna pantalla del módulo, en vez de dejar pasar.
         if (!$submenu) {
-            $submenu = DB::table('Submenus')->where('RutaSubmenu', '/deterioro-cortes')->first();
+            $submenu = DB::connection('identidad')->table('Submenus')->where('RutaSubmenu', '/deterioro-cortes')->first();
         }
         if (!$submenu) {
             abort(403, 'El módulo de deterioro no está registrado en el menú.');
         }
 
-        $rol = DB::table('RolUsuario')->where('IdUsuario', auth()->id())->first();
+        $rol = DB::connection('identidad')->table('RolUsuario')->where('IdUsuario', auth()->id())->first();
         if (!$rol) {
             abort(403, 'No tienes un rol asignado. Contacta al administrador.');
         }
 
-        $tienePermiso = DB::table('PermisosRoles')
+        $tienePermiso = DB::connection('identidad')->table('PermisosRoles')
             ->where('IdRoles', $rol->IdRol)
             ->where('IdSubmenu', $submenu->IdSubmenu)
             ->exists();

@@ -11,6 +11,61 @@ const showErrors = async function(data){
         document.querySelector(`#error-${nombre}`).style="display:block;";
     }
 }
+/**Conmutar el ambiente de trabajo entre produccion y demo */
+const conmutarAmbiente = function(destino,elemento){
+    let demo = destino == 'demo';
+    if(elemento){
+        elemento.disabled = true;
+    }
+    Swal.fire({
+        title: demo ? '¿Cambiar a ambiente Demo?' : '¿Volver al ambiente de Producción?',
+        text: demo ? 'Verás y modificarás datos de prueba. Ninguna información real se altera. La página se recargará.' : 'Volverás a ver y modificar datos reales. La página se recargará.',
+        icon: demo ? 'warning' : 'question',
+        showCancelButton: true,
+        confirmButtonText: demo ? 'Sí, entrar a Demo' : 'Sí, volver a Producción',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: demo ? '#c99a2e' : 'rgb(65,110,195)'
+    }).then(async (value)=>{
+        if(!value.isConfirmed){
+            restablecerSwitchAmbiente(elemento,demo);
+            return;
+        }
+        let dataToSend = new FormData();
+        dataToSend.append('ambiente',destino);
+        let res = await makeOptionsFetch(`${globalUrl}/cambiar-ambiente`,dataToSend,'post',$('meta[name="csrf-token-ambiente"]').attr('content'));
+        if(res.success){
+            Swal.fire({
+                title: demo ? 'Ambiente Demo activado' : 'Ambiente Producción activo',
+                text: demo ? 'Todo lo que hagas a partir de ahora ocurre sobre datos de prueba.' : 'Vuelves a trabajar sobre datos reales.',
+                icon:'success',
+                confirmButtonText:'Entendido',
+                confirmButtonColor: demo ? '#c99a2e' : 'rgb(65,110,195)',
+                allowOutsideClick:false,
+                allowEscapeKey:false
+            }).then((value)=>{
+                location.reload();
+            });
+        }else{
+            restablecerSwitchAmbiente(elemento,demo);
+            if(res.errors && document.getElementById('error-ambiente')){
+                showErrors(res);
+            }
+            Swal.fire({
+                title:'No fue posible cambiar de ambiente',
+                text:'Intenta de nuevo. Si el problema continúa, avisa al área de desarrollo.',
+                icon:'error',
+                confirmButtonText:'Entendido'
+            });
+        }
+    });
+}
+/**Dejar el switch en el ambiente que sigue activo en el servidor */
+const restablecerSwitchAmbiente = function(elemento,demo){
+    if(elemento){
+        elemento.checked = !demo;
+        elemento.disabled = false;
+    }
+}
 /**Convertir a mayusculas los valores ingresados */
 const toUpperValues = function(element){
     element.value = element.value.toUpperCase();

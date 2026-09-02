@@ -107,6 +107,10 @@ class RoutesController extends Controller
     public function deterioroDetalleOperaciones(){
         return view('deterioro.detalle-operaciones');
     }
+    /**Vista comparativo contable contra fiscal e impuesto diferido */
+    public function deterioroContableFiscal(){
+        return view('deterioro.contable-fiscal');
+    }
     /**Vista perfil de usuario */
     public function perfilUsuario(){
         $user = Admin::perfilUsuario();
