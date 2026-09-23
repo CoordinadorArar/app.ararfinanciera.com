@@ -5,7 +5,7 @@
 <div class="det-contenedor" id="divComparativo">
 
     <div class="det-encabezado">
-        <div>
+        <div class="det-titular">
             <nav class="det-migas">
                 <a href="{{ url('/deterioro-cortes') }}">Cortes</a>
                 <span>&rsaquo;</span>
@@ -17,8 +17,18 @@
             <p class="det-subtitulo">Diferencia temporaria entre el deterioro contable y el deterioro fiscal acumulado, y el impuesto diferido que se deriva de ella</p>
         </div>
         <div>
+            <a class="btn btn-secondary btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
             <a class="btn btn-light btn-sm" id="btnResumenCF" href="#"><i class="fas fa-table"></i>&nbsp; Resumen</a>
             <a class="btn btn-light btn-sm" id="btnDetalleCF" href="#"><i class="fas fa-list"></i>&nbsp; Detalle</a>
+            <a class="btn btn-light btn-sm" id="btnEvolucionCF" href="#"><i class="fas fa-chart-line"></i>&nbsp; Evolución</a>
+            <a class="btn btn-light btn-sm" id="btnSuspensionesCF" href="#"><i class="fas fa-circle-pause"></i>&nbsp; Intereses suspendidos</a>
+            <a class="btn btn-light btn-sm" id="btnConciliacionCF" href="#"><i class="fas fa-scale-unbalanced"></i>&nbsp; Conciliación</a>
+            <a class="btn btn-success btn-sm" id="btnControlesCF" href="#"><i class="fas fa-lock"></i>&nbsp; Controles y cierre</a>
+        </div>
+        <div class="det-acciones">
+            <a class="btn btn-sm det-btn-ayuda" href="{{ url('/deterioro-ayuda') }}?volver={{ urlencode(request()->getRequestUri()) }}"
+               data-bs-toggle="tooltip" title="Guía de uso del módulo" aria-label="Guía de uso del módulo"><i class="fas fa-question"></i><span class="rot">&nbsp; Guía de uso</span></a>
+            <span id="accionesExportar"></span>
         </div>
     </div>
 
@@ -81,6 +91,7 @@
     <div class="det-fila">
         <div class="det-panel">
             <h6>Movimiento del período</h6>
+            <p class="det-subtitulo">Las cifras del puente en este corte y en el corte anterior, con su variación</p>
             <div class="det-scroll">
                 <table class="det-tabla" id="tablaMovimiento">
                     <thead>
@@ -99,6 +110,7 @@
 
         <div class="det-panel">
             <h6>Reversión proyectada</h6>
+            <p class="det-subtitulo">Año gravable en que cada operación termina de deducir el 100 % fiscal</p>
             <div id="reversionGrafico"></div>
             <div class="det-scroll" id="reversionTabla"></div>
         </div>
@@ -132,5 +144,6 @@
 
 </div>
 <script src="{{ asset('js/deterioro-comun.js') }}"></script>
+<script src="{{ asset('js/deterioro-exportar.js') }}"></script>
 <script src="{{ asset('js/deterioro-comparativo.js') }}"></script>
 @endsection

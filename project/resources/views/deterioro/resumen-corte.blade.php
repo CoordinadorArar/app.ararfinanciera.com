@@ -5,14 +5,28 @@
 <div class="det-contenedor" id="divResumen">
 
     <div class="det-encabezado">
-        <div>
+        <div class="det-titular">
+            <nav class="det-migas">
+                <a href="{{ url('/deterioro-cortes') }}">Cortes</a>
+                <span>&rsaquo;</span>
+                <span class="actual">Resumen <span id="migaFecha"></span></span>
+            </nav>
             <h4 class="det-titulo">Resumen del corte <span id="tituloFecha" class="text-muted"></span></h4>
             <p class="det-subtitulo">Matriz de producto por rango de mora, con capital, interés, base y deterioro</p>
         </div>
         <div>
-            <a class="btn btn-light btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
-            <a class="btn btn-light btn-sm" id="btnComparativo" href="#"><i class="fas fa-scale-balanced"></i>&nbsp; Contable vs. fiscal</a>
+            <a class="btn btn-secondary btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
+            <a class="btn btn-light btn-sm" id="btnEvolucion" href="#"><i class="fas fa-chart-line"></i>&nbsp; Evolución</a>
+            <a class="btn btn-light btn-sm" id="btnComparativo" href="#"><i class="fas fa-scale-balanced"></i>&nbsp; Contable contra fiscal</a>
+            <a class="btn btn-light btn-sm" id="btnSuspensiones" href="#"><i class="fas fa-circle-pause"></i>&nbsp; Intereses suspendidos</a>
+            <a class="btn btn-light btn-sm" id="btnConciliacion" href="#"><i class="fas fa-scale-unbalanced"></i>&nbsp; Conciliación</a>
             <a class="btn btn-primary btn-sm" id="btnDetalle" href="#"><i class="fas fa-list"></i>&nbsp; Ver detalle</a>
+            <a class="btn btn-success btn-sm" id="btnControles" href="#"><i class="fas fa-lock"></i>&nbsp; Controles y cierre</a>
+        </div>
+        <div class="det-acciones">
+            <a class="btn btn-sm det-btn-ayuda" href="{{ url('/deterioro-ayuda') }}?volver={{ urlencode(request()->getRequestUri()) }}"
+               data-bs-toggle="tooltip" title="Guía de uso del módulo" aria-label="Guía de uso del módulo"><i class="fas fa-question"></i><span class="rot">&nbsp; Guía de uso</span></a>
+            <span id="accionesExportar"></span>
         </div>
     </div>
 
@@ -111,4 +125,5 @@
 </div>
 @endsection
 <script src="{{ asset('js/deterioro-comun.js') }}"></script>
+<script src="{{ asset('js/deterioro-exportar.js') }}"></script>
 <script src="{{ asset('js/deterioro-resumen.js') }}"></script>

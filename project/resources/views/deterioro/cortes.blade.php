@@ -9,9 +9,13 @@
             <h4 class="det-titulo">Deterioro de cartera</h4>
             <p class="det-subtitulo">Cortes mensuales, cálculo contable y controles de cuadre</p>
         </div>
-        <button class="btn btn-primary btn-sm" id="btnNuevoCorte" onclick="abrirNuevoCorte()">
-            <i class="fas fa-plus"></i>&nbsp; Nuevo corte
-        </button>
+        <div class="det-acciones">
+            <button class="btn btn-primary btn-sm" id="btnNuevoCorte" onclick="abrirNuevoCorte()">
+                <i class="fas fa-plus"></i>&nbsp; Nuevo corte
+            </button>
+            <a class="btn btn-sm det-btn-ayuda" href="{{ url('/deterioro-ayuda') }}?volver={{ urlencode(request()->getRequestUri()) }}"
+               data-bs-toggle="tooltip" title="Guía de uso del módulo" aria-label="Guía de uso del módulo"><i class="fas fa-question"></i><span class="rot">&nbsp; Guía de uso</span></a>
+        </div>
     </div>
 
     <div class="det-aviso info" id="avisoOrigen" style="display:none">

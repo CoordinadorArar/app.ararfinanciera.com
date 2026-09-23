@@ -33,5 +33,17 @@ Desktop.ini
 .vscode/
 *.swp
 
+# Archivos Excel
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+
 # Router del servidor local de desarrollo
 /router.php
+
+# Los soportes de las marcas de suspensión son documentos sensibles y no van al
+# repositorio; el .htaccess que bloquea la carpeta sí, porque es lo que la protege
+# en el servidor y una carpeta recreada sin él queda abierta.
+/project/soportes-suspension/*
+!/project/soportes-suspension/.htaccess

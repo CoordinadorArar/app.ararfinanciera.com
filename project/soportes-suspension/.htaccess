@@ -1,0 +1,11 @@
+# Los soportes de las marcas de suspensión (actas de defunción, autos de
+# insolvencia, demandas) no deben ser accesibles directamente. Se sirven
+# únicamente por la ruta autenticada /deterioro-soporte-suspension/{idSuspension},
+# que además exige el permiso 'consultar' del módulo de deterioro.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

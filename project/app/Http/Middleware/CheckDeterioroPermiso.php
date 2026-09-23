@@ -18,10 +18,23 @@ use Illuminate\Support\Facades\DB;
  * concede por rol desde la pantalla de gestión del sitio.
  *
  * Uso: ->middleware('deterioro.permiso:calcular')
+ *
+ * La regla vive una sola vez, en evaluar(). El middleware la usa para abortar
+ * con 403 y las pantallas la consultan por tiene() para no dibujar acciones que
+ * el servidor va a rechazar. Duplicarla dejaría que pantalla y servidor
+ * divergieran, y el día que divergieran la pantalla ofrecería un botón que el
+ * servidor rechaza.
+ *
+ * El gate de pantalla es cosmético: la seguridad sigue estando en el middleware.
  */
 class CheckDeterioroPermiso
 {
-    public function handle($request, Closure $next, $accion = 'consultar')
+    /**
+     * Resuelve el permiso y devuelve el motivo cuando no lo hay, para que el
+     * middleware pueda distinguir "el módulo no está registrado" de "no tienes
+     * rol" y de "tu rol no tiene esta acción".
+     */
+    public static function evaluar($accion, $idUsuario)
     {
         $submenu = DB::connection('identidad')->table('Submenus')
             ->where('RutaSubmenu', '/deterioro-accion-'.$accion)
@@ -33,12 +46,12 @@ class CheckDeterioroPermiso
             $submenu = DB::connection('identidad')->table('Submenus')->where('RutaSubmenu', '/deterioro-cortes')->first();
         }
         if (!$submenu) {
-            abort(403, 'El módulo de deterioro no está registrado en el menú.');
+            return ['ok' => false, 'mensaje' => 'El módulo de deterioro no está registrado en el menú.'];
         }
 
-        $rol = DB::connection('identidad')->table('RolUsuario')->where('IdUsuario', auth()->id())->first();
+        $rol = DB::connection('identidad')->table('RolUsuario')->where('IdUsuario', $idUsuario)->first();
         if (!$rol) {
-            abort(403, 'No tienes un rol asignado. Contacta al administrador.');
+            return ['ok' => false, 'mensaje' => 'No tienes un rol asignado. Contacta al administrador.'];
         }
 
         $tienePermiso = DB::connection('identidad')->table('PermisosRoles')
@@ -47,7 +60,23 @@ class CheckDeterioroPermiso
             ->exists();
 
         if (!$tienePermiso) {
-            abort(403, 'No tienes permiso para esta acción del módulo de deterioro.');
+            return ['ok' => false, 'mensaje' => 'No tienes permiso para esta acción del módulo de deterioro.'];
+        }
+
+        return ['ok' => true, 'mensaje' => null];
+    }
+
+    /** Misma regla que el middleware, en booleano, para las pantallas. */
+    public static function tiene($accion, $idUsuario = null)
+    {
+        return self::evaluar($accion, $idUsuario === null ? auth()->id() : $idUsuario)['ok'];
+    }
+
+    public function handle($request, Closure $next, $accion = 'consultar')
+    {
+        $permiso = self::evaluar($accion, auth()->id());
+        if (!$permiso['ok']) {
+            abort(403, $permiso['mensaje']);
         }
 
         return $next($request);

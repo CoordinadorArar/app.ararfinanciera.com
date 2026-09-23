@@ -18,6 +18,10 @@ window.addEventListener('load', function () {
     }
     document.getElementById('btnDetalle').href = `${globalUrl}/deterioro-detalle-operaciones?corte=${idCorte}`;
     document.getElementById('btnComparativo').href = `${globalUrl}/deterioro-contable-fiscal?corte=${idCorte}`;
+    document.getElementById('btnEvolucion').href = `${globalUrl}/deterioro-evolucion?corte=${idCorte}`;
+    document.getElementById('btnSuspensiones').href = `${globalUrl}/deterioro-suspensiones?corte=${idCorte}`;
+    document.getElementById('btnConciliacion').href = `${globalUrl}/deterioro-conciliacion?corte=${idCorte}`;
+    document.getElementById('btnControles').href = `${globalUrl}/deterioro-controles?corte=${idCorte}`;
     cargarResumen(idCorte);
 });
 
@@ -31,11 +35,13 @@ const cargarResumen = async function (idCorte) {
     if (res.res !== 'ok') { detError('No se pudo cargar', res.text); return; }
 
     document.getElementById('tituloFecha').textContent = detFecha(res.corte.fecha_corte);
+    document.getElementById('migaFecha').textContent = detFecha(res.corte.fecha_corte);
     pintarTarjetas(res);
     pintarMatriz(res.resumen);
     pintarFiscal(res.resumen, res.corte);
     pintarGeneral(res.resumen);
     pintarCuadres(res.cuadres);
+    detMenuExportar(res);
 };
 
 const pintarTarjetas = function (res) {
@@ -222,13 +228,7 @@ const pintarGeneral = function (filas) {
 
 const pintarCuadres = function (cuadres) {
     let html = '';
-    cuadres.forEach(c => {
-        html += '<div class="det-cuadre">'
-            + '<span class="det-punto ' + (c.estado === 'OK' ? 'ok' : 'falla') + '"></span>'
-            + '<span>' + c.descripcion + '</span>'
-            + '<span class="dif">' + detMoneda2.format(c.diferencia) + '</span>'
-            + '</div>';
-    });
+    cuadres.forEach(c => { html += detFilaCuadre(c); });
     document.getElementById('listaCuadres').innerHTML = html
         || '<p class="text-muted mb-0">Sin controles registrados.</p>';
 };

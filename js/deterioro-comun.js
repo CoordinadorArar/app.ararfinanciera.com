@@ -10,6 +10,11 @@ const detPesos = function (valor, conDecimales) {
     return (conDecimales ? detMoneda2 : detMoneda).format(n);
 };
 
+/** Dato que no existe. No es cero: det-cero es para ceros confirmados. */
+const detAusente = function (motivo) {
+    return '<span class="det-ausente" data-bs-toggle="tooltip" title="' + motivo + '">&mdash;</span>';
+};
+
 const detPorcentaje = function (valor) {
     return (Number(valor || 0) * 100).toFixed(0) + '%';
 };
@@ -91,9 +96,17 @@ const detBadgeRango = function (rango) {
     return '<span class="det-badge ' + (clases[rango] || '') + '">' + rango + '</span>';
 };
 
-const detEstadoCorte = function (estado) {
+/** La salvedad no es un estado del corte: es un atributo de su cierre. */
+const detBadgeSalvedad = function () {
+    return ' <span class="det-badge det-salvedad" data-bs-toggle="tooltip" '
+        + 'title="El cierre se registró con requisitos sin resolver">Con salvedades</span>';
+};
+
+/** El segundo parámetro es opcional para no romper las llamadas existentes. */
+const detEstadoCorte = function (estado, conSalvedades) {
     const clases = { 'ABIERTO': 'det-estado-abierto', 'CALCULADO': 'det-estado-calculado', 'CERRADO': 'det-estado-cerrado' };
-    return '<span class="det-badge ' + (clases[estado] || '') + '">' + estado + '</span>';
+    return '<span class="det-badge ' + (clases[estado] || '') + '">' + estado + '</span>'
+        + (conSalvedades ? detBadgeSalvedad() : '');
 };
 
 /* --- Fiscal --- */
@@ -148,6 +161,71 @@ const detCeldaSigno = function (valor, titulo) {
     if (n >= 0) return detCeldaNum(n);
     return '<td class="num" data-order="' + n + '" title="' + titulo + '">'
         + '<span class="det-var baja">&minus;' + detMoneda2.format(Math.abs(n)) + '</span></td>';
+};
+
+/** Línea de tendencia sin ejes: la tabla que la acompaña es la fuente. */
+const detSpark = function (valores) {
+    const maximo = Math.max.apply(null, valores);
+    const minimo = Math.min.apply(null, valores.concat([0]));
+    const rango = (maximo - minimo) || 1;
+    const x = i => (i * 100 / (valores.length - 1)).toFixed(2);
+    const y = v => (44 - ((v - minimo) / rango) * 40).toFixed(2);
+
+    const puntos = valores.map((v, i) => x(i) + ',' + y(v)).join(' ');
+    const dots = valores.map(function (v, i) {
+        const ultimo = i === valores.length - 1;
+        return '<line x1="' + x(i) + '" y1="' + y(v) + '" x2="' + x(i) + '" y2="' + y(v) + '" '
+            + 'stroke="' + (ultimo ? 'rgb(45,85,165)' : '#7d9fd8') + '" stroke-width="' + (ultimo ? 6 : 3)
+            + '" stroke-linecap="round" vector-effect="non-scaling-stroke"></line>';
+    }).join('');
+
+    return '<svg class="det-spark" viewBox="0 0 100 48" preserveAspectRatio="none">'
+        + '<polyline points="' + puntos + '" fill="none" stroke="rgb(45,85,165)" stroke-width="1.5" '
+        + 'vector-effect="non-scaling-stroke"></polyline>' + dots + '</svg>';
+};
+
+/* --- Controles de cuadre --- */
+
+/** Tres estados: OK cuadra, FALLA descuadra y N/A no aplica al corte. */
+const detClaseCuadre = function (estado) {
+    if (estado === 'OK') return 'ok';
+    return estado === 'FALLA' ? 'falla' : 'nota';
+};
+
+/** Sin diferencia calculada va un guion: un 0,00 se leeria como cuadre en cero. */
+const detDifCuadre = function (diferencia) {
+    if (diferencia === null || diferencia === undefined || diferencia === '') {
+        return '<span class="dif na">&mdash;</span>';
+    }
+    return '<span class="dif">' + detMoneda2.format(Number(diferencia)) + '</span>';
+};
+
+/** El motivo se rotula cuando la fila solo informa, para no leerse como falla. */
+const detMotivoCuadre = function (c) {
+    if (!c.motivo) return '';
+    return '<span class="det-motivo">' + (c.informativo ? '<b>Informativo:</b> ' : '') + c.motivo + '</span>';
+};
+
+/**
+ * Dos ejes independientes: el estado decide el punto y el badge, y la bandera
+ * informativa distingue la fila que solo muestra la cifra de la que no aplica.
+ */
+const detFilaCuadre = function (c) {
+    const noAplica = c.estado === 'N/A' && !c.informativo;
+    return '<div class="det-cuadre"><span class="det-punto ' + detClaseCuadre(c.estado) + '"'
+        + (noAplica ? ' title="No aplica a este corte"' : (c.informativo ? ' title="Cifra informativa"' : ''))
+        + '></span>'
+        + '<span>' + c.descripcion
+        + (noAplica ? ' <span class="det-na">no aplica</span>' : '')
+        + detMotivoCuadre(c) + '</span>'
+        + detDifCuadre(c.diferencia) + '</div>';
+};
+
+/** Estado vacío: una tabla sin filas no dice por qué está vacía. */
+const detVacio = function (icono, titulo, frase) {
+    return '<div class="det-vacio"><i class="fas ' + icono + '"></i>'
+        + '<div class="tit">' + titulo + '</div>'
+        + '<p class="det-subtitulo mb-0">' + frase + '</p></div>';
 };
 
 const detError = function (titulo, texto) {

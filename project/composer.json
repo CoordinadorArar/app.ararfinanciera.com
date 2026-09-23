@@ -16,6 +16,7 @@
         "laravel/ui": "^3.4",
         "league/flysystem-sftp": "~1.0",
         "phpmailer/phpmailer": "^6.6",
+        "phpoffice/phpspreadsheet": "^1.29",
         "robrichards/wse-php": "^2.0",
         "tymon/jwt-auth": "^1.0",
         "uxweb/sweet-alert": "^2.0"
@@ -63,7 +64,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.32"
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
