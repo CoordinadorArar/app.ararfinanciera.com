@@ -5,13 +5,30 @@
 <div class="det-contenedor" id="divDetalle">
 
     <div class="det-encabezado">
-        <div>
+        <div class="det-titular">
+            <nav class="det-migas">
+                <a href="{{ url('/deterioro-cortes') }}">Cortes</a>
+                <span>&rsaquo;</span>
+                <a id="migaResumen" href="#">Resumen <span id="migaFecha"></span></a>
+                <span>&rsaquo;</span>
+                <span class="actual">Detalle</span>
+            </nav>
             <h4 class="det-titulo">Detalle por operación <span id="tituloFecha" class="text-muted"></span></h4>
             <p class="det-subtitulo">Cada cifra desciende hasta la cuota de origen</p>
         </div>
         <div>
-            <a class="btn btn-light btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
+            <a class="btn btn-secondary btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
             <a class="btn btn-light btn-sm" id="btnResumen" href="#"><i class="fas fa-table"></i>&nbsp; Resumen</a>
+            <a class="btn btn-light btn-sm" id="btnEvolucionDet" href="#"><i class="fas fa-chart-line"></i>&nbsp; Evolución</a>
+            <a class="btn btn-light btn-sm" id="btnComparativoDet" href="#"><i class="fas fa-scale-balanced"></i>&nbsp; Contable contra fiscal</a>
+            <a class="btn btn-light btn-sm" id="btnSuspensionesDet" href="#"><i class="fas fa-circle-pause"></i>&nbsp; Intereses suspendidos</a>
+            <a class="btn btn-light btn-sm" id="btnConciliacionDet" href="#"><i class="fas fa-scale-unbalanced"></i>&nbsp; Conciliación</a>
+            <a class="btn btn-success btn-sm" id="btnControlesDet" href="#"><i class="fas fa-lock"></i>&nbsp; Controles y cierre</a>
+        </div>
+        <div class="det-acciones">
+            <a class="btn btn-sm det-btn-ayuda" href="{{ url('/deterioro-ayuda') }}?volver={{ urlencode(request()->getRequestUri()) }}"
+               data-bs-toggle="tooltip" title="Guía de uso del módulo" aria-label="Guía de uso del módulo"><i class="fas fa-question"></i><span class="rot">&nbsp; Guía de uso</span></a>
+            <span id="accionesExportar"></span>
         </div>
     </div>
 
@@ -65,6 +82,14 @@
                        title="Operaciones cuyo deterioro fiscal acumulado supera al contable">Solo diferido pasivo</label>
             </div>
         </div>
+        <div class="campo" id="campoSoloRepetidas" style="display:none">
+            <label>&nbsp;</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="filtroSoloRepetidas" onchange="cargarDetalle()">
+                <label class="form-check-label" for="filtroSoloRepetidas"
+                       title="Operaciones con cuotas que factoring entrega repetidas; no se cuentan en los totales">Solo con cuotas repetidas</label>
+            </div>
+        </div>
         <button class="btn btn-primary btn-sm" onclick="cargarDetalle()"><i class="fas fa-filter"></i>&nbsp; Filtrar</button>
         <div class="btn-group btn-group-sm det-vistas" role="group">
             <input type="radio" class="btn-check" name="vistaDetalle" id="vistaContable" checked onchange="cambiarVista()">
@@ -77,6 +102,7 @@
     </div>
 
     <div id="avisoFiscalDetalle" style="display:none"></div>
+    <div id="avisoRepetidasDetalle"></div>
 
     <div class="det-panel">
         <h6>Operaciones <span id="badgeFiscalDetalle"></span></h6>
@@ -92,17 +118,17 @@
                         <th class="num">Cuotas</th>
                         <th class="num">Capital vencido</th>
                         <th class="num">Interés vencido</th>
-                        <th class="num" title="Capital vencido más interés vencido (RN-03)">Base</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido más interés vencido (RN-03)">Base</th>
                         <th class="num">%</th>
                         <th class="num">Deterioro</th>
-                        <th class="num" title="Base por la tarifa anual del método individual (RN-07)">Individual 33 %</th>
-                        <th class="num" title="Deducciones tomadas en años gravables anteriores">Acum. anterior</th>
-                        <th class="num" title="Tope del acumulado deducible: el menor entre el saldo de SIESA y la base">Saldo topado</th>
-                        <th class="num" title="Individual del año limitado por el tope disponible">Deducción del año</th>
-                        <th class="num" title="Acumulado anterior más deducción del año">Fiscal acumulado</th>
-                        <th class="num" title="Deterioro contable menos deterioro fiscal acumulado. Positiva: deducible. Negativa: imponible">Diferencia temporaria</th>
-                        <th class="num" title="Diferencia temporaria por la tarifa de renta. Positivo: activo. Negativo: pasivo">Impuesto diferido</th>
-                        <th class="num" title="Año gravable en que la operación completa el 100 % deducible">Año de reversión</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Base por la tarifa anual del método individual (RN-07)">Individual 33 %</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Deducciones tomadas en años gravables anteriores">Acum. anterior</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Tope del acumulado deducible: el menor entre el saldo de SIESA y la base">Saldo topado</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Individual del año limitado por el tope disponible">Deducción del año</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Acumulado anterior más deducción del año">Fiscal acumulado</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Deterioro contable menos deterioro fiscal acumulado. Positiva: deducible. Negativa: imponible">Diferencia temporaria</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Diferencia temporaria por la tarifa de renta. Positivo: activo. Negativo: pasivo">Impuesto diferido</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Año gravable en que la operación completa el 100 % deducible. Las que ya lo completaron muestran «Al 100 %» en vez de un año">Año de reversión</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -122,10 +148,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <div id="avisoCuotas"></div>
                 <div class="det-scroll">
                     <table class="det-tabla">
                         <thead>
                             <tr>
+                                <th class="num" data-bs-toggle="tooltip" title="Identificador del registro en el sistema de factoring">Id detalle</th>
                                 <th class="num">Cuota</th>
                                 <th>Inicio</th>
                                 <th>Vencimiento</th>
@@ -149,4 +177,5 @@
 </div>
 @endsection
 <script src="{{ asset('js/deterioro-comun.js') }}"></script>
+<script src="{{ asset('js/deterioro-exportar.js') }}"></script>
 <script src="{{ asset('js/deterioro-detalle.js') }}"></script>

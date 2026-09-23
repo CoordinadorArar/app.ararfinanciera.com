@@ -151,6 +151,7 @@ table.det-tabla tr.det-total td {
 .det-estado-abierto   { background: #fdf3d6; color: #8a6410; }
 .det-estado-calculado { background: #e2edfb; color: rgb(45, 85, 165); }
 .det-estado-cerrado   { background: #e6f4ea; color: #1e7c3a; }
+.det-estado-vigente   { background: #e2edfb; color: rgb(45, 85, 165); }
 
 /* --- Semáforos de cuadre --- */
 
@@ -165,6 +166,21 @@ table.det-tabla tr.det-total td {
 
 .det-cuadre:last-child { border-bottom: 0; }
 
+.det-cuadre > span { min-width: 0; }
+
+.det-motivo {
+    display: block;
+    margin-top: .12rem;
+    color: #8593a7;
+    font-size: .74rem;
+    line-height: 1.3;
+}
+
+.det-motivo b {
+    font-weight: 600;
+    color: #6b7a90;
+}
+
 .det-punto {
     width: .6rem;
     height: .6rem;
@@ -174,11 +190,26 @@ table.det-tabla tr.det-total td {
 
 .det-punto.ok { background: #35a35c; }
 .det-punto.falla { background: #d34848; }
+.det-punto.nota { background: #8593a7; }
 
 .det-cuadre .dif {
     margin-left: auto;
     font-variant-numeric: tabular-nums;
     color: #6b7a90;
+}
+
+.det-cuadre .dif.na { color: #a7b1c0; }
+
+.det-na {
+    margin-left: .3rem;
+    padding: .05rem .35rem;
+    border-radius: 4px;
+    background: #eef1f6;
+    color: #8593a7;
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .02em;
 }
 
 /* --- Filtros --- */
@@ -231,6 +262,7 @@ table.det-tabla tr.det-total td {
 
 .det-pasos li {
     display: flex;
+    align-items: flex-start;
     gap: .6rem;
     padding: .3rem 0;
     border-bottom: 1px solid #eef1f6;
@@ -256,7 +288,8 @@ table.det-tabla tr.det-total td {
     grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
 }
 
-.det-panel > h6 .det-badge { text-transform: none; }
+.det-panel > h6 .det-badge,
+.det-panel-cab h6 .det-badge { text-transform: none; }
 
 table.det-tabla thead tr.det-grupo th {
     background: #eef2f7;
@@ -278,10 +311,19 @@ table.det-tabla thead th[title] {
 
 tr.det-sin-fiscal td { color: #8593a7; background: #fcfdfe; }
 
+/* Marca de fila que exige gestión. Generaliza .det-topado y .det-sin-congelar.
+   La fila entera se marca sobre su primera celda: con border-collapse el
+   navegador no pinta el box-shadow de un <tr>. */
+.det-topado,
+.det-sin-congelar,
+tr.det-atencion > td:first-child { box-shadow: inset 2px 0 0 #d9a520; }
+
+/* La cuota repetida no exige gestión: existe en el origen y se muestra igual de
+   legible que las demás. El filo gris sólo la localiza al desplazar la tabla. */
+tr.det-repetida > td:first-child { box-shadow: inset 2px 0 0 #b8c2d0; }
+
 /* El recorte por tope se marca dentro de la celda de la deducción: como columna
    propia quedaría vacía en casi todas las filas. */
-.det-topado { box-shadow: inset 2px 0 0 #d9a520; }
-
 .det-recorte {
     display: block;
     font-size: .7rem;
@@ -543,6 +585,97 @@ table.det-tabla thead th[data-bs-toggle="tooltip"] {
 .det-var.sube { color: #1e7c3a; }
 .det-var.baja { color: #a3391f; }
 
+/* --- Descomposición del movimiento --- */
+
+.det-puente.tres { grid-template-columns: 1fr auto 1fr auto 1fr; }
+
+@media (max-width: 991px) {
+    .det-puente.tres { grid-template-columns: 1fr; }
+}
+
+.det-cascada { font-size: .82rem; }
+
+.det-cascada .fila {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .4rem .5rem;
+    border-radius: 5px;
+}
+
+.det-cascada .fila.ancla { background: #f6f8fb; }
+
+.det-cascada .eti { flex: 0 0 15rem; color: #4a5a70; }
+.det-cascada .eti .det-subtitulo { display: block; }
+
+/* Las barras se escalan entre los movimientos, nunca contra el saldo: contra el
+   saldo un movimiento de 40 M sobre 1.750 M daría una barra del 2 %. */
+.det-cascada .pista {
+    position: relative;
+    flex: 1 1 auto;
+    height: 16px;
+    min-width: 80px;
+}
+
+.det-cascada .cero {
+    position: absolute;
+    left: 50%;
+    top: -4px;
+    bottom: -4px;
+    width: 1px;
+    background: #dfe5ee;
+}
+
+.det-cascada .tramo {
+    position: absolute;
+    top: 1px;
+    height: 14px;
+    border-radius: 3px;
+    min-width: 2px;
+}
+
+.det-cascada .tramo.aumenta { left: 50%; background: rgb(45, 85, 165); }
+.det-cascada .tramo.libera { right: 50%; background: #a3391f; }
+.det-cascada .tramo.ancla { display: none; }
+
+.det-cascada .cifra {
+    flex: 0 0 11rem;
+    text-align: right;
+    color: #1f2d3d;
+    font-variant-numeric: tabular-nums;
+}
+
+.det-cascada .fila.ancla .cifra { font-weight: 600; font-size: .92rem; }
+
+.det-cierre {
+    margin-top: .55rem;
+    padding-top: .35rem;
+    border-top: 1px solid #eef1f6;
+}
+
+.det-var.aumenta { color: rgb(45, 85, 165); }
+
+.det-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .1rem .45rem;
+    border-radius: 4px;
+    font-size: .72rem;
+    font-weight: 600;
+}
+
+.det-chip.libera { background: #fbdcd6; color: #a3391f; }
+
+.det-leyenda i.aumenta { background: rgb(45, 85, 165); }
+.det-leyenda i.libera { background: #a3391f; }
+
+@media (max-width: 768px) {
+    .det-cascada .pista { display: none; }
+    .det-cascada .eti { flex: 1 1 auto; }
+    .det-cascada .cifra { flex: 0 0 auto; }
+}
+
 /* --- Estado vacío --- */
 
 .det-vacio { padding: 2.5rem 1rem; text-align: center; }
@@ -559,4 +692,185 @@ table.det-tabla thead th[data-bs-toggle="tooltip"] {
     font-weight: 600;
     color: #6b7a90;
     margin-bottom: .2rem;
+}
+
+/* --- Intereses suspendidos --- */
+
+.det-badge.det-ambar { background: #fde8d4; color: #9a5312; }
+
+/* --- Conciliación con SIESA --- */
+
+/* Dato que no existe, distinto del cero confirmado: legible, no apagado.
+   det-cero (#c3cbd8) es solo para ceros. */
+.det-ausente {
+    color: #6b7a90;
+    border-bottom: 1px dotted #b8c2d0;
+    cursor: help;
+}
+
+/* Salto directo a cada panel: tres poblaciones apiladas exigen navegación. */
+.det-anclas { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .8rem; margin-top: .5rem; }
+.det-anclas a { color: #6b7a90; text-decoration: none; }
+.det-anclas a:hover { color: rgb(45, 85, 165); }
+
+/* En conciliación el signo es dirección, no gravedad: los dos lados pesan igual.
+   La gravedad la lleva el estado de la partida, no el color de la cifra. */
+.det-dif { color: #1f2d3d; font-variant-numeric: tabular-nums; }
+.det-dif .sg { color: #6b7a90; margin-right: .1rem; }
+
+/* La explicación es prosa: única columna de la tabla que envuelve. */
+table.det-tabla td.det-texto { white-space: normal; max-width: 28rem; }
+
+/* Avance del explicado. La cifra manda; la barra solo la acompaña. */
+.det-progreso { display: flex; align-items: center; gap: .6rem; margin-top: .45rem; }
+.det-progreso .pista { flex: 1 1 auto; height: 8px; background: #f1f4f9; border-radius: 3px; }
+.det-progreso .relleno { display: block; height: 8px; border-radius: 3px; background: rgb(45, 85, 165); }
+.det-progreso .cifra { font-size: .78rem; color: #6b7a90; font-variant-numeric: tabular-nums; }
+
+/* --- Cierre del corte, salvedad y requisitos --- */
+
+/* La salvedad es un atributo del cierre, no un cuarto estado del corte: va en
+   badge propio contiguo al estado, nunca fundido con él. */
+.det-badge.det-salvedad { background: #fbdcd6; color: #a3391f; }
+
+/* Misma métrica que .det-cuadre más la acción de resolución: .det-cuadre .dif
+   toma margin-left:auto y no deja sitio para el enlace. */
+.det-requisito {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .55rem .1rem;
+    border-bottom: 1px solid #eef1f6;
+    font-size: .82rem;
+}
+
+.det-requisito:last-child { border-bottom: 0; }
+.det-requisito > span { min-width: 0; }
+
+.det-requisito .cifra {
+    margin-left: auto;
+    text-align: right;
+    color: #6b7a90;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.det-requisito .dif.na { color: #a7b1c0; }
+
+.det-requisito .acc { flex: 0 0 auto; white-space: nowrap; }
+
+.det-requisito .acc a {
+    color: rgb(45, 85, 165);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.det-requisito .acc a:hover { text-decoration: underline; }
+
+/* Foto del cierre: el lenguaje visual de .det-panel.det-referencia, pero
+   siempre abierta. Con salvedades no puede quedar plegada. */
+.det-panel.det-foto {
+    background: #fbfcfd;
+    border-style: dashed;
+}
+
+.det-foto .det-dato {
+    display: block;
+    font-size: .82rem;
+    color: #1f2d3d;
+}
+
+.det-foto .det-congelado {
+    margin-top: .85rem;
+    padding-top: .55rem;
+    border-top: 1px solid #eef1f6;
+}
+
+/* --- Exportables del corte --- */
+
+/* El control no es navegación: se separa de la barra de la cabecera con un
+   borde propio, y el bloque del título toma el espacio libre para que la
+   navegación quede pegada a él y no centrada entre los dos extremos. */
+.det-encabezado .det-titular { flex: 1 1 20rem; }
+
+.det-acciones {
+    display: flex;
+    align-items: center;
+    padding-left: .75rem;
+    border-left: 1px solid #e3e7ee;
+}
+
+/* Tokens de .det-tarjeta.destacada: el gris de btn-outline-secondary no está
+   en la paleta del módulo. */
+.det-btn-exportar {
+    background: #fff;
+    border: 1px solid #c8d7f2;
+    color: rgb(45, 85, 165);
+    font-weight: 600;
+}
+
+.det-btn-exportar:hover,
+.det-btn-exportar:focus,
+.det-btn-exportar.show {
+    background: #f4f7fd;
+    border-color: #c8d7f2;
+    color: rgb(45, 85, 165);
+}
+
+.det-btn-exportar:disabled {
+    background: #fff;
+    border-color: #e3e7ee;
+    color: #a7b2c2;
+    opacity: 1;
+}
+
+.det-menu-exportar { min-width: 20rem !important; }
+
+.det-menu-exportar .dropdown-item {
+    white-space: normal;
+    padding: .5rem .75rem;
+    font-size: .85rem;
+}
+
+.det-menu-exportar .dropdown-item .det-subtitulo { display: block; }
+
+@media (max-width: 576px) {
+    .det-acciones {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .det-acciones,
+    .det-acciones .dropdown,
+    .det-acciones > span,
+    .det-btn-exportar { width: 100%; }
+}
+
+/* --- Soporte de la suspensión --- */
+
+/* El clip vive al final de la causal: sin soporte no se pinta nada, así que la
+   ausencia no tiñe la tabla de avisos. */
+.det-soporte {
+    color: rgb(45, 85, 165);
+    margin-left: .35rem;
+}
+
+.det-soporte:hover,
+.det-soporte:focus { color: rgb(30, 60, 130); }
+
+.det-archivo {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: .25rem;
+    font-size: .82rem;
+    color: #6b7a90;
+}
+
+.det-archivo .btn { font-size: inherit; }
+
+.det-archivo .nom {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

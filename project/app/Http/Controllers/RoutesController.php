@@ -111,6 +111,26 @@ class RoutesController extends Controller
     public function deterioroContableFiscal(){
         return view('deterioro.contable-fiscal');
     }
+    /**Vista histórico y descomposición del movimiento del mes */
+    public function deterioroEvolucion(){
+        return view('deterioro.evolucion');
+    }
+    /**Vista de marcación de suspensión de causación de intereses */
+    public function deterioroSuspensiones(){
+        return view('deterioro.suspensiones');
+    }
+    /**Vista de conciliación con SIESA por operación */
+    public function deterioroConciliacion(){
+        return view('deterioro.conciliacion');
+    }
+    /**Vista de controles C-1 y C-2, cierre y reapertura del corte */
+    public function deterioroControles(){
+        return view('deterioro.controles');
+    }
+    /**Vista de guía de uso del módulo de deterioro de cartera */
+    public function deterioroAyuda(){
+        return view('deterioro.ayuda');
+    }
     /**Vista perfil de usuario */
     public function perfilUsuario(){
         $user = Admin::perfilUsuario();

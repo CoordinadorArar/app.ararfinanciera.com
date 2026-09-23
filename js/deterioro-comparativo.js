@@ -17,6 +17,10 @@ window.addEventListener('load', function () {
     document.getElementById('btnResumenCF').href = `${globalUrl}/deterioro-resumen?corte=${idCorte}`;
     document.getElementById('migaResumen').href = `${globalUrl}/deterioro-resumen?corte=${idCorte}`;
     document.getElementById('btnDetalleCF').href = `${globalUrl}/deterioro-detalle-operaciones?corte=${idCorte}&vista=diferido`;
+    document.getElementById('btnEvolucionCF').href = `${globalUrl}/deterioro-evolucion?corte=${idCorte}`;
+    document.getElementById('btnSuspensionesCF').href = `${globalUrl}/deterioro-suspensiones?corte=${idCorte}`;
+    document.getElementById('btnConciliacionCF').href = `${globalUrl}/deterioro-conciliacion?corte=${idCorte}`;
+    document.getElementById('btnControlesCF').href = `${globalUrl}/deterioro-controles?corte=${idCorte}`;
     cargarComparativo(idCorte);
 });
 
@@ -43,6 +47,7 @@ const cargarComparativo = async function (idCorte) {
     pintarReversion();
     pintarEvolucion();
     pintarCuadresCF(res.cuadres || []);
+    detMenuExportar(res);
 };
 
 /** Normaliza la fila del resumen a los conceptos del puente, sin netear signos. */
@@ -213,7 +218,8 @@ const pintarPuente = function () {
 /* --- Movimiento del período --- */
 
 const cfVariacion = function (actual, anterior, hay) {
-    if (!hay) return '<td class="num">&mdash;</td>';
+    if (!hay) return '<td class="num">'
+        + detAusente('No hay corte anterior comparable con qué calcular la variación') + '</td>';
     const d = actual - anterior;
     if (!d) return '<td class="num"><span class="det-cero">0</span></td>';
     return '<td class="num"><span class="det-var ' + (d > 0 ? 'sube' : 'baja') + '">'
@@ -230,8 +236,11 @@ const pintarMovimiento = function () {
 
     const fila = function (etiqueta, actual, anterior, sinDato) {
         return '<tr><td>' + etiqueta + '</td>'
-            + '<td class="num">' + (hay ? detPesos(anterior, true) : '&mdash;') + '</td>'
-            + '<td class="num">' + (sinDato ? '<span class="det-cero">&mdash;</span>' : detPesos(actual, true)) + '</td>'
+            + '<td class="num">' + (hay ? detPesos(anterior, true)
+                : detAusente('Es el primer corte de la serie: no hay corte anterior con qué comparar')) + '</td>'
+            + '<td class="num">' + (sinDato
+                ? detAusente('El corte es anterior a la fase 3 y no tiene comparativo contable contra fiscal')
+                : detPesos(actual, true)) + '</td>'
             + cfVariacion(actual, anterior, hay && !sinDato) + '</tr>';
     };
 
@@ -336,27 +345,6 @@ const pintarReversion = function () {
 
 /* --- Evolución --- */
 
-/** Línea de tendencia sin ejes: la tabla de abajo es la fuente. */
-const cfSpark = function (valores) {
-    const maximo = Math.max.apply(null, valores);
-    const minimo = Math.min.apply(null, valores.concat([0]));
-    const rango = (maximo - minimo) || 1;
-    const x = i => (i * 100 / (valores.length - 1)).toFixed(2);
-    const y = v => (44 - ((v - minimo) / rango) * 40).toFixed(2);
-
-    const puntos = valores.map((v, i) => x(i) + ',' + y(v)).join(' ');
-    const dots = valores.map(function (v, i) {
-        const ultimo = i === valores.length - 1;
-        return '<line x1="' + x(i) + '" y1="' + y(v) + '" x2="' + x(i) + '" y2="' + y(v) + '" '
-            + 'stroke="' + (ultimo ? 'rgb(45,85,165)' : '#7d9fd8') + '" stroke-width="' + (ultimo ? 6 : 3)
-            + '" stroke-linecap="round" vector-effect="non-scaling-stroke"></line>';
-    }).join('');
-
-    return '<svg class="det-spark" viewBox="0 0 100 48" preserveAspectRatio="none">'
-        + '<polyline points="' + puntos + '" fill="none" stroke="rgb(45,85,165)" stroke-width="1.5" '
-        + 'vector-effect="non-scaling-stroke"></polyline>' + dots + '</svg>';
-};
-
 const pintarEvolucion = function () {
     const serie = (cfDatos.evolucion || []).slice()
         .sort((a, b) => detFecha(a.fecha_corte).localeCompare(detFecha(b.fecha_corte)));
@@ -379,14 +367,15 @@ const pintarEvolucion = function () {
             : '') + '</p>';
 
     document.getElementById('evolucionGrafico').innerHTML = conDato.length >= 3
-        ? cfSpark(valores)
+        ? detSpark(valores)
         : '<div class="det-aviso info"><i class="fas fa-circle-info mt-1"></i><div>La serie tiene '
         + conDato.length + (conDato.length === 1 ? ' corte' : ' cortes') + ' con comparativo contable&ndash;fiscal'
         + (previos ? ' y ' + previos + (previos === 1 ? ' corte anterior' : ' cortes anteriores')
             + ' a la fase 3, que no entran en la gráfica' : '')
         + '. La gráfica de evolución se habilita a partir del tercer corte.</div></div>';
 
-    const guion = '<td class="num"><span class="det-cero">&mdash;</span></td>';
+    const guion = '<td class="num">'
+        + detAusente('Corte anterior a la fase 3: sin comparativo contable contra fiscal') + '</td>';
     let html = '';
     serie.forEach(function (s, i) {
         const sin = cfSinFase3(s);
@@ -411,13 +400,7 @@ const pintarEvolucion = function () {
 
 const pintarCuadresCF = function (cuadres) {
     let html = '';
-    cuadres.forEach(function (c) {
-        html += '<div class="det-cuadre">'
-            + '<span class="det-punto ' + (c.estado === 'OK' ? 'ok' : 'falla') + '"></span>'
-            + '<span>' + c.descripcion + '</span>'
-            + '<span class="dif">' + detMoneda2.format(cfNum(c.diferencia)) + '</span>'
-            + '</div>';
-    });
+    cuadres.forEach(function (c) { html += detFilaCuadre(c); });
     document.getElementById('listaCuadresCF').innerHTML = html
         || '<p class="text-muted mb-0">Sin controles registrados.</p>';
 };

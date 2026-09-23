@@ -57,6 +57,17 @@ Route::group(['middleware'=>['auth','submenu.permiso']],function(){
     Route::get('/deterioro-resumen', [RoutesController::class, 'deterioroResumen'])->name('deterioro-resumen');
     Route::get('/deterioro-detalle-operaciones', [RoutesController::class, 'deterioroDetalleOperaciones'])->name('deterioro-detalle-operaciones');
     Route::get('/deterioro-contable-fiscal', [RoutesController::class, 'deterioroContableFiscal'])->name('deterioro-contable-fiscal');
+    Route::get('/deterioro-evolucion', [RoutesController::class, 'deterioroEvolucion'])->name('deterioro-evolucion');
+    Route::get('/deterioro-suspensiones', [RoutesController::class, 'deterioroSuspensiones'])->name('deterioro-suspensiones');
+    Route::get('/deterioro-conciliacion', [RoutesController::class, 'deterioroConciliacion'])->name('deterioro-conciliacion');
+    Route::get('/deterioro-controles', [RoutesController::class, 'deterioroControles'])->name('deterioro-controles');
+    /* Lleva además el permiso de acción porque el middleware de submenú deja
+     * pasar toda ruta que no encuentre en Submenus, y esta no se siembra a
+     * propósito: la ayuda no es una pantalla del menú y sembrarla obligaría a
+     * escribir en la base de identidad de producción para algo que ya cubre el
+     * permiso de consulta. Sin él, la guía -que trae cifras reales de cartera-
+     * quedaría abierta a cualquier usuario autenticado del sitio. */
+    Route::get('/deterioro-ayuda', [RoutesController::class, 'deterioroAyuda'])->middleware('deterioro.permiso:consultar')->name('deterioro-ayuda');
 });
 
 /**Rutas Gestión Documental */
@@ -179,9 +190,53 @@ Route::group(['middleware'=>['auth','deterioro.permiso:consultar']],function(){
     Route::post('/deterioro-detalle-datos', [DeterioroController::class, 'detalleOperaciones'])->name('deterioro-detalle-datos');
     Route::post('/deterioro-cuotas-operacion', [DeterioroController::class, 'cuotasOperacion'])->name('deterioro-cuotas-operacion');
     Route::post('/deterioro-comparativo-datos', [DeterioroController::class, 'comparativoContableFiscal'])->name('deterioro-comparativo-datos');
+    Route::post('/deterioro-evolucion-datos', [DeterioroController::class, 'evolucionHistorica'])->name('deterioro-evolucion-datos');
+    Route::post('/deterioro-suspensiones-datos', [DeterioroController::class, 'suspensiones'])->name('deterioro-suspensiones-datos');
+    Route::post('/deterioro-suspensiones-corte', [DeterioroController::class, 'suspensionesCorte'])->name('deterioro-suspensiones-corte');
+    /* El soporte va con 'consultar' y no con 'suspender': quien puede ver la
+     * marca -causal, cliente y observación- tiene que poder abrir la evidencia
+     * en que se sustenta; exigir 'suspender' dejaría el enlace visible para
+     * todos y abrible sólo para quien marca. */
+    Route::get('/deterioro-soporte-suspension/{idSuspension}', [DeterioroController::class, 'verSoporteSuspension'])
+        ->where('idSuspension', '[0-9]+')->name('deterioro-ver-soporte');
+    Route::post('/deterioro-conciliacion-datos', [DeterioroController::class, 'conciliacionSiesa'])->name('deterioro-conciliacion-datos');
+    Route::post('/deterioro-controles-datos', [DeterioroController::class, 'controlesCorte'])->name('deterioro-controles-datos');
 });
 Route::group(['middleware'=>['auth','deterioro.permiso:calcular']],function(){
     Route::post('/deterioro-crear-corte', [DeterioroController::class, 'crearCorte'])->name('deterioro-crear-corte');
     Route::post('/deterioro-ejecutar-corte', [DeterioroController::class, 'ejecutarCorte'])->name('deterioro-ejecutar-corte');
     Route::post('/deterioro-eliminar-corte', [DeterioroController::class, 'eliminarCorte'])->name('deterioro-eliminar-corte');
+});
+Route::group(['middleware'=>['auth','deterioro.permiso:suspender']],function(){
+    Route::post('/deterioro-marcar-suspension', [DeterioroController::class, 'marcarSuspension'])->name('deterioro-marcar-suspension');
+    Route::post('/deterioro-levantar-suspension', [DeterioroController::class, 'levantarSuspension'])->name('deterioro-levantar-suspension');
+});
+Route::group(['middleware'=>['auth','deterioro.permiso:conciliar']],function(){
+    Route::post('/deterioro-explicar-partida', [DeterioroController::class, 'explicarPartida'])->name('deterioro-explicar-partida');
+});
+Route::group(['middleware'=>['auth','deterioro.permiso:clasificar']],function(){
+    Route::post('/deterioro-clasificar-salida', [DeterioroController::class, 'clasificarSalida'])->name('deterioro-clasificar-salida');
+});
+/* Cerrar con salvedad exige además el permiso 'forzarCierre', que el
+ * controlador verifica cuando llega motivo: cerrar un corte limpio y forzarlo
+ * dejando constancia de que algo estaba mal no son la misma decisión. */
+Route::group(['middleware'=>['auth','deterioro.permiso:cerrar']],function(){
+    Route::post('/deterioro-cerrar-corte', [DeterioroController::class, 'cerrarCorte'])->name('deterioro-cerrar-corte');
+});
+/* Reabrir no comparte permiso con cerrar: deshace la inmutabilidad de un mes
+ * que ya se reportó y es la acción más delicada del módulo. */
+Route::group(['middleware'=>['auth','deterioro.permiso:reabrir']],function(){
+    Route::post('/deterioro-reabrir-corte', [DeterioroController::class, 'reabrirCorte'])->name('deterioro-reabrir-corte');
+});
+/* Los exportables son de sólo lectura, pero no heredan el permiso de consultar:
+ * el archivo plano del asiento y el detalle completo del corte salen del sitio y
+ * llegan a contabilidad. */
+Route::group(['middleware'=>['auth','deterioro.permiso:exportar']],function(){
+    Route::post('/deterioro-exportar-transicion', [DeterioroController::class, 'exportarTransicion'])->name('deterioro-exportar-transicion');
+    Route::post('/deterioro-exportar-resumen', [DeterioroController::class, 'exportarResumen'])->name('deterioro-exportar-resumen');
+    Route::post('/deterioro-exportar-asiento', [DeterioroController::class, 'exportarAsiento'])->name('deterioro-exportar-asiento');
+    Route::post('/deterioro-exportar-detalle', [DeterioroController::class, 'exportarDetalle'])->name('deterioro-exportar-detalle');
+});
+Route::group(['middleware'=>['auth','deterioro.permiso:auditar']],function(){
+    Route::post('/deterioro-bitacora-datos', [DeterioroController::class, 'bitacora'])->name('deterioro-bitacora-datos');
 });
