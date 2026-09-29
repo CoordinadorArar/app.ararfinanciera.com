@@ -16,7 +16,7 @@
             <h4 class="det-titulo">Detalle por operación <span id="tituloFecha" class="text-muted"></span></h4>
             <p class="det-subtitulo">Cada cifra desciende hasta la cuota de origen</p>
         </div>
-        <div>
+        <div class="det-navegacion">
             <a class="btn btn-secondary btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
             <a class="btn btn-light btn-sm" id="btnResumen" href="#"><i class="fas fa-table"></i>&nbsp; Resumen</a>
             <a class="btn btn-light btn-sm" id="btnEvolucionDet" href="#"><i class="fas fa-chart-line"></i>&nbsp; Evolución</a>
@@ -90,6 +90,14 @@
                        title="Operaciones con cuotas que factoring entrega repetidas; no se cuentan en los totales">Solo con cuotas repetidas</label>
             </div>
         </div>
+        <div class="campo" id="campoSoloProrroga" style="display:none">
+            <label>&nbsp;</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="filtroSoloProrroga" onchange="cargarDetalle()">
+                <label class="form-check-label" for="filtroSoloProrroga"
+                       title="Operaciones con saldo de prórroga vencido de SIESA dentro de la base">Solo con interés de prórroga</label>
+            </div>
+        </div>
         <button class="btn btn-primary btn-sm" onclick="cargarDetalle()"><i class="fas fa-filter"></i>&nbsp; Filtrar</button>
         <div class="btn-group btn-group-sm det-vistas" role="group">
             <input type="radio" class="btn-check" name="vistaDetalle" id="vistaContable" checked onchange="cambiarVista()">
@@ -103,6 +111,7 @@
 
     <div id="avisoFiscalDetalle" style="display:none"></div>
     <div id="avisoRepetidasDetalle"></div>
+    <div id="avisoProrrogaDetalle"></div>
 
     <div class="det-panel">
         <h6>Operaciones <span id="badgeFiscalDetalle"></span></h6>
@@ -116,9 +125,9 @@
                         <th>Rango</th>
                         <th class="num">Días mora</th>
                         <th class="num">Cuotas</th>
-                        <th class="num">Capital vencido</th>
-                        <th class="num">Interés vencido</th>
-                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido más interés vencido (RN-03)">Base</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido de SIESA cuando la operación tiene atribución SIESA (marcado «SIESA»); si no, de factoring. La base usa factoring, salvo en operaciones con intereses suspendidos con saldo en SIESA.">Capital vencido</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Interés vencido de SIESA cuando la operación tiene atribución SIESA (marcado «SIESA»); si no, de factoring. La base usa factoring, salvo en operaciones con intereses suspendidos con saldo en SIESA.">Interés vencido</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Base efectiva del deterioro. Sin suspensión: capital vencido más interés vencido de factoring más prórroga vencida de SIESA (RN-03). Con intereses suspendidos: base congelada, tomada de SIESA cuando la operación tiene saldo atribuido allí.">Base</th>
                         <th class="num">%</th>
                         <th class="num">Deterioro</th>
                         <th class="num" data-bs-toggle="tooltip" title="Base por la tarifa anual del método individual (RN-07)">Individual 33 %</th>

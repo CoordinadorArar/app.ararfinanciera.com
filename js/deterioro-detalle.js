@@ -6,6 +6,7 @@ let detTabla = null;
 let detFechaCorte = null;
 let detCorteEstado = null;
 let detEvaluadas = null;
+let detProrrogaMedida = null;
 
 /** Columnas que alterna el conmutador de vista. La base y la identidad son fijas. */
 const detColContable = [5, 6, 7, 9, 10];
@@ -60,6 +61,7 @@ const cargarCorte = async function () {
     detFechaCorte = res.corte.fecha_corte;
     detCorteEstado = res.corte.estado;
     detAvisoRepetidas();
+    detAvisoProrroga();
     document.getElementById('tituloFecha').textContent = detFecha(detFechaCorte);
     document.getElementById('migaFecha').textContent = detFecha(detFechaCorte);
     document.getElementById('avisoFiscalDetalle').innerHTML = detAvisoFiscal(detFechaCorte);
@@ -97,6 +99,31 @@ const detUiRepetidas = function (operaciones) {
     document.getElementById('campoSoloRepetidas').style.display = hay ? '' : 'none';
     if (!hay) filtro.checked = false;
     detAvisoRepetidas();
+};
+
+const detAvisoProrroga = function () {
+    document.getElementById('avisoProrrogaDetalle').innerHTML =
+        detProrrogaMedida === false ? detAvisoSinProrroga(detCorteEstado) : '';
+};
+
+/**
+ * Mismo trato que las repetidas: el interruptor sólo existe si el corte trae
+ * prórroga. La bandera no se recalcula con una respuesta ya filtrada por
+ * prórroga ni con una respuesta vacía: ahí conserva el último valor conocido
+ * del corte, porque «ninguna fila» no distingue el corte sin prórroga del
+ * anterior a la política.
+ */
+const detUiProrroga = function (operaciones) {
+    const filtro = document.getElementById('filtroSoloProrroga');
+    if (operaciones.length && !filtro.checked) {
+        detProrrogaMedida = operaciones[0].interes_prorroga_siesa !== null
+            && operaciones[0].interes_prorroga_siesa !== undefined;
+    }
+    const hay = filtro.checked
+        || (detProrrogaMedida && operaciones.some(o => Number(o.interes_prorroga_siesa) > 0));
+    document.getElementById('campoSoloProrroga').style.display = hay ? '' : 'none';
+    if (!hay) filtro.checked = false;
+    detAvisoProrroga();
 };
 
 /** Estado visual de la vista: aviso fiscal, filtros propios y etiquetas. */
@@ -159,6 +186,7 @@ const cargarDetalle = async function () {
     if (fiscal) datos.append('soloTopadas', document.getElementById('filtroSoloTopadas').checked ? '1' : '');
     if (vista === 'diferido') datos.append('soloPasivo', document.getElementById('filtroSoloPasivo').checked ? '1' : '');
     datos.append('soloDuplicadas', document.getElementById('filtroSoloRepetidas').checked ? '1' : '');
+    datos.append('soloProrroga', document.getElementById('filtroSoloProrroga').checked ? '1' : '');
 
     const res = await makeOptionsFetch(`${globalUrl}/deterioro-detalle-datos`, datos, 'post', detTokenD());
     $('#divDetalle').preloader('remove');
@@ -172,6 +200,7 @@ const cargarDetalle = async function () {
     if (detTabla) { detTabla.destroy(); detTabla = null; }
 
     detUiRepetidas(res.operaciones);
+    detUiProrroga(res.operaciones);
 
     let html = '';
     res.operaciones.forEach(function (o) {
@@ -182,11 +211,11 @@ const cargarDetalle = async function () {
             + '<td data-order="' + o.rango + '">' + detBadgeRango(o.rango) + '</td>'
             + '<td class="num">' + (o.dias_mora_operacion || 0) + '</td>'
             + '<td class="num">' + o.cuotas + '</td>'
-            + '<td class="num">' + detPesos(o.capital_vencido) + '</td>'
-            + '<td class="num">' + detPesos(o.interes_vencido) + '</td>'
-            + '<td class="num">' + detPesos(o.base_deterioro) + '</td>'
-            + '<td class="num">' + detPorcentaje(o.pct_contable) + '</td>'
-            + '<td class="num">' + detPesos(o.deterioro_contable, true) + '</td>'
+            + detCeldaVencido(o.capital_vencido_siesa, o.capital_vencido, o.origen_saldo_siesa, o)
+            + detCeldaVencido(o.interes_vencido_siesa, o.interes_vencido, o.origen_saldo_siesa, o)
+            + detCeldaBase(o)
+            + '<td class="num" data-order="' + Number(o.pct_contable || 0) + '">' + detPorcentaje(o.pct_contable) + '</td>'
+            + '<td class="num" data-order="' + Number(o.deterioro_contable || 0) + '">' + detPesos(o.deterioro_contable, true) + '</td>'
             + detCeldaNum(o.deterioro_fiscal_individual)
             + detCeldaNum(o.fiscal_acumulado_anterior)
             + detCeldaNum(o.saldo_topado)
@@ -198,7 +227,8 @@ const cargarDetalle = async function () {
             + (o.ano_reversion_fiscal
                 || detAusente('La operación no tiene año de reversión proyectado')) + '</td>'
             + '<td class="text-end"><button class="btn btn-light btn-sm py-0 px-2" title="Ver cuotas" '
-            + 'onclick="verCuotas(' + o.id_operacion + ')"><i class="fas fa-magnifying-glass"></i></button></td>'
+            + 'onclick="verCuotas(' + o.id_operacion + ',' + Number(o.interes_prorroga_siesa || 0)
+            + ')"><i class="fas fa-magnifying-glass"></i></button></td>'
             + '</tr>';
     });
     document.getElementById('tbodyDetalle').innerHTML = html
@@ -233,7 +263,46 @@ const detMarcaRepetidas = function (o) {
         + detEntero(n) + (n === 1 ? ' cuota repetida' : ' cuotas repetidas') + '</span>';
 };
 
-const verCuotas = async function (idOperacion) {
+/** Sublínea en la celda de la base: cinco operaciones de dos mil no justifican columna. */
+const detMarcaProrroga = function (o) {
+    const n = Number(o.interes_prorroga_siesa || 0);
+    if (!detProrrogaMedida || n <= 0) return '';
+    return '<span class="det-suma" data-bs-toggle="tooltip" title="' + detTextoProrroga + '">+ '
+        + detMoneda.format(n) + ' prórroga</span>';
+};
+
+const detOrigenSiesa = { TERCERO: 'saldo del tercero', OPE: 'operación SIESA', NOTA: 'nota contable' };
+
+const detCeldaBase = function (o) {
+    const congelada = o.base_congelada !== null && o.base_congelada !== undefined;
+    const base = Number((congelada ? o.base_congelada : o.base_deterioro) || 0);
+    const siesa = o.origen_base === 'SIESA';
+    const fuente = !congelada ? '' : '<span class="det-fuente" data-bs-toggle="tooltip" title="'
+        + (siesa
+            ? 'Operación con intereses suspendidos: la base es capital vencido más interés vencido de SIESA más prórroga vencida. Base sin suspender (factoring): '
+            : 'Operación con intereses suspendidos sin saldo atribuido en SIESA: la base es capital vencido de factoring más interés congelado más prórroga vencida. Base sin suspender: ')
+        + detMoneda.format(Number(o.base_deterioro || 0)) + '.">'
+        + (siesa ? '<b>SIESA</b> · suspendida' : 'suspendida · congelada') + '</span>';
+    return '<td class="num" data-order="' + base + '">' + detPesos(base) + fuente + detMarcaProrroga(o) + '</td>';
+};
+
+const detCeldaVencido = function (siesa, factoring, origen, o) {
+    if (siesa === null || siesa === undefined) {
+        return '<td class="num" data-order="' + Number(factoring || 0) + '">' + detPesos(factoring) + '</td>';
+    }
+    const s = Number(siesa || 0), f = Number(factoring || 0), d = s - f;
+    const texto = 'Valor vencido de SIESA' + (detOrigenSiesa[origen] ? ' (origen: ' + detOrigenSiesa[origen] + ')' : '') + '. '
+        + (d !== 0
+            ? 'Factoring: ' + detMoneda.format(f) + '. Diferencia SIESA − factoring: '
+                + (d > 0 ? '+' : '−') + detMoneda.format(Math.abs(d)) + '.'
+            : 'Coincide con factoring.')
+        + (Number(o.suspendida) === 1 && o.origen_base === 'SIESA' ? ' La base usa este valor.' : ' La base se calcula con factoring.');
+    return '<td class="num" data-order="' + s + '">' + detPesos(s)
+        + '<span class="det-fuente" data-bs-toggle="tooltip" title="' + texto + '"><b>SIESA</b>'
+        + (d !== 0 ? ' · fact. ' + detMoneda.format(f) : '') + '</span></td>';
+};
+
+const verCuotas = async function (idOperacion, prorroga) {
     const datos = new FormData();
     datos.append('idCorte', detIdCorte);
     datos.append('idOperacion', idOperacion);
@@ -248,7 +317,17 @@ const verCuotas = async function (idOperacion) {
     document.getElementById('tituloCuotas').textContent =
         'Cuotas de la operación ' + idOperacion + ' · ' + total + ' registros'
         + (repetidas ? ', ' + (total - repetidas) + ' en los totales' : '');
-    document.getElementById('avisoCuotas').innerHTML = detEvaluadas === false
+    // La prórroga no está en estas cuotas: sin el aviso, la suma de lo vencido
+    // no da la base y el descenso parece descuadrado.
+    const pr = Number(prorroga || 0);
+    const avisoProrroga = pr <= 0 ? ''
+        : '<div class="det-aviso info"><i class="fas fa-circle-info mt-1"></i>'
+        + '<div>Esta operación tiene <strong>' + detMoneda.format(pr) + ' de interés de prórroga</strong> '
+        + 'que reporta SIESA y que <strong>no está en estas cuotas</strong>: viene de otra fuente. '
+        + 'La base de deterioro es la suma de lo vencido de estas cuotas <strong>más</strong> ese valor.'
+        + '</div></div>';
+
+    document.getElementById('avisoCuotas').innerHTML = (detEvaluadas === false
         ? detAvisoSinEvaluar()
         : repetidas
             ? '<div class="det-aviso info"><i class="fas fa-circle-info mt-1"></i>'
@@ -256,7 +335,7 @@ const verCuotas = async function (idOperacion) {
             + ' de estas ' + total + ' cuotas llegan repetidas</strong> y por eso se ven aquí, pero '
             + '<strong>no están contadas en los totales de la operación</strong>: el saldo se calcula con '
             + (total - repetidas) + ' cuotas. Cada repetida indica a qué cuota repite.</div></div>'
-            : '';
+            : '') + avisoProrroga;
 
     let html = '';
     res.cuotas.forEach(function (c) {

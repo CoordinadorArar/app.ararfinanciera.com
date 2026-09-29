@@ -14,7 +14,7 @@
             <h4 class="det-titulo">Resumen del corte <span id="tituloFecha" class="text-muted"></span></h4>
             <p class="det-subtitulo">Matriz de producto por rango de mora, con capital, interés, base y deterioro</p>
         </div>
-        <div>
+        <div class="det-navegacion">
             <a class="btn btn-secondary btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
             <a class="btn btn-light btn-sm" id="btnEvolucion" href="#"><i class="fas fa-chart-line"></i>&nbsp; Evolución</a>
             <a class="btn btn-light btn-sm" id="btnComparativo" href="#"><i class="fas fa-scale-balanced"></i>&nbsp; Contable contra fiscal</a>
@@ -31,6 +31,17 @@
     </div>
 
     <div class="det-tarjetas" id="tarjetas"></div>
+    <div id="avisoProrroga"></div>
+
+    <div class="det-panel">
+        <div class="det-panel-cab">
+            <h6>Vencido por rango de mora</h6>
+            <div class="det-leyenda mb-0" id="leyendaRangos"><span><i class="corriente"></i>Capital vencido</span><span><i class="siguiente"></i>Interés vencido</span></div>
+        </div>
+        <div class="det-grafico" id="contGraficoRangos">
+            <canvas id="graficoRangos" role="img" aria-label="Capital e interés vencido por rango de mora"></canvas>
+        </div>
+    </div>
 
     <div class="det-panel">
         <h6>Producto por rango</h6>
@@ -46,6 +57,7 @@
                         <th class="num">Capital vencido</th>
                         <th class="num">Interés corriente</th>
                         <th class="num">Interés vencido</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Saldo de prórroga vencido que reporta SIESA. Se trata como interés y entra a la base (RN-03). No es la prórroga del control C-1">Interés de prórroga</th>
                         <th class="num">Base de deterioro</th>
                         <th class="num">Deterioro contable</th>
                     </tr>
@@ -75,13 +87,13 @@
                     <tr>
                         <th>Producto</th>
                         <th>Rango</th>
-                        <th class="num" title="Tarifa fiscal efectiva sobre la base">%</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Tarifa fiscal efectiva sobre la base">%</th>
                         <th class="num">Operaciones</th>
-                        <th class="num" title="Capital vencido más interés vencido (RN-03)">Base</th>
-                        <th class="num" title="Base por la tarifa anual del método individual (RN-07)">Individual 33 %</th>
-                        <th class="num" title="Deducciones tomadas en años gravables anteriores">Acum. anterior</th>
-                        <th class="num" title="Tope del acumulado deducible: el menor entre el saldo de SIESA y la base">Saldo topado</th>
-                        <th class="num" title="Individual del año limitado por el tope disponible">Deducción del año</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido más interés vencido más interés de prórroga de SIESA (RN-03)">Base</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Base por la tarifa anual del método individual (RN-07)">Individual 33 %</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Deducciones tomadas en años gravables anteriores">Acum. anterior</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Tope del acumulado deducible: el menor entre el saldo de SIESA y la base">Saldo topado</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Individual del año limitado por el tope disponible">Deducción del año</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyFiscal"></tbody>
@@ -126,4 +138,5 @@
 @endsection
 <script src="{{ asset('js/deterioro-comun.js') }}"></script>
 <script src="{{ asset('js/deterioro-exportar.js') }}"></script>
+<script src="{{ asset('js/chart.min.js') }}"></script>
 <script src="{{ asset('js/deterioro-resumen.js') }}"></script>

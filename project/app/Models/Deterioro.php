@@ -71,31 +71,7 @@ class Deterioro extends Model
      */
     const TIPOS_DOCTO_INTERES_SIESA = ['CC', 'FAT'];
 
-    /**
-     * Grupo de cuentas contables que son cartera, definido por Contabilidad el
-     * 21 de septiembre de 2026: el saldo son los registros de las cuentas que
-     * empiezan por `13` (deudores), y nada mas.
-     *
-     * Medido sobre la compania 7 al 31 de agosto de 2026, el filtro saca una
-     * sola cuenta de las que hoy entran por los cuatro prefijos: `28050501`
-     * 'Anticipo Clientes Nal', 173 filas por -42.406.660,00. De esas 173, una
-     * sola estaba atribuida a una operacion —por -129.468,00—, de modo que el
-     * filtro sube el `saldo_siesa` de esa unica operacion y deja el resto del
-     * corte igual. Lo que si corrige es el total del snapshot, donde un pasivo
-     * venia restando del saldo de cartera.
-     *
-     * **El deterioro `13990501..05` sigue dentro**, porque empieza por `13` y
-     * la regla es esa. Son 283 filas por -1.042.258.277,00 y **ninguna esta
-     * atribuida a una operacion**: son asientos globales ('AJUSTE DETERIORO DE
-     * CARTERA FISCAL A 30 DE JUNIO DE 2022'), de modo que no mueven un peso de
-     * ninguna operacion y sólo pesan en el total. Excluirlas es la decision de
-     * politica contable que sigue pendiente, y cuando se tome, se toma aqui.
-     *
-     * Las filas sin auxiliar siguen pasando: hoy son cero con saldo distinto de
-     * cero, y descartarlas por no poder clasificarlas restaria cartera en
-     * silencio, que es peor que dejarlas entrar y que `C-SIESA-NOTA` las vea.
-     */
-    const CUENTA_CARTERA_SIESA = '13';
+    const CUENTA_CAPITAL_SIESA = '13050501';
 
     /**
      * Desplazamiento del consecutivo de un `OPE` de refinanciacion: SIESA le da
@@ -143,10 +119,75 @@ class Deterioro extends Model
                       ELSE {$columna} END)";
     }
 
+    /**
+     * El texto que sigue al ancla de operacion en una nota de SIESA, como
+     * expresion de SQL. Son cuatro las formas con que las notas escriben la
+     * operacion —`OPE: n`, `OPE-1-n`, `OPE n` y `OPEn`— y se prueban en ese
+     * orden; el ancla es siempre el literal completo y nunca el numero suelto.
+     *
+     * Vive en un solo sitio porque son dos los consumidores que tienen que
+     * coincidir: `sqlSaldoSiesa()`, que clasifica la fila y le atribuye la
+     * operacion, e `interesALaFechaDelEventoEnLote()`, que la congela. Con un
+     * parseo por consumidor una operacion podia quedar bien clasificada como
+     * interes y a la vez ser incongelable: medido sobre las 31.284 filas de
+     * interes de la compania 7, el reconocimiento del congelamiento —que
+     * exigia el literal `OPE: `— dejaba fuera 260.
+     *
+     * La exclusion de los `OPE` **no** esta aqui: es propia de
+     * `sqlSaldoSiesa()`, que los cruza por consecutivo, y el congelamiento no
+     * la quiere.
+     */
+    public static function restoDeAnclaOpe($columna)
+    {
+        return "CASE
+                    WHEN CHARINDEX('OPE: ', {$columna}) > 0
+                        THEN SUBSTRING({$columna}, CHARINDEX('OPE: ', {$columna}) + 5, 12)
+                    WHEN PATINDEX('%OPE-1-[0-9]%', {$columna}) > 0
+                        THEN SUBSTRING({$columna}, PATINDEX('%OPE-1-[0-9]%', {$columna}) + 6, 12)
+                    WHEN PATINDEX('%OPE [0-9]%', {$columna}) > 0
+                        THEN SUBSTRING({$columna}, PATINDEX('%OPE [0-9]%', {$columna}) + 4, 12)
+                    WHEN PATINDEX('%OPE[0-9]%', {$columna}) > 0
+                        THEN SUBSTRING({$columna}, PATINDEX('%OPE[0-9]%', {$columna}) + 3, 12)
+                END";
+    }
+
+    /**
+     * El numero de operacion que hay en un resto de `restoDeAnclaOpe()`: sus
+     * digitos hasta el primer caracter que no lo es. Corta pegado a texto
+     * ('OPE: 569ESPE' es la operacion 569), que es justo lo que el corte por el
+     * primer espacio no hacia.
+     *
+     * Devuelve nulo **solo si el resto es nulo**, es decir si ninguna de las
+     * cuatro anclas encajo. Un resto que exista y no empiece por digito da
+     * **cero, no nulo**: `LEFT()` deja cadena vacia y `TRY_CONVERT(int, '')`
+     * vale 0 en SQL Server. Queda escrito porque el nulo es lo que los dos
+     * consumidores leen como 'no se pudo atribuir', y un cero silencioso seria
+     * una operacion inexistente colandose por esa puerta.
+     *
+     * Solo lo alcanza la rama `OPE: ` —las otras tres exigen digito en el
+     * PATINDEX—, con una nota de forma 'OPE: ABC'. Medido el 23 de septiembre
+     * de 2026: cero filas de interes, cero filas del snapshot con
+     * `id_operacion_nota = 0` y cero marcas con `id_operacion = 0`. Es
+     * comportamiento anterior a la extraccion, que movio la expresion literal.
+     */
+    public static function operacionDeRestoOpe($resto)
+    {
+        return "TRY_CONVERT(int, LEFT({$resto}, NULLIF(PATINDEX('%[^0-9]%', {$resto} + 'x'), 0) - 1))";
+    }
+
     /** Los prefijos de PREFIJOS_SALDO_SIESA como lista literal para un IN de SQL. */
     public static function prefijosSaldoSiesa()
     {
         return "'".implode("', '", self::PREFIJOS_SALDO_SIESA)."'";
+    }
+
+    public static function sqlOperacionesUnicasPorTercero($idCorte = '@idCorte')
+    {
+        return "SELECT nit = CONVERT(varchar(25), id_cliente), id_operacion = MIN(id_operacion)
+                FROM det_deterioro_operacion
+                WHERE id_corte = {$idCorte} AND id_cliente IS NOT NULL
+                GROUP BY id_cliente
+                HAVING COUNT(*) = 1";
     }
 
     /** Los tipos de TIPOS_DOCTO_INTERES_SIESA como lista literal para un IN de SQL. */
@@ -662,7 +703,9 @@ class Deterioro extends Model
      * FecInicialMora es de la operación, no de la cuota (D-01).
      *
      * base_deterioro = capital vencido + interés vencido (RN-03 / D-03).
-     * Excluye administración e interés de mora.
+     * Excluye administración e interés de mora. La prórroga vencida se le suma
+     * después, en enlazarSaldoSiesa(), porque no viene de factoring sino del
+     * snapshot de SIESA.
      *
      * Y excluye las cuotas que el origen entregó por duplicado: contarlas sería
      * deteriorar dos veces la misma obligación. Las filas siguen en el detalle
@@ -779,10 +822,20 @@ class Deterioro extends Model
      * que en las cinco operaciones donde aparece —2133, 2316, 1276, 1238 y
      * 2136— la fila `SALDO OPE n` **sola** cuadra al peso contra el capital de
      * factoring, y las prórrogas van encima: son 56 filas por 82.170.273 que,
-     * contadas como capital, fabricaban partidas de conciliación falsas. Siguen
-     * sumando al valor nominal, que es un techo y donde sobrar es conservador.
-     * Si Contabilidad define que la prórroga sí es capital de la operación, el
-     * cambio es mover ese `CASE`.
+     * contadas como capital, fabricaban partidas de conciliación falsas.
+     *
+     * Lo que sí cambia desde el corte de agosto de 2026, por definición de
+     * Contabilidad: la prórroga **vencida** es interés de la obligación y entra
+     * en la base de deterioro, no sólo en el valor nominal. Capital no es y no
+     * pasa a serlo —`saldo_siesa` sigue sin tocarla y C-3 no se mueve—: viaja en
+     * `interes_prorroga_siesa` y la base la suma al interés vencido, que es el
+     * tratamiento que le corresponde a un accesorio ya exigible. La no vencida
+     * queda en `PRORROGA_NV` y sigue fuera de la base, igual que el interés
+     * corriente por D-03; la que no trae fecha de vencimiento se trata como no
+     * vencida, porque meter en la base algo que no se sabe exigible es el error
+     * que no se puede cometer en silencio. Hoy las 57 filas de prórroga están
+     * todas vencidas y ninguna tiene la fecha nula, de modo que el corte de
+     * agosto no cambia una sola fila del snapshot por este reparto.
      *
      * Los `OPE` se excluyen del parseo a propósito —`resto` sale nulo para
      * ellos—: cruzan por consecutivo y dejarlos entrar por las dos vías haría
@@ -829,8 +882,7 @@ class Deterioro extends Model
      * Sobre el filtro por cuenta contable, que llega el 21 de septiembre de
      * 2026. Hasta entonces no se filtraba ninguna, y al saldo entraban tanto el
      * deterioro `13990501..05` como el pasivo `28050501`. Contabilidad definió
-     * que el saldo son las cuentas que empiezan por `13` —CUENTA_CARTERA_SIESA,
-     * donde está medido qué entra y qué sale—, de modo que el pasivo queda
+     * que el saldo son las cuentas que empiezan por `13`, de modo que el pasivo queda
      * fuera y el deterioro sigue dentro.
      *
      * El efecto sobre el corte de agosto de 2026 está medido aislando el
@@ -880,8 +932,11 @@ class Deterioro extends Model
         $siesa = self::origenSiesa();
         $prefijos = self::prefijosSaldoSiesa();
         $cuentaInteres = self::CUENTA_INTERES_SIESA;
-        $tiposInteres = self::tiposDoctoInteresSiesa();
-        $cuentaCartera = self::CUENTA_CARTERA_SIESA;
+        $cuentaCapital = self::CUENTA_CAPITAL_SIESA;
+        $restoNota = self::restoDeAnclaOpe('s.f353_notas');
+        $operacionNota = self::operacionDeRestoOpe('a.resto');
+        $operacionOpe = self::operacionDeConsecutivoOpe('s.f353_consec_docto_cruce');
+        $unicas = self::sqlOperacionesUnicasPorTercero();
 
         return "DECLARE @corte date = ?;
                 DECLARE @idCorte int = ?;
@@ -891,11 +946,12 @@ class Deterioro extends Model
                 INSERT INTO det_corte_saldo_siesa (
                     id_corte, tipo_docto_cruce, consec_docto_cruce,
                     id_operacion_nota, componente,
-                    nit, razon_social, saldo, fecha_extraccion)
+                    nit, razon_social, saldo, saldo_vencido, fecha_extraccion)
                 SELECT @idCorte, z.tipo, z.consec,
                     z.operacion, z.componente,
                     MIN(z.nit), MIN(z.razon_social),
-                    SUM(ISNULL(z.saldo, 0)), @ahora
+                    SUM(ISNULL(z.saldo, 0)),
+                    SUM(CASE WHEN z.fecha_vcto <= @corte THEN ISNULL(z.saldo, 0) ELSE 0 END), @ahora
                 FROM (
                     SELECT tipo = s.f353_id_tipo_docto_cruce,
                            consec = s.f353_consec_docto_cruce,
@@ -903,25 +959,25 @@ class Deterioro extends Model
                            nit = t.f200_nit,
                            razon_social = t.f200_razon_social,
                            saldo = m.saldo,
+                           fecha_vcto = s.f353_fecha_vcto,
                            movimientos = m.f354_rowid_sa,
-                           operacion = TRY_CONVERT(int,
-                               LEFT(a.resto, NULLIF(PATINDEX('%[^0-9]%', a.resto + 'x'), 0) - 1)),
+                           operacion = CASE
+                               WHEN u.id_operacion IS NOT NULL THEN u.id_operacion
+                               WHEN s.f353_id_tipo_docto_cruce = 'OPE' THEN {$operacionOpe}
+                               ELSE {$operacionNota} END,
                            componente = CASE
-                               WHEN CHARINDEX('PRORROGA', s.f353_notas) > 0 THEN 'PRORROGA'
-                               WHEN aux.f253_id = '{$cuentaInteres}'
-                                AND s.f353_id_tipo_docto_cruce IN ({$tiposInteres})
-                               THEN 'INTERES'
-                               WHEN aux.f253_id IS NULL
-                                AND (s.f353_id_tipo_docto_cruce = 'FAT'
-                                     OR CHARINDEX('FACTURA AUTOMATICA', s.f353_notas) > 0
-                                     OR CHARINDEX('FACTURACION AUTOMATICA', s.f353_notas) > 0
-                                     OR CHARINDEX('INTERES', s.f353_notas) > 0)
-                               THEN 'INTERES' ELSE 'CAPITAL' END
+                               WHEN aux.f253_id = '{$cuentaInteres}' THEN 'INTERES'
+                               WHEN CHARINDEX('PRORROGA', s.f353_notas) > 0
+                               THEN CASE WHEN s.f353_fecha_vcto <= @corte
+                                         THEN 'PRORROGA' ELSE 'PRORROGA_NV' END
+                               ELSE 'CAPITAL' END
                     FROM {$siesa}t353_co_saldo_abierto s
                     INNER JOIN {$siesa}t200_mm_terceros t
                             ON t.f200_rowid = s.f353_rowid_tercero
-                    LEFT JOIN {$siesa}t253_co_auxiliares aux
-                           ON aux.f253_rowid = s.f353_rowid_auxiliar
+                    INNER JOIN {$siesa}t253_co_auxiliares aux
+                            ON aux.f253_rowid = s.f353_rowid_auxiliar
+                    LEFT JOIN ({$unicas}) u
+                           ON u.nit = t.f200_nit COLLATE DATABASE_DEFAULT
                     LEFT JOIN (
                         SELECT f354_rowid_sa,
                                saldo = SUM(ISNULL(f354_valor_db, 0) - ISNULL(f354_valor_cr, 0))
@@ -931,19 +987,10 @@ class Deterioro extends Model
                            ON m.f354_rowid_sa = s.f353_rowid
                     CROSS APPLY (SELECT resto = CASE
                         WHEN s.f353_id_tipo_docto_cruce = 'OPE' THEN NULL
-                        WHEN CHARINDEX('OPE: ', s.f353_notas) > 0
-                            THEN SUBSTRING(s.f353_notas, CHARINDEX('OPE: ', s.f353_notas) + 5, 12)
-                        WHEN PATINDEX('%OPE-1-[0-9]%', s.f353_notas) > 0
-                            THEN SUBSTRING(s.f353_notas, PATINDEX('%OPE-1-[0-9]%', s.f353_notas) + 6, 12)
-                        WHEN PATINDEX('%OPE [0-9]%', s.f353_notas) > 0
-                            THEN SUBSTRING(s.f353_notas, PATINDEX('%OPE [0-9]%', s.f353_notas) + 4, 12)
-                        WHEN PATINDEX('%OPE[0-9]%', s.f353_notas) > 0
-                            THEN SUBSTRING(s.f353_notas, PATINDEX('%OPE[0-9]%', s.f353_notas) + 3, 12)
-                        END) a
+                        ELSE ({$restoNota}) END) a
                     WHERE s.f353_id_cia = @cia
                       AND s.f353_id_tipo_docto_cruce IN ({$prefijos})
-                      AND (aux.f253_id IS NULL
-                           OR aux.f253_id LIKE '{$cuentaCartera}%')) z
+                      AND aux.f253_id IN ('{$cuentaCapital}', '{$cuentaInteres}')) z
                 GROUP BY z.tipo, z.consec, z.tercero, z.operacion, z.componente
                 HAVING SUM(ISNULL(z.saldo, 0)) <> 0
                     OR (z.tipo = 'OPE' AND COUNT(z.movimientos) > 0)";
@@ -977,6 +1024,22 @@ class Deterioro extends Model
      * contradiría lo que el propio módulo tiene escrito sobre qué es el saldo
      * de SIESA.
      *
+     * La prórroga vencida se toma **siempre de la nota**, aunque la operación
+     * además cruce por `OPE`: es la única vía que la identifica, y no compite
+     * con el `COALESCE` del capital. Se guarda en `interes_prorroga_siesa` y se
+     * suma a `base_deterioro` aquí, que es el sitio: el paso corre después de la
+     * consolidación por operación y antes del deterioro contable y del fiscal,
+     * de modo que los dos toman ya la base con prórroga. `valor_nominal_siesa`
+     * no cambia, porque ya sumaba la prórroga por las dos vías.
+     *
+     * `interes_prorroga_siesa` lleva `ISNULL(…, 0)` y no el nulo de la unión, a
+     * diferencia de `saldo_siesa`: como el `UPDATE` recorre todas las
+     * operaciones del corte, el cero significa «se midió y no hay prórroga» y el
+     * nulo queda reservado para «este corte se calculó antes de la política».
+     * Son dos cosas distintas y las pantallas tienen que poder separarlas para
+     * decidir si pintan un cero o un «no evaluado», igual que hacen con la marca
+     * de cuotas repetidas.
+     *
      * `valor_nominal_siesa` es la otra cifra, y es nueva: la suma de los cuatro
      * prefijos que Contabilidad definió, capital más interés facturado. Es el
      * 100 % del valor nominal de la obligación y el techo del acumulado fiscal
@@ -1009,34 +1072,55 @@ class Deterioro extends Model
      */
     public static function sqlEnlazarSaldoSiesa()
     {
-        $operacionOpe = self::operacionDeConsecutivoOpe('consec_docto_cruce');
+        $unicas = self::sqlOperacionesUnicasPorTercero();
+        $capital = self::sqlCapitalSiesaAtribuido('s', 'u');
 
         return "DECLARE @idCorte int = ?;
 
                 UPDATE o SET
-                    saldo_siesa = COALESCE(ope.saldo, nota.capital),
+                    saldo_siesa = c.capital,
                     origen_saldo_siesa = CASE
-                        WHEN ope.saldo IS NOT NULL THEN 'OPE'
-                        WHEN nota.capital IS NOT NULL THEN 'NOTA' END,
-                    valor_nominal_siesa = CASE
-                        WHEN ope.saldo IS NULL AND nota.capital IS NULL THEN NULL
-                        ELSE ISNULL(ope.saldo, 0) + ISNULL(nota.total, 0) END
+                        WHEN c.capital IS NULL THEN NULL
+                        WHEN u.id_operacion IS NOT NULL THEN 'TERCERO'
+                        WHEN s.opes > 0 THEN 'OPE' ELSE 'NOTA' END,
+                    valor_nominal_siesa = CASE WHEN c.capital IS NULL THEN NULL ELSE s.total END,
+                    interes_prorroga_siesa = ISNULL(s.prorroga, 0),
+                    capital_vencido_siesa = CASE WHEN c.capital IS NULL THEN NULL
+                        WHEN s.opes > 0 AND u.id_operacion IS NULL THEN s.capital_ope_vencido
+                        ELSE s.capital_vencido END,
+                    interes_vencido_siesa = CASE WHEN c.capital IS NULL THEN NULL ELSE s.interes_vencido END,
+                    base_deterioro = o.base_deterioro + ISNULL(s.prorroga, 0)
                 FROM det_deterioro_operacion o
-                LEFT JOIN (
-                    SELECT operacion = {$operacionOpe}, saldo = SUM(saldo)
-                    FROM det_corte_saldo_siesa
-                    WHERE id_corte = @idCorte AND tipo_docto_cruce = 'OPE'
-                    GROUP BY {$operacionOpe}) ope
-                       ON ope.operacion = o.id_operacion
-                LEFT JOIN (
-                    SELECT id_operacion_nota,
-                           capital = NULLIF(SUM(CASE WHEN componente = 'CAPITAL' THEN saldo ELSE 0 END), 0),
-                           total = SUM(saldo)
-                    FROM det_corte_saldo_siesa
-                    WHERE id_corte = @idCorte AND id_operacion_nota IS NOT NULL
-                    GROUP BY id_operacion_nota) nota
-                       ON nota.id_operacion_nota = o.id_operacion
+                LEFT JOIN (".self::sqlSaldoSiesaPorOperacion('@idCorte').") s
+                       ON s.id_operacion_nota = o.id_operacion
+                LEFT JOIN ({$unicas}) u
+                       ON u.id_operacion = o.id_operacion
+                CROSS APPLY (SELECT capital = {$capital}) c
                 WHERE o.id_corte = @idCorte";
+    }
+
+    public static function sqlSaldoSiesaPorOperacion($idCorte)
+    {
+        return "SELECT id_operacion_nota,
+                       opes = SUM(CASE WHEN tipo_docto_cruce = 'OPE' THEN 1 ELSE 0 END),
+                       capital_ope = SUM(CASE WHEN componente = 'CAPITAL' AND tipo_docto_cruce = 'OPE' THEN saldo ELSE 0 END),
+                       capital = SUM(CASE WHEN componente = 'CAPITAL' THEN saldo ELSE 0 END),
+                       prorroga = SUM(CASE WHEN componente = 'PRORROGA' THEN saldo ELSE 0 END),
+                       capital_ope_vencido = SUM(CASE WHEN componente = 'CAPITAL' AND tipo_docto_cruce = 'OPE' THEN saldo_vencido ELSE 0 END),
+                       capital_vencido = SUM(CASE WHEN componente = 'CAPITAL' THEN saldo_vencido ELSE 0 END),
+                       interes_vencido = SUM(CASE WHEN componente = 'INTERES' THEN saldo_vencido ELSE 0 END),
+                       total = SUM(saldo)
+                FROM det_corte_saldo_siesa
+                WHERE id_corte = {$idCorte} AND id_operacion_nota IS NOT NULL
+                GROUP BY id_operacion_nota";
+    }
+
+    public static function sqlCapitalSiesaAtribuido($s, $u)
+    {
+        return "CASE
+                    WHEN {$s}.opes > 0
+                    THEN CASE WHEN {$u}.id_operacion IS NULL THEN {$s}.capital_ope ELSE {$s}.capital END
+                    ELSE NULLIF({$s}.capital, 0) END";
     }
 
     public static function enlazarSaldoSiesa($idCorte)
@@ -1057,18 +1141,26 @@ class Deterioro extends Model
      * (fecha_reactivacion IS NULL OR fecha_reactivacion > fecha de corte):
      * levantar una marca hoy no puede cambiar un corte ya calculado.
      *
-     * interes_vencido y base_deterioro NO se tocan aquí ni en ningún otro
-     * paso: son el insumo de C-INTERES y C-BASE contra el detalle de cuotas de
-     * origen. El congelamiento vive en columnas propias.
+     * interes_vencido y base_deterioro NO se tocan aquí: son el insumo de
+     * C-INTERES y C-BASE contra el detalle de cuotas de origen más la prórroga
+     * vencida del snapshot, que enlazarSaldoSiesa() es el único paso que suma a
+     * la base. El congelamiento vive en columnas propias.
      *
-     * La base de una operación suspendida es siempre el capital vencido a la
-     * fecha de corte más el interés congelado: el capital que todavía no ha
-     * vencido no entra al cálculo, igual que en las operaciones sin suspender.
+     * Con atribución SIESA (capital_vencido_siesa no nulo) la base de una
+     * operación suspendida es el capital vencido más el interés vencido más la
+     * prórroga vencida de SIESA, con origen_base 'SIESA'. Sin ella es el
+     * capital vencido a la fecha de corte más el interés congelado más la
+     * prórroga vencida de SIESA:
+     * el capital que todavía no ha vencido no entra al cálculo, igual que en las
+     * operaciones sin suspender, y la prórroga entra porque ya está vencida y
+     * suspender la causación no la borra. Con ella a los dos lados, la
+     * diferencia base_deterioro − base_congelada sigue siendo interes_vencido −
+     * interes_vencido_congelado, que es lo que verifica C-SUSPENSION.
      * El congelado se suma al capital vencido y no al capital total porque la
      * base excluye el interés corriente por D-03, y se suma para que el interés
      * no desaparezca de la base, como exige D-06.
      *
-     * El saldo de SIESA no puede ser base: es el capital total abierto de la
+     * El saldo total de SIESA no es base: es el capital total abierto de la
      * operación —corriente más vencido, porque SIESA no distingue la cuota
      * vencida de la que está por vencer (§14.1)—, de modo que tomarlo metía
      * capital no vencido en el cálculo. La política inicial de D-15 se planteó
@@ -1077,9 +1169,8 @@ class Deterioro extends Model
      * valor_nominal_siesa para el tope fiscal R de RN-09; ninguna de las dos es
      * base. El parámetro siesa_manda_sobre_base tampoco se consulta aquí.
      *
-     * origen_base queda en 'FACTORING' en todas las filas. La columna se
-     * conserva porque C-SUSPENSION se apoya en ella y porque deja constancia de
-     * la fuente de la base en los cortes calculados con la política anterior.
+     * origen_base queda en 'SIESA' o 'FACTORING' según la fuente de la base;
+     * C-SUSPENSION sólo cubre las 'FACTORING' y C-SIESA-BASE las 'SIESA'.
      *
      * interes_no_facturado sólo se llena para productos con
      * sigue_calculando_suspendido = 1 (FACTORING) y con piso en cero: un
@@ -1099,8 +1190,12 @@ class Deterioro extends Model
                     suspendida = 1,
                     id_suspension = s.id_suspension,
                     interes_vencido_congelado = s.interes_congelado,
-                    base_congelada = o.capital_vencido + s.interes_congelado,
-                    origen_base = 'FACTORING',
+                    base_congelada = CASE WHEN o.capital_vencido_siesa IS NOT NULL
+                                     THEN o.capital_vencido_siesa + ISNULL(o.interes_vencido_siesa, 0)
+                                     ELSE o.capital_vencido + s.interes_congelado END
+                                     + ISNULL(o.interes_prorroga_siesa, 0),
+                    origen_base = CASE WHEN o.capital_vencido_siesa IS NOT NULL
+                                  THEN 'SIESA' ELSE 'FACTORING' END,
                     interes_no_facturado = CASE
                         WHEN ISNULL(pi.sigue_calculando_suspendido, 0) = 1
                         THEN CASE WHEN o.interes_vencido - s.interes_congelado > 0
@@ -1418,21 +1513,19 @@ class Deterioro extends Model
     {
         DB::table('det_conciliacion_partida')->where('id_corte', $idCorte)->delete();
 
-        $operacionOpe = self::operacionDeConsecutivoOpe('s.consec_docto_cruce');
-
         $columnas = 'id_corte, id_operacion, numero_operacion, nit, cliente,
                      saldo_siesa, saldo_factoring, diferencia, tipo';
 
         DB::insert(
             "INSERT INTO det_conciliacion_partida ($columnas)
-             SELECT s.id_corte, NULL, {$operacionOpe}, MIN(s.nit), MIN(s.razon_social),
+             SELECT s.id_corte, NULL, s.id_operacion_nota, MIN(s.nit), MIN(s.razon_social),
                     SUM(s.saldo), NULL, SUM(s.saldo), 'SOLO_SIESA'
              FROM det_corte_saldo_siesa s
-             WHERE s.id_corte = ? AND s.tipo_docto_cruce = 'OPE'
+             WHERE s.id_corte = ? AND s.tipo_docto_cruce = 'OPE' AND s.componente = 'CAPITAL'
                AND NOT EXISTS (SELECT 1 FROM det_deterioro_operacion o
                                WHERE o.id_corte = s.id_corte
-                                 AND o.id_operacion = {$operacionOpe})
-             GROUP BY s.id_corte, {$operacionOpe}
+                                 AND o.id_operacion = s.id_operacion_nota)
+             GROUP BY s.id_corte, s.id_operacion_nota
              HAVING SUM(s.saldo) <> 0", [$idCorte]);
 
         DB::insert(
@@ -1509,8 +1602,7 @@ class Deterioro extends Model
     /**
      * Controles de RN-12 y de las fases posteriores. Desde la fase 6 entran
      * los tres que dependen de SIESA: la extracción, la conciliación de C-3 y
-     * C-SIESA-BASE, que sólo cubre los cortes calculados con la política
-     * anterior de D-15, cuando la base salía del saldo de SIESA.
+     * C-SIESA-BASE, que cubre las suspendidas con base tomada de SIESA.
      *
      * Un control cuyo insumo no existe en el corte se registra en N/A con el
      * motivo, no en FALLA: los cortes calculados antes de las fases 2 y 3 no
@@ -1521,8 +1613,8 @@ class Deterioro extends Model
     public static function verificarCuadres($idCorte)
     {
         $fechaCorte = DB::table('det_corte')->where('id_corte', $idCorte)->value('fecha_corte');
-        $operacionOpe = self::operacionDeConsecutivoOpe('consec_docto_cruce');
-        $operacionOpeE = self::operacionDeConsecutivoOpe('e.consec_docto_cruce');
+        $unicas = self::sqlOperacionesUnicasPorTercero('?');
+        $capitalSiesa = self::sqlCapitalSiesaAtribuido('x', 'u');
 
         // El lado detalle de C-CUOTAS, C-CAPITAL, C-INTERES, C-PARTIC y C-BASE
         // excluye de forma explícita las cuotas repetidas del origen, porque el
@@ -1544,8 +1636,28 @@ class Deterioro extends Model
             'SELECT operaciones = COUNT(*), cuotas = SUM(cuotas),
                     capital = SUM(capital_corriente + capital_vencido),
                     interes = SUM(interes_corriente + interes_vencido),
-                    base = SUM(base_deterioro), deterioro = SUM(deterioro_contable)
+                    base = SUM(base_deterioro), deterioro = SUM(deterioro_contable),
+                    prorroga = SUM(interes_prorroga_siesa)
              FROM det_deterioro_operacion WHERE id_corte = ?', [$idCorte]);
+
+        // La prórroga vencida que entró a la base, medida por el camino
+        // independiente: el snapshot de SIESA y no la columna que el enlace
+        // escribió. Es el lado detalle que C-BASE le suma al detalle de cuotas
+        // —donde la prórroga no existe, porque no viene de factoring— y el lado
+        // resumen de C-SIESA-PRORROGA.
+        //
+        // Se restringe a las operaciones que existen en el corte: el snapshot
+        // también atribuye filas a operaciones de fuera, que el enlace descarta
+        // y que C-SIESA-NOTA publica aparte.
+        $prorrogaSiesa = DB::selectOne(
+            "SELECT valor = ISNULL(SUM(s.saldo), 0),
+                    operaciones = COUNT(DISTINCT s.id_operacion_nota)
+             FROM det_corte_saldo_siesa s
+             WHERE s.id_corte = ? AND s.componente = 'PRORROGA'
+               AND s.id_operacion_nota IS NOT NULL
+               AND EXISTS (SELECT 1 FROM det_deterioro_operacion o
+                           WHERE o.id_corte = s.id_corte
+                             AND o.id_operacion = s.id_operacion_nota)", [$idCorte]);
 
         // Dos caminos independientes sobre la reducción de base que produjo el
         // congelamiento (D-06): uno parte de base_deterioro/base_congelada, el
@@ -1555,11 +1667,7 @@ class Deterioro extends Model
         //
         // Se restringe a origen_base = 'FACTORING' porque esa identidad sólo se
         // sostiene mientras el capital vencido sea el mismo de los dos lados.
-        // Como la base congelada es siempre capital vencido más interés
-        // congelado, toda operación suspendida queda en FACTORING y el control
-        // las cubre todas; el filtro sólo deja fuera las bases de SIESA de los
-        // cortes calculados con la política anterior (D-15), que vigila
-        // C-SIESA-BASE.
+        // Las suspendidas con base de SIESA las vigila C-SIESA-BASE.
         $suspension = DB::selectOne(
             "SELECT operaciones = SUM(CASE WHEN suspendida = 1 AND origen_base = 'FACTORING' THEN 1 ELSE 0 END),
                     suspendidas = SUM(CASE WHEN suspendida = 1 THEN 1 ELSE 0 END),
@@ -1576,7 +1684,8 @@ class Deterioro extends Model
         // el motor escribió, aquél rearma la base desde sus dos componentes.
         $siesaBase = DB::selectOne(
             "SELECT operaciones = COUNT(*), base = ISNULL(SUM(base_congelada), 0),
-                    componentes = ISNULL(SUM(ISNULL(saldo_siesa, 0) + ISNULL(interes_vencido_congelado, 0)), 0)
+                    componentes = ISNULL(SUM(ISNULL(capital_vencido_siesa, 0) + ISNULL(interes_vencido_siesa, 0)
+                                             + ISNULL(interes_prorroga_siesa, 0)), 0)
              FROM det_deterioro_operacion WHERE id_corte = ? AND origen_base = 'SIESA'", [$idCorte]);
 
         // El saldo que el motor dejó en la operación contra el que el snapshot
@@ -1611,23 +1720,12 @@ class Deterioro extends Model
         // hace el COALESCE del enlace. Sumar los dos sin excluir daría de más
         // justamente en el caso que C-SIESA-DOBLE vigila.
         $snapshotEnlazado = DB::selectOne(
-            "SELECT snapshot = ISNULL(SUM(x.saldo), 0)
-             FROM (SELECT operacion = {$operacionOpe}, saldo = SUM(saldo)
-                   FROM det_corte_saldo_siesa
-                   WHERE id_corte = ? AND tipo_docto_cruce = 'OPE'
-                   GROUP BY {$operacionOpe}
-                   UNION ALL
-                   SELECT operacion = n.id_operacion_nota, saldo = SUM(n.saldo)
-                   FROM det_corte_saldo_siesa n
-                   WHERE n.id_corte = ? AND n.id_operacion_nota IS NOT NULL
-                     AND n.componente = 'CAPITAL'
-                     AND NOT EXISTS (SELECT 1 FROM det_corte_saldo_siesa e
-                                     WHERE e.id_corte = n.id_corte
-                                       AND e.tipo_docto_cruce = 'OPE'
-                                       AND {$operacionOpeE} = n.id_operacion_nota)
-                   GROUP BY n.id_operacion_nota) x
+            "SELECT snapshot = ISNULL(SUM({$capitalSiesa}), 0)
+             FROM (".self::sqlSaldoSiesaPorOperacion('?').") x
              INNER JOIN det_deterioro_operacion o
-                     ON o.id_corte = ? AND o.id_operacion = x.operacion",
+                     ON o.id_corte = ? AND o.id_operacion = x.id_operacion_nota
+             LEFT JOIN ({$unicas}) u
+                    ON u.id_operacion = o.id_operacion",
             [$idCorte, $idCorte, $idCorte]);
 
         // Invariante del que depende que no haya doble conteo: capital
@@ -1640,11 +1738,13 @@ class Deterioro extends Model
                     operaciones = COUNT(DISTINCT n.id_operacion_nota)
              FROM det_corte_saldo_siesa n
              WHERE n.id_corte = ? AND n.id_operacion_nota IS NOT NULL
-               AND n.componente = 'CAPITAL'
+               AND n.componente = 'CAPITAL' AND n.tipo_docto_cruce <> 'OPE'
                AND EXISTS (SELECT 1 FROM det_corte_saldo_siesa e
                            WHERE e.id_corte = n.id_corte
                              AND e.tipo_docto_cruce = 'OPE'
-                             AND {$operacionOpeE} = n.id_operacion_nota)", [$idCorte]);
+                             AND e.id_operacion_nota = n.id_operacion_nota)
+               AND NOT EXISTS (SELECT 1 FROM ({$unicas}) u
+                               WHERE u.id_operacion = n.id_operacion_nota)", [$idCorte, $idCorte]);
 
         // Cobertura del parseo: saldo de los prefijos que ninguna nota pudo
         // atribuir. Es informativo y no puede fallar, porque hay cartera en
@@ -1674,6 +1774,7 @@ class Deterioro extends Model
                     operaciones = COUNT(DISTINCT s.id_operacion_nota)
              FROM det_corte_saldo_siesa s
              WHERE s.id_corte = ? AND s.id_operacion_nota IS NOT NULL
+               AND s.tipo_docto_cruce <> 'OPE'
                AND NOT EXISTS (SELECT 1 FROM det_deterioro_operacion o
                                WHERE o.id_corte = s.id_corte
                                  AND o.id_operacion = s.id_operacion_nota)", [$idCorte]);
@@ -1840,7 +1941,7 @@ class Deterioro extends Model
         // Los tres controles de la fase 6 siguen la misma regla: sin insumo van
         // a N/A con el motivo, nunca a OK con cero.
         $sinSiesaBase = (int) $siesaBase->operaciones === 0
-            ? 'el corte no tiene operaciones con la base tomada del saldo de SIESA' : null;
+            ? 'el corte no tiene operaciones suspendidas con la base tomada de SIESA' : null;
         $sinSnapshot = (int) $snapshot->filas === 0 || (int) $enlaceSiesa->operaciones === 0
             ? 'el corte no tiene extraído el saldo de SIESA o ninguna operación cruzó contra un OPE' : null;
         $sinPartidas = (int) $conciliacion->partidas === 0
@@ -1864,6 +1965,21 @@ class Deterioro extends Model
             . number_format($siesaNota->neto, 0, ',', '.') . '; más ' . $siesaHuerfana->filas
             . ' atribuida(s) a ' . $siesaHuerfana->operaciones . ' operación(es) fuera del corte por '
             . number_format($siesaHuerfana->valor, 0, ',', '.');
+        // El SUM de la columna se deja sin ISNULL y su nulo se atiende aquí: es
+        // lo que dice que el corte se calculó antes de que la prórroga entrara
+        // en la base. Aplanado a cero, el control compararía un cero fabricado
+        // contra la cifra real del snapshot y saldría en FALLA por una
+        // diferencia que no es un descuadre sino un corte viejo.
+        //
+        // Y la población puede estar legítimamente vacía —un corte sin prórroga
+        // vencida en SIESA—, que en cero saldría en verde diciendo que cuadra
+        // algo que no existe. Se exige que los dos lados estén en cero: si el
+        // motor llevó prórroga a la base y el snapshot no la tiene, eso sí es el
+        // descuadre que el control existe para ver.
+        $sinProrrogaSiesa = $sinAtribucion ?: ($oper->prorroga === null
+            ? 'este corte se calculó antes de que la prórroga vencida entrara en la base de deterioro'
+            : ((int) $prorrogaSiesa->operaciones === 0 && (float) $oper->prorroga == 0.0
+                ? 'ninguna operación del corte tiene saldo de prórroga vencida en SIESA' : null));
         $motivoFiscalNominal = $sinAtribucion ?: ((int) $fiscalNominal->operaciones === 0
             ? 'ninguna operación del corte tiene acumulado declarado por encima de su valor nominal en SIESA'
             : 'el módulo no corrige el acumulado ya declarado: la cifra es lo que excede el valor nominal en '
@@ -1906,8 +2022,8 @@ class Deterioro extends Model
                 $origen->interes, $oper->interes],
             ['C-PARTIC', 'Capital corriente más vencido contra el capital total',
                 $origen->capital, $origen->corriente + $origen->vencido],
-            ['C-BASE', 'Base de deterioro contra capital vencido más interés vencido',
-                $oper->base, $origen->vencido + $origen->ivencido],
+            ['C-BASE', 'Base de deterioro contra capital vencido más interés vencido más prórroga vencida de SIESA',
+                $oper->base, $origen->vencido + $origen->ivencido + $prorrogaSiesa->valor],
             // Cuánto dejó fuera del cálculo la marca de cuotas repetidas.
             // Informativo y nunca en falla: es una cifra que hay que poder ver
             // y explicar, no un descuadre. Su presencia en det_corte_cuadre es
@@ -1933,11 +2049,7 @@ class Deterioro extends Model
             // conteo: es la magnitud contable del faltante.
             ['C-MARCAS', 'Base de las operaciones con marca de suspensión aplicable que no se pudieron congelar por no traer interés congelado',
                 $marcasSinCongelar->base_pendiente, 0, $sinMarcas],
-            // Los cortes calculados con la política anterior de D-15, donde la
-            // base era el saldo de SIESA más el interés congelado, y el control
-            // la rearma desde sus dos componentes. Con la política vigente
-            // ninguna operación toma esa base y el control queda en N/A.
-            ['C-SIESA-BASE', 'Base congelada de las operaciones con base de SIESA contra el saldo de SIESA más su interés vencido congelado',
+            ['C-SIESA-BASE', 'Base congelada de las suspendidas con base de SIESA contra capital vencido más interés vencido más prórroga vencida de SIESA',
                 $siesaBase->base, $siesaBase->componentes, $sinSiesaBase],
             ['C-SIESA-EXTRAC', 'Saldo de SIESA que el motor dejó en las operaciones contra el que el snapshot tiene para esas mismas operaciones',
                 $enlaceSiesa->motor, $snapshotEnlazado->snapshot, $sinSnapshot],
@@ -1948,6 +2060,11 @@ class Deterioro extends Model
             // de ninguna operación de factoring y su saldo no es un descuadre.
             ['C-SIESA-NOTA', 'Filas de los prefijos de SIESA que ninguna nota pudo atribuir a una operación',
                 $siesaNota->filas, 0, $motivoSiesaNota, true, 0],
+            // Cuánta prórroga vencida de SIESA entró a la base de deterioro: la
+            // columna que el enlace escribió contra la suma del snapshot, que es
+            // el mismo lado con que C-BASE completa el detalle de cuotas.
+            ['C-SIESA-PRORROGA', 'Prórroga vencida de SIESA que entró en la base de deterioro contra la del snapshot para esas mismas operaciones',
+                $oper->prorroga, $prorrogaSiesa->valor, $sinProrrogaSiesa],
             // Informativo: el acumulado declarado que excede el valor nominal no
             // lo corrige el módulo, porque P es lo declarado ante la DIAN.
             ['C-FISCAL-NOMINAL', 'Acumulado fiscal de años anteriores por encima del 100 % del valor nominal en SIESA',
@@ -2560,6 +2677,13 @@ class Deterioro extends Model
      * Se agrupa por calificacion_abc y no por ISNULL(rango_codigo, 'Corriente'):
      * rango_codigo es nchar(1) y ISNULL devuelve el tipo del primer argumento,
      * de modo que 'Corriente' se truncaría a 'C' y se mezclaría con ese rango.
+     *
+     * interes_prorroga_siesa se suma SIN ISNULL, al contrario que el resto: el
+     * nulo tiene que sobrevivir la agregación porque es lo que distingue un
+     * corte calculado antes de que la prórroga entrara en la base. Un cero ahí
+     * diría «se midió y no hay», y la pantalla no podría avisar de que ese corte
+     * no la evaluó. SUM ignora los nulos, así que el grupo sale nulo sólo si
+     * ninguna de sus operaciones la tiene medida, que es justo el caso.
      */
     public static function resumenPorProductoRango($idCorte)
     {
@@ -2573,6 +2697,7 @@ class Deterioro extends Model
                     capital_vencido = SUM(o.capital_vencido),
                     interes_corriente = SUM(o.interes_corriente),
                     interes_vencido = SUM(o.interes_vencido),
+                    interes_prorroga_siesa = SUM(o.interes_prorroga_siesa),
                     base = SUM(o.base_deterioro),
                     pct = MAX(o.pct_contable),
                     deterioro = SUM(o.deterioro_contable),
@@ -3278,7 +3403,10 @@ class Deterioro extends Model
                        fec_inicial_mora, cuotas, dias_mora_operacion,
                        rango = ISNULL(calificacion_abc, 'Corriente'),
                        capital_corriente, capital_vencido, interes_corriente, interes_vencido,
-                       interes_mora, base_deterioro, pct_contable, deterioro_contable,
+                       interes_mora, interes_prorroga_siesa,
+                       capital_vencido_siesa, interes_vencido_siesa, origen_saldo_siesa,
+                       base_deterioro, suspendida, base_congelada, origen_base,
+                       pct_contable, deterioro_contable,
                        deterioro_fiscal_individual, deterioro_fiscal_general,
                        fiscal_acumulado_anterior, saldo_topado, deduccion_fiscal_ano,
                        deterioro_fiscal_acumulado, diferencia_temporaria,
@@ -3322,6 +3450,10 @@ class Deterioro extends Model
                           WHERE d.id_corte = det_deterioro_operacion.id_corte
                             AND d.id_operacion = det_deterioro_operacion.id_operacion
                             AND d.duplicada_de IS NOT NULL)';
+        }
+        // Prórroga: la operación llevó prórroga vencida de SIESA a la base.
+        if (!empty($filtros['soloProrroga'])) {
+            $sql .= ' AND ISNULL(interes_prorroga_siesa, 0) > 0';
         }
         if (!empty($filtros['busqueda'])) {
             $sql .= ' AND (cliente LIKE ? OR id_cliente LIKE ? OR CAST(id_operacion AS varchar(20)) LIKE ?)';
@@ -3661,12 +3793,42 @@ class Deterioro extends Model
      * mes facturado y el número de operación, porque el consecutivo de la fila
      * es el de la factura y no el de la operación.
      *
-     * De las 30.068 `FAT` de la compañía 7, **30.048 traen esa forma y 20 no**:
-     * escriben 'FACTURA AUTOMATICA CORTE: 30/11/2025' con un solo espacio y sin
-     * `OPE:`, de modo que no se les puede atribuir operación y el WHERE las
-     * descarta. Hoy las 20 están en saldo cero y ninguna afecta a una marca
-     * vigente, pero el descarte es silencioso: si el generador vuelve a escribir
-     * esa forma con saldo, el interés se subestimaría sin que nada avise.
+     * La operación sale de `restoDeAnclaOpe()`, la misma expresión con que
+     * `sqlSaldoSiesa()` clasifica la fila, y no de un parseo propio: hasta el
+     * 23 de septiembre de 2026 aquí se exigía el literal `OPE: ` y se cortaba
+     * por el primer espacio, de modo que 260 de las 31.284 filas de interés de
+     * la compañía 7 quedaban fuera —254 escriben `OPE n`, `OPE-1-n` u `OPEn`, y
+     * otras 6 traen el número pegado a texto, 'OPE: 569ESPE'—. Eran filas que
+     * la clasificación veía como interés y el congelamiento no podía usar.
+     *
+     * El mes de corte admite `CORTE :`, `CORTE:` y `CORTE `, con separador '/'
+     * o '-' y año de dos o cuatro dígitos. El año de dos dígitos exige el
+     * estilo 3 y no el 103, que sobre `date` sólo convierte años de cuatro, por
+     * eso el COALESCE de los dos. La cadena vacía se anula antes de convertir:
+     * `TRY_CONVERT(date, '', 103)` no falla, devuelve 1900-01-01, y una nota con
+     * 'CORTE' y sin fecha entraría como facturada en cualquier mes.
+     *
+     * Medido el 23 de septiembre de 2026 sobre esas 31.284 filas, el parseo
+     * resuelve las dos piezas en **31.091** contra las 31.024 de antes. Las
+     * variantes del corte son 31.030 `CORTE : dd/mm/aaaa`, 49 `CORTE:` con año
+     * de dos o cuatro dígitos, 24 `CORTE ` con '/', 5 `CORTE : dd/mm/aa` y 3
+     * `CORTE dd-mm-aaaa`.
+     *
+     * Las **193** que quedan fuera lo hacen por decisión de Contabilidad y no
+     * se intenta cubrirlas: **158** rotulan el mes con letras ('FACTURA
+     * AUTOMATICA JUNIO 30-2018 OPE-1-1107', 'INTERESES CORRIENTES CORTE NOV /
+     * 16'), **20** traen mes y no operación ('FACTURA AUTOMATICA CORTE:
+     * 30/11/2025') y **15** no traen ninguna de las dos ('ANULADO CON EL DOC
+     * 100011505'). El descarte de esas 193 sigue siendo silencioso: si el
+     * generador vuelve a escribir esas formas con saldo, el interés se
+     * subestimaría sin que nada avise.
+     *
+     * Las 67 filas que el parseo compartido rescata son de 9 operaciones y
+     * **ninguna está marcada**: las 242 marcas ya congeladas conservan su valor
+     * y su suma de 349.472.166,00 al peso, medido marca a marca contra lo
+     * guardado en `det_suspension_interes`. El rescate se verá cuando alguna de
+     * esas 9 se suspenda; el saldo abierto que hoy suma es 16.930.379,00, casi
+     * todo de la operación 569.
      *
      * El mes se compara con EOMONTH y no con el día del evento. La nota rotula
      * el corte con el último día **calendario** del mes ('CORTE : 30/04/2022')
@@ -3776,6 +3938,8 @@ class Deterioro extends Model
         $siesa = self::origenSiesa();
         $tiposInteres = self::tiposDoctoInteresSiesa();
         $cuentaInteres = self::CUENTA_INTERES_SIESA;
+        $restoNota = self::restoDeAnclaOpe('s.f353_notas');
+        $operacionNota = self::operacionDeRestoOpe('a.resto');
 
         foreach (array_chunk($pendientes, 500) as $trozo) {
             $valores = implode(', ', array_fill(0, count($trozo), '(?, ?)'));
@@ -3793,19 +3957,22 @@ class Deterioro extends Model
                     FROM (VALUES {$valores}) v(op, ev)
                  ),
                  facturas AS (
-                    SELECT z.f353_rowid,
-                           operacion = TRY_CONVERT(int, LEFT(z.resto, NULLIF(CHARINDEX(' ', z.resto + ' '), 0) - 1)),
-                           mes_facturado = TRY_CONVERT(date, SUBSTRING(z.notas, CHARINDEX('CORTE : ', z.notas) + 8, 10), 103)
-                    FROM (SELECT s.f353_rowid, notas = s.f353_notas,
-                                 resto = SUBSTRING(s.f353_notas, CHARINDEX('OPE: ', s.f353_notas) + 5, 20)
-                          FROM {$siesa}t353_co_saldo_abierto s
-                          LEFT JOIN {$siesa}t253_co_auxiliares aux
-                                 ON aux.f253_rowid = s.f353_rowid_auxiliar
-                          WHERE s.f353_id_cia = @cia
-                            AND s.f353_id_tipo_docto_cruce IN ({$tiposInteres})
-                            AND aux.f253_id = '{$cuentaInteres}'
-                            AND CHARINDEX('OPE: ', s.f353_notas) > 0
-                            AND CHARINDEX('CORTE : ', s.f353_notas) > 0) z
+                    SELECT s.f353_rowid, b.operacion, c.mes_facturado
+                    FROM {$siesa}t353_co_saldo_abierto s
+                    LEFT JOIN {$siesa}t253_co_auxiliares aux
+                           ON aux.f253_rowid = s.f353_rowid_auxiliar
+                    CROSS APPLY (SELECT resto = {$restoNota},
+                                        corte = LTRIM(REPLACE(SUBSTRING(s.f353_notas,
+                                            NULLIF(CHARINDEX('CORTE', s.f353_notas), 0) + 5, 14), ':', ' '))) a
+                    CROSS APPLY (SELECT operacion = {$operacionNota},
+                                        fecha = NULLIF(LEFT(a.corte, CHARINDEX(' ', a.corte + ' ') - 1), '')) b
+                    CROSS APPLY (SELECT mes_facturado = COALESCE(TRY_CONVERT(date, b.fecha, 103),
+                                                                 TRY_CONVERT(date, b.fecha, 3))) c
+                    WHERE s.f353_id_cia = @cia
+                      AND s.f353_id_tipo_docto_cruce IN ({$tiposInteres})
+                      AND aux.f253_id = '{$cuentaInteres}'
+                      AND b.operacion IS NOT NULL
+                      AND c.mes_facturado IS NOT NULL
                  )
                  SELECT k.operacion, evento = CONVERT(varchar(10), k.evento, 23),
                         facturas = COUNT(DISTINCT f.f353_rowid),

@@ -241,6 +241,7 @@ class DeterioroController extends Controller
             'soloTopadas' => $request->input('soloTopadas'),
             'soloPasivo' => $request->input('soloPasivo'),
             'soloDuplicadas' => $request->input('soloDuplicadas'),
+            'soloProrroga' => $request->input('soloProrroga'),
             'busqueda' => $request->input('busqueda'),
         ];
     }

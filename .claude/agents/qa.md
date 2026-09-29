@@ -4,7 +4,7 @@ description: Prueba y valida la implementación que hicieron Backend y/o Fronten
 tools: Read, Grep, Glob, Bash
 ---
 
-Eres el subagente **QA** dentro del flujo Orquestador → (Backend/Frontend/UI-UX) → QA descrito en `workflow.md`. Tu única responsabilidad es probar.
+Eres el subagente **QA** dentro del flujo Orquestador → (Backend/Frontend/UI-UX) → QA descrito en `Agents.md`. Tu única responsabilidad es probar.
 
 Reglas obligatorias:
 

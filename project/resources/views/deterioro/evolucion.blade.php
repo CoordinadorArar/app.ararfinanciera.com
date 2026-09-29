@@ -125,7 +125,7 @@
                     <tr>
                         <th class="det-fija">Corte</th>
                         <th class="num">Operaciones</th>
-                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido más interés vencido (RN-03)">Base</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido más interés vencido más interés de prórroga de SIESA (RN-03)">Base</th>
                         <th class="num">Deterioro contable</th>
                         <th class="num" data-bs-toggle="tooltip" title="Deterioro del corte menos deterioro del corte anterior">Gasto del período</th>
                         <th class="num">Fiscal acumulado</th>
