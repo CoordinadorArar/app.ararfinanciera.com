@@ -331,6 +331,30 @@ tr.det-repetida > td:first-child { box-shadow: inset 2px 0 0 #b8c2d0; }
     font-variant-numeric: tabular-nums;
 }
 
+/* Hermana de .det-recorte para lo que suma dentro de la celda. El azul del
+   módulo ya significa «aumenta»; el ámbar de .det-recorte, «se quita». */
+.det-suma {
+    display: block;
+    font-size: .7rem;
+    color: rgb(45, 85, 165);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.det-fuente {
+    display: block;
+    font-size: .7rem;
+    color: #6b7a90;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.det-fuente b {
+    color: rgb(45, 85, 165);
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
 /* --- Método general, solo de referencia --- */
 
 .det-badge.det-inactivo {
@@ -532,6 +556,14 @@ table.det-tabla thead th[data-bs-toggle="tooltip"] {
 
 .det-leyenda i.corriente { background: rgb(45, 85, 165); }
 .det-leyenda i.siguiente { background: #7d9fd8; }
+
+.det-grafico { position: relative; height: 280px; }
+
+@media (max-width: 576px) {
+    .det-grafico { height: 220px; }
+}
+
+.det-grafico.vacio { height: auto; }
 
 .det-barra {
     display: flex;
@@ -793,6 +825,15 @@ table.det-tabla td.det-texto { white-space: normal; max-width: 28rem; }
    navegación quede pegada a él y no centrada entre los dos extremos. */
 .det-encabezado .det-titular { flex: 1 1 20rem; }
 
+/* La barra de navegación envuelve por debajo de 1400 px: con el baseline del
+   encabezado sus botones quedaban escalonados contra el título. */
+.det-encabezado .det-navegacion {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    align-items: center;
+}
+
 .det-acciones {
     display: flex;
     align-items: center;
@@ -873,4 +914,311 @@ table.det-tabla td.det-texto { white-space: normal; max-width: 28rem; }
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* --- Guía de uso --- */
+
+.det-ayuda {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+}
+
+.det-ayuda-indice {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    border-left: 1px solid #e3e7ee;
+}
+
+.det-ayuda-indice a {
+    display: flex;
+    gap: .55rem;
+    align-items: baseline;
+    padding: .35rem .6rem;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    font-size: .8rem;
+    color: #6b7a90;
+    text-decoration: none;
+    line-height: 1.35;
+}
+
+.det-ayuda-indice a .num {
+    flex: 0 0 1.4rem;
+    font-size: .7rem;
+    font-weight: 600;
+    color: #a7b2c2;
+    font-variant-numeric: tabular-nums;
+}
+
+.det-ayuda-indice a .rot { flex: 1; min-width: 0; }
+.det-ayuda-indice a:hover { color: rgb(45, 85, 165); }
+
+.det-ayuda-indice a.actual {
+    color: rgb(45, 85, 165);
+    font-weight: 600;
+    background: #f4f7fd;
+    border-left-color: rgb(45, 85, 165);
+}
+
+.det-ayuda-indice a.actual .num { color: rgb(45, 85, 165); }
+
+.det-ayuda-seccion { margin-bottom: 2.25rem; scroll-margin-top: 1rem; }
+.det-ayuda .det-panel[id] { scroll-margin-top: 1rem; }
+.det-ayuda-seccion + .det-ayuda-seccion { border-top: 1px solid #e3e7ee; padding-top: 1.75rem; }
+
+.det-ayuda-tit {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1f2d3d;
+    letter-spacing: -.01em;
+    margin: 0 0 .75rem;
+}
+
+.det-ayuda-tit .num {
+    display: block;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: rgb(45, 85, 165);
+    font-weight: 600;
+    margin-bottom: .2rem;
+}
+
+.det-ayuda-lede {
+    font-size: .95rem;
+    line-height: 1.6;
+    color: #4a5a70;
+    max-width: 52rem;
+    margin: 0 0 1rem;
+}
+
+.det-ayuda-texto {
+    font-size: .84rem;
+    line-height: 1.6;
+    color: #4a5a70;
+    max-width: 52rem;
+    margin: 0 0 1rem;
+}
+
+.det-ayuda-texto p { margin: 0 0 .75rem; }
+.det-ayuda-texto ul,
+.det-ayuda-texto ol { padding-left: 1.2rem; margin: 0 0 .75rem; }
+.det-ayuda-texto li { margin-bottom: .35rem; }
+.det-ayuda-texto strong { color: #1f2d3d; font-weight: 600; }
+.det-ayuda-texto a { color: rgb(45, 85, 165); text-decoration: none; }
+.det-ayuda-texto a:hover { text-decoration: underline; }
+.det-ayuda-texto > :last-child { margin-bottom: 0; }
+.det-ayuda .det-panel > .det-ayuda-texto:last-child { margin-bottom: 0; }
+
+.det-ayuda-sub {
+    font-size: .88rem;
+    font-weight: 600;
+    color: #1f2d3d;
+    margin: 1.25rem 0 .35rem;
+    text-transform: none;
+}
+
+.det-ayuda-sub:first-child { margin-top: 0; }
+
+.det-ayuda code {
+    font-size: .78rem;
+    background: #f1f4f9;
+    color: #35547f;
+    padding: .05rem .3rem;
+    border-radius: 3px;
+}
+
+.det-ayuda-codigo {
+    white-space: pre;
+    font-family: SFMono-Regular, Consolas, monospace;
+    font-size: .78rem;
+    line-height: 1.6;
+    color: #35547f;
+    background: #f6f8fb;
+    border: 1px solid #e3e7ee;
+    border-left: 3px solid #c8d7f2;
+    border-radius: 6px;
+    padding: .75rem 1rem;
+    margin: 0 0 1rem;
+    overflow-x: auto;
+}
+
+.det-ayuda-paso {
+    flex: 0 0 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e2edfb;
+    color: rgb(45, 85, 165);
+    font-size: .74rem;
+    font-weight: 600;
+}
+
+.det-ayuda .det-pasos li { padding: .65rem 0; line-height: 1.55; color: #4a5a70; }
+.det-ayuda .det-pasos li:first-child { padding-top: 0; }
+.det-ayuda .det-pasos li:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.det-ayuda-prop { font-size: .8rem; }
+
+.det-ayuda-prop > div {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) 9.5rem;
+    grid-template-areas: "bloque bloque bloque" "eti pista cifra";
+    align-items: center;
+    column-gap: .75rem;
+    padding: .3rem 0;
+}
+
+.det-ayuda-prop .eti { grid-area: eti; color: #4a5a70; }
+
+.det-ayuda-prop .pista {
+    grid-area: pista;
+    display: flex;
+    height: 14px;
+    background: #f1f4f9;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.det-ayuda-prop .tramo { display: block; height: 100%; }
+.det-ayuda-prop .tramo.corriente { background: #c8d7f2; }
+.det-ayuda-prop .tramo.vencido { background: rgb(45, 85, 165); }
+
+.det-ayuda-prop .cifra {
+    grid-area: cifra;
+    text-align: right;
+    color: #1f2d3d;
+    font-variant-numeric: tabular-nums;
+}
+
+.det-ayuda-prop .base {
+    margin-top: .4rem;
+    padding-top: .6rem;
+    border-top: 1px dashed #e3e7ee;
+}
+
+.det-ayuda-prop .base .eti,
+.det-ayuda-prop .base .cifra { font-weight: 600; }
+.det-ayuda-prop .base .cifra { color: rgb(45, 85, 165); }
+
+.det-ayuda .det-leyenda i.gv-corriente { background: #c8d7f2; }
+.det-ayuda .det-leyenda i.gv-vencido { background: rgb(45, 85, 165); }
+
+.det-ayuda .det-corte-bloque {
+    display: block;
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #8593a7;
+}
+
+.det-ayuda-identidad .det-corte-bloque { margin: 1.1rem 0 .35rem; }
+.det-ayuda-identidad .det-corte-bloque:first-child { margin-top: 0; }
+.det-ayuda-prop .det-corte-bloque { grid-area: bloque; }
+
+.det-ayuda-prop .base .det-corte-bloque {
+    grid-column: 2 / 4;
+    color: rgb(45, 85, 165);
+    margin-bottom: .25rem;
+}
+
+.det-ayuda-identidad .grupo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(10rem, 14rem);
+    gap: 0;
+    font-size: .82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.det-ayuda-identidad .grupo > span { padding: .42rem .6rem; border-bottom: 1px solid #eef1f6; }
+.det-ayuda-identidad .grupo > span:nth-last-child(-n+3) { border-bottom: 0; }
+.det-ayuda-identidad .grupo > .izq { text-align: right; color: #4a5a70; }
+.det-ayuda-identidad .grupo > .ig { color: #a7b2c2; text-align: center; padding-inline: .25rem; }
+.det-ayuda-identidad .der { font-weight: 600; color: #1f2d3d; }
+
+.det-ayuda-decision {
+    background: #fff;
+    border: 1px solid #e3e7ee;
+    border-left: 3px solid #e0b84a;
+    border-radius: 8px;
+    padding: .85rem 1rem;
+    margin-bottom: .75rem;
+}
+
+.det-ayuda-decision:has(.det-inactivo) { border-left-color: #c8d0dc; }
+.det-ayuda-decision .ref { display: flex; gap: .6rem; align-items: flex-start; }
+.det-ayuda-decision .ref .det-badge { flex: 0 0 auto; margin-top: .1rem; }
+.det-ayuda-decision .ref b { font-size: .86rem; font-weight: 600; color: #1f2d3d; line-height: 1.4; }
+
+.det-ayuda-decision > p {
+    margin: .45rem 0 0;
+    padding-left: 2.2rem;
+    font-size: .82rem;
+    line-height: 1.55;
+    color: #4a5a70;
+}
+
+.det-ayuda-faq { padding: .8rem 0; border-bottom: 1px solid #eef1f6; }
+.det-ayuda-faq:first-child { padding-top: 0; }
+.det-ayuda-faq:last-child { border-bottom: 0; padding-bottom: 0; }
+.det-ayuda-faq .q { margin: 0 0 .3rem; font-size: .86rem; font-weight: 600; color: #1f2d3d; }
+.det-ayuda-faq .a { margin: 0; font-size: .82rem; line-height: 1.6; color: #4a5a70; max-width: 52rem; }
+
+.det-ayuda-pie {
+    margin: 1rem 0 0;
+    padding-top: .85rem;
+    border-top: 1px solid #e3e7ee;
+    font-size: .74rem;
+    color: #8593a7;
+}
+
+.det-ayuda .det-panel .det-panel { background: #fbfcfd; margin: 1rem 0 0; }
+.det-ayuda .det-panel > :last-child { margin-bottom: 0; }
+
+@media (max-width: 991px) {
+    .det-ayuda { grid-template-columns: 1fr; gap: 0; }
+    .det-ayuda-indice {
+        display: flex;
+        gap: .25rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #fff;
+        max-height: none;
+        border-left: 0;
+        border-bottom: 1px solid #e3e7ee;
+        margin-bottom: 1.25rem;
+    }
+    .det-ayuda-indice a { margin-left: 0; border-left: 0; border-bottom: 2px solid transparent; }
+    .det-ayuda-indice a.actual { border-bottom-color: rgb(45, 85, 165); background: transparent; }
+}
+
+@media (max-width: 768px) {
+    .det-ayuda-prop > div {
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "bloque bloque" "eti cifra" "pista pista";
+        row-gap: .3rem;
+    }
+    .det-ayuda-prop .base .det-corte-bloque { grid-column: 1 / -1; }
+}
+
+@media (max-width: 576px) {
+    .det-ayuda-identidad .grupo { grid-template-columns: 1fr; }
+    .det-ayuda-identidad .grupo > .izq { text-align: left; border-bottom: 0; padding-bottom: 0; }
+    .det-ayuda-identidad .ig { display: none; }
+    .det-ayuda-identidad .der::before { content: "= "; color: #a7b2c2; font-weight: 400; }
+    .det-ayuda-decision > p { padding-left: 0; }
 }

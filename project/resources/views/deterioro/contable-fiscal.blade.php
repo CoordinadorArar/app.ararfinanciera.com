@@ -16,7 +16,7 @@
             <h4 class="det-titulo">Contable contra fiscal <span id="badgeAlcance"></span></h4>
             <p class="det-subtitulo">Diferencia temporaria entre el deterioro contable y el deterioro fiscal acumulado, y el impuesto diferido que se deriva de ella</p>
         </div>
-        <div>
+        <div class="det-navegacion">
             <a class="btn btn-secondary btn-sm" href="{{ url('/deterioro-cortes') }}"><i class="fas fa-arrow-left"></i>&nbsp; Cortes</a>
             <a class="btn btn-light btn-sm" id="btnResumenCF" href="#"><i class="fas fa-table"></i>&nbsp; Resumen</a>
             <a class="btn btn-light btn-sm" id="btnDetalleCF" href="#"><i class="fas fa-list"></i>&nbsp; Detalle</a>
@@ -64,7 +64,7 @@
                     <tr>
                         <th class="det-fija" id="thPrimera">Rango</th>
                         <th class="num">Operaciones</th>
-                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido más interés vencido (RN-03)">Base</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido más interés vencido más interés de prórroga de SIESA (RN-03)">Base</th>
                         <th class="num" data-bs-toggle="tooltip" title="Deterioro contable sobre la base">%</th>
                         <th class="num">Deterioro contable</th>
                         <th class="num" data-bs-toggle="tooltip" title="Deducciones tomadas en años gravables anteriores">Acum. anterior</th>

@@ -81,8 +81,8 @@ const pintarTarjetasEfecto = function () {
 
     document.getElementById('tarjetasEfecto').innerHTML =
         detTarjetaCifra('Operaciones suspendidas', detEntero(filas.length), 'Con evento aplicado a este corte')
-        + detTarjetaCifra('Interés congelado', detMoneda2.format(congelado), 'Interés que dejó de crecer en la base')
-        + detTarjetaCifra('Reducción de la base de deterioro', detMoneda2.format(reduccion), 'Menor base por el interés congelado')
+        + detTarjetaCifra('Interés congelado', detMoneda2.format(congelado), 'Interés al evento; entra a la base solo sin saldo en SIESA')
+        + detTarjetaCifra('Reducción de la base de deterioro', detMoneda2.format(reduccion), 'Base sin suspender menos base efectiva (puede ser negativa)')
         + detTarjetaCifra('Interés no facturado en FACTORING', detMoneda2.format(noFacturado),
             'Informativo — no forma parte de la base de deterioro');
 };
@@ -302,7 +302,7 @@ const confirmarMarcar = function () {
         && !document.getElementById('marcarSoporte').files[0];
     Swal.fire({
         title: '¿Marcar esta operación?',
-        text: 'El interés reconocido a la fecha del evento queda congelado en la base de deterioro y deja de crecer. '
+        text: 'El interés reconocido a la fecha del evento queda congelado. La base pasa a tomarse de SIESA si la operación tiene saldo atribuido allí; si no, es el capital vencido de factoring más el interés congelado. '
             + 'El capital se sigue deteriorando normal. La marca se puede levantar después, pero queda en bitácora.'
             + (rechazado ? ' El archivo que eligió fue rechazado: la marca quedará sin soporte.' : ''),
         icon: 'warning', showCancelButton: true,

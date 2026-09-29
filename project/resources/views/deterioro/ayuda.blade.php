@@ -60,9 +60,9 @@
 
             <section class="det-ayuda-seccion" id="ayuda-1">
                 <h5 class="det-ayuda-tit"><span class="num">Sección 1</span>Qué es el módulo y qué reemplaza</h5>
-                <p class="det-ayuda-lede">Hoy el deterioro se calcula en un libro de Excel de 68 MB por corte, con siete entradas que se digitan a mano cada mes: los saldos de SIESA por cliente, las prórrogas y reservas, la cartera de SIESA por operación, el deterioro del mes anterior por rango, la provisión fiscal acumulada y las notas de gestión.</p>
+                <p class="det-ayuda-lede">Hoy el deterioro se calcula en un libro de Excel de 68 MB por corte, con siete entradas que se digitan a mano cada mes: las fechas de corte y de comparación, los saldos de SIESA por cliente, las prórrogas y reservas, la cartera de SIESA por operación, el deterioro del mes anterior por rango, la provisión fiscal acumulada y las notas de gestión.</p>
                 <div class="det-ayuda-texto">
-                    <p>El módulo hace <strong>exactamente el mismo cálculo, con las mismas reglas</strong>, y cambia cuatro cosas:</p>
+                    <p>El módulo parte <strong>del mismo cálculo y de las mismas reglas del libro</strong>, con las políticas que Contabilidad definió después (interés de prórroga en la base, tope por valor nominal, congelamiento de intereses), y cambia cuatro cosas:</p>
                 </div>
                 <div class="det-panel">
                     <div class="det-scroll">
@@ -81,7 +81,7 @@
                 </div>
                 <div class="det-aviso info">
                     <i class="fas fa-circle-check mt-1"></i>
-                    <div><strong>El criterio de aceptación fue la réplica al centavo.</strong> El módulo reprodujo el corte de julio de 2026 contra el libro, cifra por cifra. No es un cálculo nuevo: es el mismo cálculo, auditable.</div>
+                    <div><strong>El punto de partida fue la réplica al centavo.</strong> El módulo reprodujo el corte de julio de 2026 contra el libro, cifra por cifra. Las diferencias posteriores con el libro obedecen a políticas definidas por Contabilidad y están documentadas.</div>
                 </div>
             </section>
 
@@ -89,13 +89,16 @@
                 <h5 class="det-ayuda-tit"><span class="num">Sección 2</span>Seis palabras que conviene tener claras antes de entrar</h5>
                 <div class="det-ayuda-texto">
                     <h6 class="det-ayuda-sub">Corte</h6>
-                    <p>Un mes. Es la unidad de todo: se crea, se calcula, se revisa y se cierra. Todas las pantallas del módulo, salvo la primera, son el detalle <strong>de un corte</strong>; por eso se entra a ellas desde la fila del corte y nunca desde el menú. La intención es que nunca haya duda de qué mes se está mirando.</p>
+                    <p>Un mes. Es la unidad de todo: se crea, se calcula, se revisa y se cierra. Todas las pantallas del módulo, salvo la primera, son el detalle <strong>de un corte</strong>; por eso se entra a ellas desde la fila del corte (Resumen, Detalle o Controles y cierre) y desde ahí se navega con los botones del encabezado, que conservan el corte elegido; nunca desde el menú. La intención es que nunca haya duda de qué mes se está mirando.</p>
 
                     <h6 class="det-ayuda-sub">Corriente y vencido</h6>
                     <p>Cada cuota se clasifica según su fecha de vencimiento contra la fecha de corte. Si ya venció, su saldo es <em>vencido</em>; si no, es <em>corriente</em>. Esta partición es la que explica casi todas las preguntas de cuadre.</p>
 
                     <h6 class="det-ayuda-sub">Base de deterioro</h6>
-                    <p><code>capital vencido + interés vencido</code>. <strong>Solo la parte vencida.</strong> Excluye a propósito el saldo de administración y el interés de mora.</p>
+                    <p><code>capital vencido + interés vencido + interés de prórroga</code>. <strong>Solo la parte vencida.</strong> Excluye a propósito el saldo de administración y el interés de mora.</p>
+
+                    <h6 class="det-ayuda-sub">Interés de prórroga</h6>
+                    <p>El saldo de prórroga <strong>vencido</strong> que reporta SIESA por operación. Por política contable se trata como interés y por eso <strong>entra a la base de deterioro</strong> y se deteriora con el porcentaje del rango de la operación, hasta el 100 % en rango F. <strong>No es la prórroga del control C-1</strong>, que es el acuerdo que traslada cuotas al final y baja la antigüedad de la mora: son dos cosas distintas con el mismo nombre. En el detalle aparece como una sublínea en la celda de la base, solo en las operaciones que lo tienen.</p>
 
                     <h6 class="det-ayuda-sub">Rango (A a F)</h6>
                     <p>La antigüedad de la mora de la operación, en días, clasificada en seis tramos. Determina el porcentaje de deterioro contable:</p>
@@ -120,10 +123,10 @@
                 </div>
                 <div class="det-ayuda-texto">
                     <h6 class="det-ayuda-sub">Congelado</h6>
-                    <p>Cuando una operación entra en suspensión de intereses, el interés deja de crecer y se queda en la base por el valor que tenía a la fecha del evento. <strong>No se reversa contra el ingreso ni sale del balance.</strong> El capital sigue deteriorándose normalmente.</p>
+                    <p>Cuando una operación entra en suspensión de intereses, el interés deja de crecer y se congela en el valor que tenía a la fecha del evento. Ese interés congelado entra a la base solo cuando la operación <strong>no tiene saldo atribuido en SIESA</strong>: la base es entonces el capital vencido de factoring más el interés congelado y la prórroga. Si la operación sí tiene saldo atribuido en SIESA, la base es el capital vencido más el interés vencido de SIESA, más la prórroga vencida. El detalle está en <a href="#ayuda-4-6">Intereses suspendidos</a>. <strong>No se reversa contra el ingreso ni sale del balance.</strong> El capital sigue deteriorándose normalmente.</p>
 
                     <h6 class="det-ayuda-sub">Tope fiscal</h6>
-                    <p>La deducción fiscal del año es el 33 % de la base, pero nunca por encima de lo que falta para completar el saldo real de la obligación. Es la pieza más delicada del cálculo y está en <a href="#ayuda-4-4">Contable contra fiscal</a>.</p>
+                    <p>La deducción fiscal del año es el 33 % de la base de las operaciones con más de 360 días de mora (rangos E y F), y en las suspendidas de su base congelada. Nunca puede superar lo que falta para llegar al valor nominal de la obligación en SIESA. Es la pieza más delicada del cálculo y está en <a href="#ayuda-4-4">Contable contra fiscal</a>.</p>
                 </div>
             </section>
 
@@ -142,7 +145,7 @@
                         </li>
                         <li>
                             <span class="det-ayuda-paso">3</span>
-                            <span><strong>Se consolida por operación.</strong> Se suman las cuotas de cada operación, se determina su rango por la antigüedad de la mora, y se calcula la base. Aquí se excluyen las cuotas que el origen entregó repetidas: siguen en el detalle, pero no se cuentan dos veces.</span>
+                            <span><strong>Se consolida por operación.</strong> Se suman las cuotas de cada operación, se determina su rango por la antigüedad de la mora, y se calcula la base, a la que se suma el interés de prórroga vencido que reporta SIESA. Aquí se excluyen las cuotas que el origen entregó repetidas: siguen en el detalle, pero no se cuentan dos veces.</span>
                         </li>
                         <li>
                             <span class="det-ayuda-paso">4</span>
@@ -150,7 +153,7 @@
                         </li>
                         <li>
                             <span class="det-ayuda-paso">5</span>
-                            <span><strong>Se cuadra y se cierra.</strong> Se corren los controles de cuadre. Si alguno falla, el corte no cierra, salvo cierre expreso con salvedad, que queda registrado como tal para siempre.</span>
+                            <span><strong>Se cuadra y se cierra.</strong> Se corren los controles de cuadre. Si alguno falla, o quedan partidas de conciliación sin explicar o bajas sin clasificar, el corte no cierra, salvo cierre expreso con salvedad, que queda registrado como tal para siempre.</span>
                         </li>
                     </ul>
                 </div>
@@ -169,9 +172,18 @@
                     </div>
                     <div class="det-ayuda-texto">
                         <p>Es la única entrada del menú. Lista los cortes registrados con su estado, el tamaño de la cartera, el deterioro calculado y el semáforo de cuadres.</p>
+                        <h6 class="det-ayuda-sub">Crear un corte</h6>
+                        <p>El botón <strong>Nuevo corte</strong> pide la fecha de corte y, de forma opcional, la fecha de comparación. Hay <strong>un solo corte por fecha</strong>. El corte solo se crea y se calcula si el período cargado en el origen de factoring coincide con la fecha de corte; si no, la pantalla lo avisa.</p>
+                        <h6 class="det-ayuda-sub">Qué muestra cada fila</h6>
+                        <ul>
+                            <li><strong>Columnas:</strong> Corte, Estado, Cuotas, Operaciones, Capital, Deterioro contable, Cuadres, Ejecutado y Duración.</li>
+                            <li><strong>Cuadres:</strong> «N de M con diferencia» o «N en cero», más los que están en n/a.</li>
+                            <li><strong>Acciones:</strong> <em>Calcular</em> y <em>Eliminar</em> mientras el corte no esté cerrado; <em>Resumen</em>, <em>Detalle</em> y <em>Controles</em> una vez calculado.</li>
+                            <li>Un corte cerrado con salvedad lleva el distintivo <strong>Con salvedades</strong>.</li>
+                        </ul>
                         <h6 class="det-ayuda-sub">Los tres estados de un corte</h6>
                         <ul>
-                            <li><span class="det-badge det-estado-abierto">ABIERTO</span> &mdash; creado, todavía sin calcular. Se puede recalcular cuantas veces se quiera.</li>
+                            <li><span class="det-badge det-estado-abierto">ABIERTO</span> &mdash; creado, todavía sin calcular; se puede calcular o eliminar.</li>
                             <li><span class="det-badge det-estado-calculado">CALCULADO</span> &mdash; el motor corrió. Las cifras están, los cuadres están medidos, y todo se puede volver a correr si cambia un parámetro o se corrige una marca.</li>
                             <li><span class="det-badge det-estado-cerrado">CERRADO</span> &mdash; la foto queda inmutable. No se recalcula. Reabrir es una acción con permiso propio y queda en bitácora.</li>
                         </ul>
@@ -200,7 +212,7 @@
                                 <tr><td class="det-texto">Cuotas</td><td class="det-texto">Filas que entregó el origen. Puede incluir repetidas del sistema de factoring</td></tr>
                                 <tr><td class="det-texto"><strong>Capital</strong></td><td class="det-texto">Capital <strong>corriente + vencido</strong>: toda la cartera</td></tr>
                                 <tr><td class="det-texto"><strong>Interés</strong></td><td class="det-texto">Interés <strong>corriente + vencido</strong>: todo el interés</td></tr>
-                                <tr><td class="det-texto"><strong>Base de deterioro</strong></td><td class="det-texto"><strong>Solo</strong> capital vencido + interés vencido</td></tr>
+                                <tr><td class="det-texto"><strong>Base de deterioro</strong></td><td class="det-texto"><strong>Solo</strong> capital vencido + interés vencido + interés de prórroga. Debajo indica «incluye X de interés de prórroga»</td></tr>
                                 <tr><td class="det-texto">Deterioro contable</td><td class="det-texto">El resultado: base × % del rango, operación por operación</td></tr>
                             </tbody>
                         </table>
@@ -260,11 +272,17 @@
                                 </tbody>
                             </table>
                         </div>
-                        <p class="det-subtitulo mt-3 mb-0">La tabla que está debajo de las tarjetas ya trae las cuatro columnas separadas &mdash;capital corriente, capital vencido, interés corriente, interés vencido&mdash; justamente para que esta suma sea visible fila por fila.</p>
+                        <p class="det-subtitulo mt-3 mb-0">La tabla que está debajo de las tarjetas ya trae las cuatro columnas separadas &mdash;capital corriente, capital vencido, interés corriente, interés vencido&mdash; justamente para que esta suma sea visible fila por fila. La columna <em>Interés de prórroga</em>, al lado del interés vencido, completa el tercer término de la base.</p>
                     </div>
 
                     <div class="det-ayuda-texto">
                         <p><strong>Un matiz sobre el Deterioro contable:</strong> tampoco es <code>base × un porcentaje</code>. Se calcula operación por operación con el porcentaje de <em>su</em> rango, y en las operaciones suspendidas sobre la base congelada. Por eso una regla de tres contra la base total no da.</p>
+                        <h6 class="det-ayuda-sub">Debajo de la matriz</h6>
+                        <ul>
+                            <li><strong>Deducción fiscal del año gravable</strong> &mdash; con el distintivo <em>Estimado</em> o <em>Definitivo</em> y cuatro tarjetas: Fiscal individual 33 %, Acumulado años anteriores, Recorte por tope y Deducción del año. La fila <em>Rangos sin deducción fiscal</em> muestra la base que no deduce.</li>
+                            <li><strong>Método general · Desactivado</strong> &mdash; solo de análisis: no entra en ninguna cifra del corte.</li>
+                            <li><strong>Controles de cuadre</strong> &mdash; la lista de controles del corte con su estado, para ver de un vistazo si algo no cuadra.</li>
+                        </ul>
                     </div>
                 </div>
 
@@ -278,13 +296,16 @@
                     </div>
                     <div class="det-ayuda-texto">
                         <p>La misma información del resumen, pero abierta operación por operación, filtrable y exportable. Cada fila se puede abrir hasta ver las cuotas que la componen. Tiene <strong>tres vistas</strong> que cambian las columnas: <em>Contable</em>, <em>Fiscal</em> y <em>Diferido</em>.</p>
+                        <p>Se filtra por <strong>Producto</strong>, <strong>Rango</strong> y <strong>Cliente u operación</strong>, además de las casillas de revisión.</p>
                         <h6 class="det-ayuda-sub">Los filtros que más se usan en una revisión</h6>
                         <ul>
-                            <li><strong>Solo con deterioro</strong> &mdash; deja las operaciones que efectivamente provisionan.</li>
-                            <li><strong>Solo topadas</strong> &mdash; las operaciones a las que el tope fiscal les recortó la deducción. Es el filtro para revisar el artículo 145 caso por caso.</li>
-                            <li><strong>Solo diferido pasivo</strong> &mdash; operaciones donde el fiscal acumulado ya superó al contable.</li>
-                            <li><strong>Solo con cuotas repetidas</strong> &mdash; las operaciones afectadas por el defecto del origen.</li>
+                            <li><strong>Solo con deterioro</strong> &mdash; deja las operaciones que efectivamente provisionan. En la vista Fiscal pasa a ser <strong>Solo con deducción fiscal</strong>.</li>
+                            <li><strong>Solo topadas</strong> &mdash; las operaciones a las que el tope fiscal les recortó la deducción. Es el filtro para revisar el artículo 145 caso por caso. Solo aparece en la vista Fiscal.</li>
+                            <li><strong>Solo diferido pasivo</strong> &mdash; operaciones donde el fiscal acumulado ya superó al contable. Solo aparece en la vista Diferido.</li>
+                            <li><strong>Solo con cuotas repetidas</strong> &mdash; las operaciones afectadas por el defecto del origen. Solo aparece si el corte las tiene.</li>
+                            <li><strong>Solo con interés de prórroga</strong> &mdash; las operaciones cuya base incluye saldo de prórroga vencido de SIESA. Solo aparece si el corte tiene alguna.</li>
                         </ul>
+                        <p>En la vista Diferido, la columna <em>Año de reversión</em> muestra un guion en las operaciones que ya completaron la deducción o que no se pueden proyectar; el Excel las distingue como <em>Deducción al 100 %</em> o <em>Sin proyección</em>. El Excel que se exporta desde aquí <strong>respeta los filtros aplicados</strong>.</p>
                         <p><strong>Para qué sirve en la práctica:</strong> cuando una cifra del resumen no convence, esta pantalla la descompone hasta la cuota. Es el sustituto del filtrado manual sobre las 115.000 filas de la hoja <code>BD</code>.</p>
                     </div>
                 </div>
@@ -299,7 +320,7 @@
                     </div>
                     <div class="det-ayuda-texto">
                         <p>Esta es la pantalla que el libro no tenía, y probablemente la de mayor valor.</p>
-                        <p><strong>El problema que resuelve.</strong> La política contable llega al 100 % de deterioro a los 720 días. La norma fiscal (art. 145 ET) acumula 33 % por año y necesita tres años. Esa brecha es una <strong>diferencia temporaria</strong>, y de ella sale un impuesto diferido que hasta hoy no se medía operación por operación.</p>
+                        <p><strong>El problema que resuelve.</strong> La política contable llega al 100 % de deterioro a partir de los 721 días (rango F). La norma fiscal (art. 145 ET) acumula 33 % por año y necesita tres años. Esa brecha es una <strong>diferencia temporaria</strong>, y de ella sale un impuesto diferido que hasta hoy no se medía operación por operación.</p>
                         <h6 class="det-ayuda-sub">El puente, de izquierda a derecha</h6>
                     </div>
                     <div class="det-ayuda-codigo">Base  &rarr;  Deterioro contable  │  Acum. anterior + Deducción del año = Fiscal acumulado
@@ -312,17 +333,28 @@
                         </ul>
                         <p>Los dos se muestran <strong>separados y sin compensar entre sí</strong>, porque compensarlos falsearía la revelación.</p>
                         <h6 class="det-ayuda-sub">El tope del artículo 145, en palabras</h6>
-                        <p>La deducción del año es el 33 % de la base, pero nunca puede llevar el acumulado por encima del saldo real de la obligación. Formalmente:</p>
+                        <p>La deducción fiscal del año es el 33 % de la base de las operaciones con más de 360 días de mora (rangos E y F), y en las suspendidas de su base congelada. Nunca puede superar lo que falta para llegar al valor nominal de la obligación en SIESA. Formalmente:</p>
                     </div>
                     <div class="det-ayuda-codigo">Deducción del año = MAX(0 ; SI(acumulado_anterior + 33% &gt; saldo_tope
                               ; saldo_tope &minus; acumulado_anterior
                               ; 33%))</div>
                     <div class="det-ayuda-texto">
-                        <p>donde <code>saldo_tope</code> es el saldo de SIESA acotado contra la base en mora. Es la regla que el módulo tenía que reproducir con exactitud, y la que el filtro <em>Solo topadas</em> del detalle permite auditar.</p>
+                        <p>donde <code>saldo_tope</code> es el menor entre el <strong>valor nominal</strong> de la obligación en SIESA (capital más interés facturado y prórroga de los documentos <code>OPE</code>, <code>CC</code>, <code>FAT</code> y <code>FEX</code>) y la base de la operación, que en las suspendidas es la base congelada. Si la operación no está en SIESA, el tope es la base. Es la regla que el módulo tenía que reproducir con exactitud, y la que el filtro <em>Solo topadas</em> del detalle permite auditar.</p>
                     </div>
                     <div class="det-aviso">
                         <i class="fas fa-triangle-exclamation mt-1"></i>
                         <div><strong>Advertencia que la pantalla muestra y conviene repetir en voz alta:</strong> la deducción se determina sobre obligaciones que <strong>subsistan al 31 de diciembre</strong>. Los cortes mensuales son estimaciones. <strong>Solo el corte de diciembre produce la cifra definitiva del año gravable.</strong></div>
+                    </div>
+                    <div class="det-ayuda-texto mt-3">
+                        <h6 class="det-ayuda-sub">Qué muestra la pantalla</h6>
+                        <ul>
+                            <li><strong>Cuatro tarjetas:</strong> Deterioro contable, Fiscal acumulado, Diferencia temporaria e Impuesto diferido.</li>
+                            <li><strong>El puente</strong>, con vista <em>Por rango</em> o <em>Por producto</em>.</li>
+                            <li><strong>Movimiento del período</strong> &mdash; el corte anterior contra este.</li>
+                            <li><strong>Reversión proyectada</strong> &mdash; el año gravable en que cada operación completa el 100 % deducible. Las que no tienen año aparecen como <em>Sin proyección</em>; el Excel del detalle separa las que ya completaron la deducción (<em>Deducción al 100 %</em>).</li>
+                            <li><strong>Evolución de la diferencia temporaria</strong> &mdash; la serie de los cortes anteriores.</li>
+                        </ul>
+                        <p>La tarifa de renta es paramétrica: hoy <strong>35 %</strong>. <strong>Fuera de diciembre el impuesto diferido es preliminar y no debe registrarse en libros.</strong></p>
                     </div>
                 </div>
 
@@ -350,9 +382,16 @@
                         </table>
                     </div>
                     <div class="det-ayuda-texto mt-3">
-                        <p>Los tres tienen que sumar exactamente la variación del deterioro contable. Hay un control de cuadre que lo verifica (<code>C-MOVIMIENTO</code>).</p>
+                        <p>Los tres tienen que sumar exactamente la variación del deterioro contable. Lo verifican dos controles de cuadre: <code>C-MOVIMIENTO</code>, contra el deterioro del corte, y <code>C-VARIACION</code>, que vuelve a restar operación por operación contra el corte anterior.</p>
+                        <h6 class="det-ayuda-sub">Qué muestra la pantalla</h6>
+                        <ul>
+                            <li><strong>Tres tarjetas:</strong> Deterioro al (fecha anterior), Gasto del período y Deterioro al (fecha del corte).</li>
+                            <li><strong>Conciliación con el libro</strong> &mdash; el gasto del módulo contra el del libro. Requiere cargar las cifras del libro.</li>
+                            <li><strong>Gasto del mes</strong> &mdash; abierto por rango o por producto.</li>
+                            <li><strong>Bajas del período</strong> &mdash; las operaciones que salieron, con su clasificación.</li>
+                        </ul>
                         <p><strong>Por qué importa la descomposición.</strong> En el libro, el gasto del mes se obtenía restando contra una cifra del mes anterior <strong>digitada a mano</strong>. Aquí el gasto sale de la comparación operación por operación, y además queda explicado: no es lo mismo que el deterioro suba porque entró cartera nueva a que suba porque la cartera existente envejeció.</p>
-                        <p><strong>Serie histórica.</strong> Un renglón por corte, con tamaño de cartera, deterioro contable, gasto del período y el bloque fiscal. Es lo que en el libro estaba disperso en hojas ocultas.</p>
+                        <p><strong>Serie histórica.</strong> Hasta 24 cortes, un renglón por corte, con tamaño de cartera, deterioro contable, gasto del período y el bloque fiscal. Es lo que en el libro estaba disperso en hojas ocultas.</p>
                     </div>
                 </div>
 
@@ -365,7 +404,7 @@
                         <span class="det-badge det-estado-vigente">4.6</span>
                     </div>
                     <div class="det-ayuda-texto">
-                        <p>Gestiona la suspensión de causación de intereses. <strong>No hay umbral automático por días de mora</strong>: la marca es manual, operación por operación, por usuario autorizado, con causal, fecha del evento, observación y soporte.</p>
+                        <p>Gestiona la suspensión de causación de intereses. <strong>No hay umbral automático por días de mora</strong>: la marca es manual, operación por operación, por usuario autorizado, con causal, fecha del evento, observación y, de forma opcional, soporte.</p>
                         <h6 class="det-ayuda-sub">Las cuatro causales que se pueden marcar</h6>
                         <ol>
                             <li>Fallecimiento del deudor sin que la aseguradora pague.</li>
@@ -377,14 +416,37 @@
                         <p>Las marcas del cargue inicial que aún no se han clasificado aparecen sin causal determinada. Esa condición no se puede elegir: se resuelve reclasificándolas en una de las cuatro.</p>
                         <h6 class="det-ayuda-sub">Qué pasa cuando se marca una operación</h6>
                         <ul>
-                            <li>El interés <strong>deja de causarse</strong> desde la fecha del evento.</li>
-                            <li>El interés reconocido hasta esa fecha <strong>se congela</strong>: permanece en el activo y en la base de deterioro por el valor que tenía. No se reversa contra el ingreso.</li>
-                            <li>El <strong>capital sigue deteriorándose</strong> normalmente hasta el 100 % a los 720 días.</li>
-                            <li>En factoring el interés se sigue calculando internamente, sin facturarse, y se reporta aparte para revelaciones.</li>
+                            <li>Para el deterioro, el interés <strong>deja de crecer</strong> desde la fecha del evento. Que factoring deje de facturarlo depende del punto B de las <a href="#ayuda-7">decisiones pendientes</a>.</li>
+                            <li>El interés reconocido hasta esa fecha <strong>se congela</strong>: permanece en el activo por el valor que tenía. No se reversa contra el ingreso. Entra a la base solo cuando la operación no tiene saldo atribuido en SIESA.</li>
+                            <li>La <strong>base congelada</strong> depende de si la operación tiene saldo atribuido en SIESA (si el tercero tiene una sola operación en el corte, todo su saldo; si tiene varias, los <code>OPE</code> por consecutivo y los <code>CC</code>/<code>FAT</code>/<code>FEX</code> por nota):
+                                <ul>
+                                    <li><strong>Con saldo en SIESA</strong> (origen <code>SIESA</code>): <code>capital vencido SIESA (13050501) + interés vencido SIESA (13451001) + prórroga vencida SIESA</code>.</li>
+                                    <li><strong>Sin saldo en SIESA</strong> (origen <code>FACTORING</code>): <code>capital vencido de factoring + interés congelado + prórroga vencida</code>.</li>
+                                </ul>
+                            </li>
+                            <li>La <strong>reducción de la base</strong> es <code>base sin suspender &minus; base congelada</code> y puede ser negativa cuando el saldo de SIESA supera lo que calcula factoring.</li>
+                            <li>El <strong>capital sigue deteriorándose</strong> normalmente hasta llegar al 100 % a partir de los 721 días (rango F).</li>
+                            <li>En el producto FACTORING el módulo calcula aparte el <strong>interés no facturado</strong> (interés vencido menos congelado) y lo muestra en la pantalla. El anexo para revelaciones está pendiente.</li>
                         </ul>
-                        <p><strong>De dónde sale el valor congelado.</strong> Son las facturas de interés (<code>FAT</code>) de esa operación hasta el mes del evento, por su <strong>saldo pendiente</strong> a esa fecha. Se toma el pendiente y no el total facturado porque lo que el cliente ya pagó no está en el activo y no puede deteriorarse.</p>
-                        <p><strong>El efecto cruzado que hay que vigilar.</strong> Al congelar el interés, la base deja de crecer y con ella el gasto por deterioro del período. Los dos efectos se presentan juntos en el comparativo mensual, para que la caída del gasto no se lea como una mejora de la cartera.</p>
-                        <p>La pantalla muestra además <strong>candidatas sugeridas</strong>: operaciones en mora avanzada sin marca vigente. El módulo sugiere; <strong>no marca por su cuenta</strong>.</p>
+                        <p><strong>De dónde sale el valor congelado.</strong> Son las facturas automáticas de interés de esa operación en SIESA &mdash;<code>FAT</code>, y <code>CC</code> de la cuenta 13451001 para las anteriores a 2022&mdash; hasta el mes del evento, por su <strong>saldo pendiente</strong> a esa fecha. Se toma el pendiente y no el total facturado porque lo que el cliente ya pagó no está en el activo y no puede deteriorarse.</p>
+                        <p><strong>El efecto cruzado que hay que vigilar.</strong> Al suspender la operación, su base deja de seguir el interés que factoring sigue calculando y con ello cambia el gasto por deterioro del período. Los dos efectos se presentan juntos en el comparativo mensual, para que la caída del gasto no se lea como una mejora de la cartera.</p>
+                        <p><strong>Marcas sin congelar.</strong> Si la operación no tiene ninguna factura de interés hasta el mes del evento, la marca queda <strong>sin congelar</strong>: la operación se deteriora con su base normal y el control <code>C-MARCAS</code> la reporta en falla, lo que bloquea el cierre hasta que se resuelva. Es el caso de agosto de 2026: 21 operaciones sin facturación de interés en SIESA, marcadas con evento del 31/08/2026 y causal sin determinar, que suman <strong>420.776.769</strong> de base en <code>C-MARCAS</code>. Es una falla prevista y aceptada.</p>
+                        <h6 class="det-ayuda-sub">Qué muestra la pantalla</h6>
+                        <ul>
+                            <li><strong>Efecto sobre este corte</strong> &mdash; Operaciones suspendidas, Interés congelado, Reducción de la base e Interés no facturado en FACTORING.</li>
+                            <li><strong>Marcas vigentes</strong> &mdash; con el botón <em>Marcar operación</em> y la acción <em>Levantar</em> en cada fila.</li>
+                            <li><strong>Candidatas sugeridas</strong> &mdash; las operaciones de rangos E y F sin marca activa. El módulo sugiere; <strong>no marca por su cuenta</strong>.</li>
+                            <li><strong>Histórico de marcas levantadas</strong>.</li>
+                        </ul>
+                        <h6 class="det-ayuda-sub">Reglas de las marcas</h6>
+                        <ul>
+                            <li>Una sola marca activa por operación.</li>
+                            <li>La fecha del evento no puede ser futura y la observación es obligatoria.</li>
+                            <li>El soporte es <strong>opcional</strong>: PDF, JPG o PNG de hasta 20 MB. Lo abre quien tenga permiso de consulta.</li>
+                            <li>Levantar una marca exige observación y conserva el histórico.</li>
+                            <li>Una marca aplica al corte si la fecha del evento es igual o anterior a la fecha de corte y no se levantó antes.</li>
+                            <li>Marcar o levantar no altera un corte ya calculado hasta que se recalcula, y <strong>nunca</strong> uno cerrado.</li>
+                        </ul>
                     </div>
                 </div>
 
@@ -397,7 +459,9 @@
                         <span class="det-badge det-estado-vigente">4.7</span>
                     </div>
                     <div class="det-ayuda-texto">
-                        <p>Cruza, operación por operación, el saldo que reporta SIESA contra el del sistema de factoring. Está partida en tres bloques, y la separación es deliberada:</p>
+                        <p>Cruza, operación por operación, el capital que reporta SIESA contra el capital total del sistema de factoring (corriente + vencido). La diferencia se lee como <code>SIESA &minus; Factoring</code>, con una tolerancia de un peso.</p>
+                        <p><strong>Saldo de SIESA para la conciliación:</strong> capital, del documento <code>OPE</code> de la operación o, en la cartera antigua, de los <code>CC</code>/<code>FAT</code>/<code>FEX</code> que la nombran en su nota. El interés facturado no entra en ese saldo, para no duplicar el congelado; sí entra en el valor nominal que topa la deducción fiscal. Las operaciones refinanciadas se cruzan por el <code>OPE</code> 10000000 + n.</p>
+                        <p>Arriba, cuatro tarjetas: Partidas por explicar, Diferencia neta, Operaciones conciliadas y Cobertura del cruce. Las partidas se reparten en tres bloques, y la separación es deliberada:</p>
                     </div>
                     <div class="det-scroll">
                         <table class="det-tabla">
@@ -406,17 +470,17 @@
                             </thead>
                             <tbody>
                                 <tr><td class="det-texto"><strong>Operaciones sin saldo en SIESA</strong></td><td class="det-texto">El módulo las deteriora y SIESA no reporta saldo. No hay contra qué comparar</td></tr>
-                                <tr><td class="det-texto"><strong>Saldos de SIESA sin operación en el corte</strong></td><td class="det-texto">SIESA reporta cartera que este corte no deteriora</td></tr>
+                                <tr><td class="det-texto"><strong>Saldos de SIESA sin operación en el corte</strong></td><td class="det-texto">SIESA reporta cartera que este corte no deteriora. Solo incluye documentos <code>OPE</code> con saldo</td></tr>
                                 <tr><td class="det-texto"><strong>Diferencias de saldo</strong></td><td class="det-texto">La operación existe en las dos fuentes, con importes distintos</td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="det-ayuda-texto mt-3">
-                        <p>Cada partida se explica desde la pantalla, con estado y autor. <strong>El corte no se puede cerrar con partidas sin explicar.</strong></p>
+                        <p>Cada partida se explica desde la pantalla, con estado y autor, y se puede filtrar por <strong>Estado</strong> (Pendientes, En gestión, Explicadas, Todas) y buscar por cliente, NIT u operación. Los estados son <em>Pendiente</em>, <em>En gestión</em> y <em>Explicada</em>; <strong>solo «Explicada» libera el cierre</strong>. Las explicaciones sobreviven al recálculo del corte. <strong>El corte no se puede cerrar con partidas sin explicar.</strong></p>
                     </div>
                     <div class="det-aviso info">
                         <i class="fas fa-circle-info mt-1"></i>
-                        <div><strong>Punto abierto.</strong> No hay definida ninguna cuantía por debajo de la cual una diferencia no deba explicarse. Las diferencias medidas son <strong>326 sobre 1.935 operaciones que cruzan</strong>. Si el residuo incluye partidas de centavos, el módulo va a obligar a explicar ruido para poder cerrar, y el control se degrada a trámite. Es una decisión de política contable, no de diseño: ver <a href="#ayuda-7">Decisiones pendientes</a>.</div>
+                        <div><strong>Punto abierto.</strong> Hoy el módulo solo ignora diferencias de hasta un peso; no hay definida una cuantía de materialidad por encima de eso. Si el residuo incluye partidas pequeñas, el módulo va a obligar a explicar ruido para poder cerrar, y el control se degrada a trámite. Es una decisión de política contable, no de diseño: ver <a href="#ayuda-7">Decisiones pendientes</a>.</div>
                     </div>
                 </div>
 
@@ -432,10 +496,18 @@
                         <p>Reúne los controles del corte y la acción de cerrarlo.</p>
                         <h6 class="det-ayuda-sub">Dos controles se gestionan aquí</h6>
                         <ul>
-                            <li><strong>C-1 · Prórrogas que reducen la antigüedad de la mora.</strong> La prórroga traslada las cuotas al final, con lo cual la operación puede bajar de rango y <strong>liberar deterioro</strong>. La pantalla lista cada mes las operaciones cuya antigüedad bajó, con el deterioro que eso liberó, para validación. Tiene efecto fiscal: la deducción del 33 % exige más de un año de vencimiento y la prórroga reinicia el conteo.</li>
-                            <li><strong>C-2 · Bajas del período.</strong> Las operaciones que estaban en el corte anterior y ya no están. Hay que clasificarlas: <strong>castigo</strong>, <strong>recaudo total</strong>, <strong>cierre con apertura de una nueva operación</strong>, u otra causa. Sin la etiqueta, una reapertura se vería igual que un recaudo en la descomposición del movimiento del mes.</li>
+                            <li><strong>C-1 · Prórrogas que reducen la antigüedad de la mora.</strong> La prórroga traslada las cuotas al final, con lo cual la operación puede bajar de rango y <strong>liberar deterioro</strong>. La pantalla lista cada mes las operaciones cuya antigüedad bajó, con el deterioro que eso liberó, para validación; la lista incluye también las caídas de mora por pagos, no solo por prórrogas, y <strong>no bloquea el cierre</strong>. Tiene efecto fiscal: la deducción del 33 % exige más de un año de vencimiento y la prórroga reinicia el conteo. <strong>No confundir con el interés de prórroga</strong>: ese es el saldo de prórroga vencido que reporta SIESA y que suma a la base de deterioro; este control es el acuerdo que traslada cuotas y baja la antigüedad.</li>
+                            <li><strong>C-2 · Bajas del período.</strong> Las operaciones que estaban en el corte anterior y ya no están. Hay que clasificarlas, siempre con observación obligatoria, en una de cuatro causales:
+                                <ul>
+                                    <li><em>Recaudo total de la operación.</em></li>
+                                    <li><em>Castigo de cartera</em> &mdash; cierra la deducción fiscal acumulada de la operación.</li>
+                                    <li><em>Cierre con apertura de una operación nueva</em> &mdash; pide la referencia de la nueva, pero no la vincula.</li>
+                                    <li><em>Otra causa, explicada en la observación.</em></li>
+                                </ul>
+                                Sin la etiqueta, una reapertura se vería igual que un recaudo en la descomposición del movimiento del mes.</li>
                         </ul>
-                        <p><strong>Los controles de cuadre.</strong> Son una treintena y cubren cuatro familias: integridad de la extracción, cuadre de la base, bloque fiscal y conciliación. Los más relevantes para Contabilidad:</p>
+                        <p>El tablero muestra además <strong>C-4</strong> y <strong>C-5</strong> como pendientes: todavía no están implementados.</p>
+                        <p><strong>Los controles de cuadre.</strong> Son veintiocho y cubren la integridad de la extracción, el cuadre de la base, las cuotas repetidas, las suspensiones, el cruce con SIESA, el bloque fiscal y el diferido, y el movimiento del mes. Cada uno queda en uno de tres estados: <strong>en cero</strong> (cuadra), <strong>con diferencia</strong> (falla) o <strong>n/a</strong> (no aplica a este corte o es solo informativo). Los más relevantes para Contabilidad:</p>
                     </div>
                     <div class="det-scroll">
                         <table class="det-tabla">
@@ -444,22 +516,41 @@
                             </thead>
                             <tbody>
                                 <tr><td><code>C-CAPITAL</code> / <code>C-INTERES</code></td><td class="det-texto">El detalle de cuotas contra el consolidado por operación</td></tr>
-                                <tr><td><code>C-BASE</code></td><td class="det-texto">Base de deterioro = capital vencido + interés vencido</td></tr>
+                                <tr><td><code>C-BASE</code></td><td class="det-texto">Base de deterioro = capital vencido + interés vencido + interés de prórroga</td></tr>
+                                <tr><td><code>C-SIESA-PRORROGA</code></td><td class="det-texto">Que la prórroga vencida de SIESA que entró en la base coincida con la del snapshot para esas mismas operaciones</td></tr>
+                                <tr><td><code>C-SUSPENSION</code></td><td class="det-texto">Que la reducción de base por congelamiento coincida con la reducción de interés vencido de las mismas operaciones</td></tr>
+                                <tr><td><code>C-MARCAS</code></td><td class="det-texto">Base de las operaciones con marca aplicable que no se pudieron congelar. Bloquea el cierre</td></tr>
                                 <tr><td><code>C-CONCILIA</code></td><td class="det-texto">Que no queden partidas de conciliación sin explicar</td></tr>
                                 <tr><td><code>C-FISCAL-TOPE</code></td><td class="det-texto">Que ninguna deducción supere el tope disponible</td></tr>
+                                <tr><td><code>C-FISCAL-NOMINAL</code></td><td class="det-texto"><strong>Informativo:</strong> acumulado fiscal declarado de años anteriores por encima del valor nominal en SIESA, que el módulo no corrige</td></tr>
+                                <tr><td><code>C-CIERRE-FISCAL</code></td><td class="det-texto">Que el acumulado fiscal escrito por el cierre de diciembre coincida con la deducción del año del corte</td></tr>
                                 <tr><td><code>C-DIF-TEMP</code> / <code>C-DIFERIDO</code></td><td class="det-texto">Diferencia temporaria e impuesto diferido contra sus componentes</td></tr>
-                                <tr><td><code>C-MOVIMIENTO</code></td><td class="det-texto">Que altas + variación + bajas den el deterioro del corte</td></tr>
-                                <tr><td><code>C-LIBRO</code></td><td class="det-texto">El gasto del período del módulo contra el del libro</td></tr>
+                                <tr><td><code>C-REVERSION</code></td><td class="det-texto">Que ninguna operación con base de deterioro quede sin proyección de año de reversión</td></tr>
+                                <tr><td><code>C-MOVIMIENTO</code></td><td class="det-texto">Que deterioro anterior + altas + variación de las que continúan &minus; bajas dé el deterioro del corte</td></tr>
+                                <tr><td><code>C-VARIACION</code></td><td class="det-texto">Altas + variación de las que continúan contra la variación recalculada operación por operación contra el corte anterior</td></tr>
+                                <tr><td><code>C-LIBRO</code></td><td class="det-texto">El gasto del período del módulo contra el del libro. <strong>Informativo</strong>: nunca bloquea, porque la cifra del mes anterior del libro se digita a mano</td></tr>
+                                <tr><td><code>C-PRORROGA</code></td><td class="det-texto">C-1: deterioro liberado por las operaciones que bajaron de antigüedad contra el recalculado contra el corte anterior</td></tr>
                                 <tr><td><code>C-SALIDAS</code></td><td class="det-texto">Que no queden bajas sin clasificar</td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="det-ayuda-texto mt-3">
-                        <p><strong>Cierre con salvedad.</strong> Si un control bloqueante falla y aun así hay que cerrar, se puede hacer <strong>expresamente</strong>, con motivo escrito. El corte queda marcado como <em>cerrado con salvedades</em> de forma permanente, y se congela la enumeración de qué controles fallaban y con qué cifra. No es una salida cómoda: es una declaración.</p>
+                        <h6 class="det-ayuda-sub">Qué exige el cierre</h6>
+                        <ul>
+                            <li>Ningún control de cuadre en falla.</li>
+                            <li>Ninguna partida de conciliación sin explicar.</li>
+                            <li>Ninguna baja sin clasificar.</li>
+                        </ul>
+                        <p><strong>Cierre con salvedad.</strong> Si algo de lo anterior falla y aun así hay que cerrar, se puede hacer <strong>expresamente</strong>: exige un permiso propio, distinto del de cerrar, y un motivo escrito de hasta 500 caracteres. El corte queda marcado como <em>cerrado con salvedades</em> de forma permanente, y se congela la foto del cierre: qué controles fallaban y con qué cifra. No es una salida cómoda: es una declaración.</p>
+                        <p><strong>Cierre de diciembre.</strong> Además de cerrar, escribe el acumulado fiscal del año gravable. Si después de escribirlo <code>C-CIERRE-FISCAL</code> no cuadra, el cierre entero se revierte.</p>
+                        <p><strong>Reabrir.</strong> Exige permiso propio y motivo obligatorio. El corte vuelve a CALCULADO, se revierte el acumulado fiscal que escribió ese cierre y todo queda en bitácora. Mientras está cerrado, un corte no admite explicar partidas, clasificar bajas, cargar cifras del libro ni eliminarse.</p>
+                        <p><strong>Bitácora del corte.</strong> Panel visible con permiso de auditoría. Se filtra por Acción, Usuario, Desde, Hasta y «Operación o valor», y registra autor, fecha y dirección IP de cada acto.</p>
+                        <h6 class="det-ayuda-sub">Permisos del módulo</h6>
+                        <p>Cada acción tiene su propio permiso: <strong>Consultar</strong>; <strong>Calcular</strong> (crear, calcular y eliminar corte); <strong>Suspender intereses</strong>; <strong>Conciliar con SIESA</strong>; <strong>Clasificar bajas</strong>; <strong>Cerrar corte</strong>; <strong>Forzar cierre con salvedad</strong>; <strong>Reabrir corte</strong>; <strong>Consultar bitácora</strong>; <strong>Exportar</strong>.</p>
                     </div>
                     <div class="det-aviso">
                         <i class="fas fa-triangle-exclamation mt-1"></i>
-                        <div>Hay un control que <strong>nunca bloquea a propósito</strong>: <code>C-DUPLICADAS</code>, el que cuenta las cuotas que el sistema de factoring entrega repetidas. Nadie puede corregir desde este módulo un defecto que vive en la base de factoring, y bloquear el cierre con él convertiría todos los meses en un cierre con salvedad, vaciando de sentido esa marca. Lo que sí bloquea es <code>C-DUPLICADAS-BASE</code>: <strong>cuánta base de deterioro se dejó fuera</strong>. Hoy vale cero, porque ninguna cuota repetida está vencida. El día que una lo esté, el corte no cierra sin explicación, y nadie tiene que acordarse de revisarlo.</div>
+                        <div>Hay controles que <strong>nunca bloquean a propósito</strong> porque publican una cifra y no un descuadre: <code>C-DUPLICADAS</code>, <code>C-SIESA-NOTA</code>, <code>C-FISCAL-NOMINAL</code> y <code>C-LIBRO</code>. El caso típico es <code>C-DUPLICADAS</code>, el que cuenta las cuotas que el sistema de factoring entrega repetidas. Nadie puede corregir desde este módulo un defecto que vive en la base de factoring, y bloquear el cierre con él convertiría todos los meses en un cierre con salvedad, vaciando de sentido esa marca. Lo que sí bloquea es <code>C-DUPLICADAS-BASE</code>: <strong>cuánta base de deterioro se dejó fuera</strong>. Vale cero mientras ninguna cuota repetida esté vencida. El día que una lo esté, el corte no cierra sin explicación, y nadie tiene que acordarse de revisarlo.</div>
                     </div>
                 </div>
 
@@ -477,14 +568,17 @@
                                 <tr><th>Salida</th><th>Formato</th><th>Para qué</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td class="det-texto">Resumen del corte</td><td>PDF</td><td class="det-texto">El corte firmado, para archivo</td></tr>
+                                <tr><td class="det-texto">Resumen del corte</td><td>PDF</td><td class="det-texto">Matriz, movimiento del mes y controles, para archivo. Sale rotulado PRELIMINAR si el corte no está cerrado</td></tr>
                                 <tr><td class="det-texto">Detalle por operación</td><td>Excel</td><td class="det-texto">Revisión y soporte</td></tr>
-                                <tr><td class="det-texto"><strong>Asiento contable</strong></td><td>Archivo plano</td><td class="det-texto">El ajuste del período, para cargar</td></tr>
-                                <tr><td class="det-texto">Transición</td><td>Excel</td><td class="det-texto">Con la estructura del libro actual, para el período de convivencia</td></tr>
+                                <tr><td class="det-texto"><strong>Asiento contable</strong></td><td>CSV separado por punto y coma</td><td class="det-texto">El ajuste del período, el auxiliar por producto, los castigos (informativos), el anexo fiscal y el anexo de diferido</td></tr>
+                                <tr><td class="det-texto">Transición</td><td>Excel</td><td class="det-texto">Con la estructura del libro actual, para el período de convivencia: hojas <code>DETERIORO</code>, <code>Tabla final</code>, <code>DIFERENCIAS</code> y <code>1399</code></td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="det-ayuda-texto mt-3">
+                        <p>Todas las salidas están en el menú <strong>Exportar</strong> de las siete pantallas del corte, con permiso propio. No está disponible en un corte ABIERTO; en uno CALCULADO la salida es <strong>preliminar</strong>, y así lo dicen el nombre del archivo y su contenido.</p>
+                        <p>El asiento <strong>no se genera</strong> en el primer corte de la serie, porque no hay contra qué medir el ajuste, ni mientras Contabilidad no defina las cuentas contables.</p>
+                        <p>En la hoja <code>DETERIORO</code> del Excel de transición, desde agosto de 2026 la columna I incluye la prórroga y por eso ya no es G + H.</p>
                         <p>El exportable de transición existe para que, mientras dure la validación en paralelo, se pueda comparar el módulo contra el libro sin rehacer nada a mano.</p>
                     </div>
                 </div>
@@ -492,14 +586,14 @@
 
             <section class="det-ayuda-seccion" id="ayuda-5">
                 <h5 class="det-ayuda-tit"><span class="num">Sección 5</span>Cómo amarran las cifras entre sí</h5>
-                <p class="det-ayuda-lede">Este es el mapa que conviene tener a mano en la revisión mensual. Todas estas igualdades las verifica el módulo y bloquean el cierre si fallan.</p>
+                <p class="det-ayuda-lede">Este es el mapa que conviene tener a mano en la revisión mensual. La mayoría de estas igualdades tienen un control de cuadre que bloquea el cierre si falla (<code>C-PARTIC</code>, <code>C-BASE</code>, <code>C-DIF-TEMP</code>, <code>C-DIFERIDO</code>, <code>C-MOVIMIENTO</code>, <code>C-VARIACION</code>); las demás se cumplen por construcción del cálculo.</p>
                 <div class="det-panel">
                     <div class="det-ayuda-identidad">
                         <p class="det-corte-bloque">La cartera y la base</p>
                         <div class="grupo">
                             <span class="izq">Capital corriente + Capital vencido</span><span class="ig">=</span><span class="der">Capital total</span>
                             <span class="izq">Interés corriente + Interés vencido</span><span class="ig">=</span><span class="der">Interés total</span>
-                            <span class="izq">Capital vencido + Interés vencido</span><span class="ig">=</span><span class="der">Base de deterioro</span>
+                            <span class="izq">Capital vencido + Interés vencido + Interés de prórroga</span><span class="ig">=</span><span class="der">Base de deterioro</span>
                             <span class="izq">Base × % del rango, operación por operación</span><span class="ig">=</span><span class="der">Deterioro contable</span>
                         </div>
                         <p class="det-corte-bloque">El bloque fiscal</p>
@@ -516,7 +610,7 @@
                     </div>
                 </div>
                 <div class="det-ayuda-texto">
-                    <p><strong>La única identidad que la pantalla de resumen no muestra explícitamente</strong> es la primera: las tarjetas de Capital e Interés son totales, la de Base es solo lo vencido. De ahí la confusión habitual.</p>
+                    <p><strong>La única identidad que la pantalla de resumen no muestra explícitamente</strong> es la de la base: las tarjetas de Capital e Interés son totales, la de Base es solo lo vencido más el interés de prórroga. De ahí la confusión habitual.</p>
                 </div>
             </section>
 
@@ -531,7 +625,7 @@
                             <li><strong>Vinculados económicos.</strong> No aplica. No hay marca de vinculados.</li>
                             <li><strong>Clasificación por cliente.</strong> La mora se clasifica <strong>por operación</strong>, no por deudor. No se arrastra la peor calificación de un cliente al resto de sus obligaciones.</li>
                             <li><strong>El módulo no castiga ni marca por su cuenta.</strong> Sugiere candidatas y señala salidas; la decisión y el registro son de una persona, con permiso y con bitácora.</li>
-                            <li><strong>Sobre SIESA el módulo solo lee.</strong> La única escritura fuera de su propia base es la marca de suspensión en el sistema de factoring, operación por operación y con confirmación.</li>
+                            <li><strong>El módulo solo lee SIESA y el sistema de factoring.</strong> Hoy no escribe nada fuera de su propia base: la marca de suspensión vive en el módulo. Escribirla en factoring para que deje de facturar (<code>D-12</code>) depende del punto B de las decisiones pendientes.</li>
                         </ul>
                     </div>
                 </div>
@@ -576,13 +670,6 @@
                     <p>Son 16.106 filas por 686.811.619. Están llaveadas por número de operación igual que los <code>OPE</code>, pero no fueron nombradas en la definición de prefijos.</p>
                 </div>
 
-                <div class="det-ayuda-decision">
-                    <div class="ref">
-                        <span class="det-badge det-inactivo">&mdash;</span>
-                        <b>¿El saldo de una operación en SIESA debe sumar sus <code>FAT</code>, <code>FEX</code> y <code>CC</code>, o seguir siendo solo el <code>OPE</code>?</b>
-                    </div>
-                    <p>Hoy es solo el <code>OPE</code>, que es capital. Si se suman, el saldo deja de ser capital y pasa a incluir interés facturado, lo que <strong>duplicaría el interés congelado</strong> y rompería la comparación de la conciliación.</p>
-                </div>
             </section>
 
             <section class="det-ayuda-seccion" id="ayuda-8">
@@ -593,8 +680,12 @@
                         <p class="a">La tarjeta <em>Cuotas</em> es el conteo crudo de lo que entregó el origen. El consolidado excluye las cuotas que factoring entregó repetidas. La diferencia es exactamente eso, y el control <code>C-DUPLICADAS</code> la mide.</p>
                     </div>
                     <div class="det-ayuda-faq">
+                        <p class="q">¿Por qué la base de una operación es mayor que su capital vencido más su interés vencido?</p>
+                        <p class="a">Porque la base tiene un tercer término: el <strong>interés de prórroga</strong>, el saldo de prórroga vencido que reporta SIESA. No viene de las cuotas del sistema de factoring, por eso no aparece al descender al detalle de cuotas. En el detalle por operación se muestra como una sublínea dentro de la celda de la base, y en el resumen tiene columna propia.</p>
+                    </div>
+                    <div class="det-ayuda-faq">
                         <p class="q">¿Puedo recalcular un corte si me equivoqué en un parámetro?</p>
-                        <p class="a">Sí, mientras esté ABIERTO o CALCULADO. El recálculo es completo y queda en bitácora. Un corte CERRADO no se recalcula: hay que reabrirlo, y eso tiene permiso propio.</p>
+                        <p class="a">Sí, mientras esté ABIERTO o CALCULADO, <strong>y solo mientras el sistema de factoring tenga cargado ese mismo mes</strong> (la tabla origen se sobrescribe cada mes). El recálculo vuelve a tomar las paramétricas vigentes a la fecha de corte, conserva las explicaciones de conciliación y las clasificaciones de bajas, y queda en bitácora. Un corte CERRADO hay que reabrirlo primero (permiso propio); al reabrirse vuelve a CALCULADO.</p>
                     </div>
                     <div class="det-ayuda-faq">
                         <p class="q">¿Por qué una operación aparece con 0 % de deterioro?</p>
@@ -602,7 +693,7 @@
                     </div>
                     <div class="det-ayuda-faq">
                         <p class="q">¿El deterioro de una operación suspendida deja de crecer?</p>
-                        <p class="a">El interés sí. El capital no: sigue deteriorándose por su rango hasta llegar al 100 % a los 720 días.</p>
+                        <p class="a">El interés sí. El capital no: sigue deteriorándose por su rango hasta llegar al 100 % a partir de los 721 días (rango F).</p>
                     </div>
                     <div class="det-ayuda-faq">
                         <p class="q">¿La cifra fiscal de un corte mensual es la que va en la declaración?</p>
@@ -625,13 +716,18 @@
                             </thead>
                             <tbody>
                                 <tr><td class="det-texto">Cuotas, saldos, fechas de vencimiento, fecha inicial de mora</td><td class="det-texto">Sistema de factoring, por consulta directa</td></tr>
-                                <tr><td class="det-texto">Saldos de cartera por operación y por cliente</td><td class="det-texto">SIESA, solo lectura</td></tr>
-                                <tr><td class="det-texto">Interés congelado de las operaciones suspendidas</td><td class="det-texto">Facturas de interés (<code>FAT</code>) de SIESA, hasta el mes del evento</td></tr>
+                                <tr><td class="det-texto">Saldos de cartera por operación</td><td class="det-texto">SIESA, solo lectura: por operación (documento <code>OPE</code> o nota que la nombra), acotado a las cuentas 13</td></tr>
+                                <tr><td class="det-texto">Saldo de prórroga vencido por operación</td><td class="det-texto">SIESA, solo lectura</td></tr>
+                                <tr><td class="det-texto">Interés congelado de las operaciones suspendidas</td><td class="det-texto">Facturas automáticas de interés de SIESA &mdash;<code>FAT</code>, y <code>CC</code> de la cuenta 13451001 para las anteriores a 2022&mdash; hasta el mes del evento, por su saldo pendiente a esa fecha</td></tr>
                                 <tr><td class="det-texto">Rangos de mora y porcentajes contables</td><td class="det-texto">Paramétrica del módulo, con vigencias</td></tr>
                                 <tr><td class="det-texto">Tarifa de renta</td><td class="det-texto">Paramétrica del módulo, congelada por corte (art. 240 ET)</td></tr>
-                                <tr><td class="det-texto">Provisión fiscal acumulada de años anteriores</td><td class="det-texto">Cargue desde el archivo de Contabilidad</td></tr>
+                                <tr><td class="det-texto">Provisión fiscal acumulada de años anteriores</td><td class="det-texto">Cargue inicial desde la hoja 1399 de Contabilidad; desde el primer cierre de diciembre, lo escribe el propio cierre del corte</td></tr>
                                 <tr><td class="det-texto">Estado inicial de las suspensiones</td><td class="det-texto">Cargue desde el archivo de Contabilidad</td></tr>
+                                <tr><td class="det-texto">Fecha del evento del cargue inicial, cuando el archivo no la trae</td><td class="det-texto">Última factura <code>FAT</code> del cliente en SIESA</td></tr>
                                 <tr><td class="det-texto">Causal, fecha del evento, soporte y observación de cada marca</td><td class="det-texto">Digitación en el módulo, con bitácora</td></tr>
+                                <tr><td class="det-texto">Causales de suspensión y de baja</td><td class="det-texto">Paramétrica del módulo, con vigencias</td></tr>
+                                <tr><td class="det-texto">Cifras del libro para <code>C-LIBRO</code> y la conciliación con el libro</td><td class="det-texto">Cargue desde el archivo de Contabilidad</td></tr>
+                                <tr><td class="det-texto">Cuentas contables del asiento</td><td class="det-texto">Paramétrica del módulo, congelada por corte (hoy sin definir)</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -639,7 +735,7 @@
                 </div>
             </section>
 
-            <p class="det-ayuda-pie">Guía de lectura para Contabilidad · 18 de septiembre de 2026. El documento técnico del módulo va aparte.</p>
+            <p class="det-ayuda-pie">Guía de lectura para Contabilidad · 24 de septiembre de 2026. El documento técnico del módulo va aparte.</p>
 
         </div>
     </div>

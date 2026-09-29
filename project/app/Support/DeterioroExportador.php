@@ -67,7 +67,8 @@ class DeterioroExportador
         }
         foreach (['soloDeterioro' => 'con-deterioro', 'soloDeduccion' => 'con-deduccion',
                   'soloTopadas' => 'topadas', 'soloPasivo' => 'pasivo',
-                  'soloDuplicadas' => 'con-repetidas'] as $filtro => $etiqueta) {
+                  'soloDuplicadas' => 'con-repetidas',
+                  'soloProrroga' => 'con-prorroga'] as $filtro => $etiqueta) {
             if (!empty($filtros[$filtro])) {
                 $sufijos[] = $etiqueta;
             }
@@ -163,6 +164,21 @@ class DeterioroExportador
      * La matriz lleva las seis columnas de rango del libro y no la de Corriente,
      * igual que allí: las operaciones corrientes no entran a ningún `SUMIFS` del
      * bloque porque su clasificación no es una de las seis letras.
+     *
+     * DESDE AGOSTO DE 2026 LA COLUMNA I NO ES G + H, y no es un descuadre. La
+     * columna I —«VALORES EN MORA CAPITAL/INTERES»— es `base_deterioro`, que
+     * ahora incluye la prórroga vencida de SIESA, mientras G y H siguen siendo
+     * el capital y el interés vencidos que entregó factoring. La matriz
+     * `CARTERA <producto>` del bloque T tampoco la lleva: suma
+     * `capital_vencido + interes_vencido`. Son 82.170.273 en cinco operaciones
+     * —2133, 2316, 1276, 1238 y 2136— en el corte de agosto de 2026.
+     *
+     * La hoja se deja así a propósito: es réplica fiel del libro heredado en las
+     * columnas A a R, el libro no tiene columna de prórroga y meterle una
+     * desplazaría el mapa de totales con el que se hace la marcha en paralelo.
+     * Quien necesite la cifra desglosada la tiene en el exportable del detalle,
+     * que sí lleva la columna «PRORROGA VENCIDA SIESA», y en el control
+     * C-SIESA-PRORROGA.
      */
     private static function hojaDeterioro($hoja, $idCorte, $corte)
     {
@@ -500,17 +516,33 @@ class DeterioroExportador
         $hoja->fromArray([['OPERACIÓN', 'DOCUMENTO', 'CLIENTE', 'PRODUCTO', 'SUBPRODUCTO',
             'FECHA INICIAL MORA', 'CUOTAS', 'DIAS MORA', 'RANGO',
             'CAPITAL CORRIENTE', 'CAPITAL VENCIDO', 'INTERES CORRIENTE', 'INTERES VENCIDO',
-            'INTERES MORA', 'BASE DETERIORO', '% CONTABLE', 'DETERIORO CONTABLE',
+            'INTERES MORA', 'PRORROGA VENCIDA SIESA',
+            'BASE DETERIORO', '% CONTABLE', 'DETERIORO CONTABLE',
             'FISCAL INDIVIDUAL', 'FISCAL GENERAL', 'ACUMULADO FISCAL ANTERIOR',
             'SALDO TOPADO', 'DEDUCCION FISCAL AÑO', 'FISCAL ACUMULADO',
             'DIFERENCIA TEMPORARIA', 'IMPUESTO DIFERIDO', 'AÑO REVERSION', 'ESTADO REVERSION',
-            'CAPITAL MES ANTERIOR', 'VARIACION CAPITAL', 'CUOTAS REPETIDAS']], null, 'A1');
+            'CAPITAL MES ANTERIOR', 'VARIACION CAPITAL', 'CUOTAS REPETIDAS',
+            'FUENTE VENCIDOS', 'CAPITAL VENCIDO FACTORING', 'INTERES VENCIDO FACTORING',
+            'SUSPENDIDA', 'ORIGEN BASE', 'BASE SIN SUSPENDER']], null, 'A1');
 
         self::volcar($hoja, Deterioro::detalleOperaciones($idCorte, $filtros), [
             'id_operacion', 'id_cliente', 'cliente', 'producto', 'nom_operacion',
             'fec_inicial_mora', 'cuotas', 'dias_mora_operacion', 'rango',
-            'capital_corriente', 'capital_vencido', 'interes_corriente', 'interes_vencido',
-            'interes_mora', 'base_deterioro', 'pct_contable', 'deterioro_contable',
+            'capital_corriente',
+            function ($f) {
+                return $f->capital_vencido_siesa !== null ? $f->capital_vencido_siesa : $f->capital_vencido;
+            },
+            'interes_corriente',
+            function ($f) {
+                return $f->interes_vencido_siesa !== null ? $f->interes_vencido_siesa : $f->interes_vencido;
+            },
+            // Vacía, y no cero, en los cortes calculados antes de que la
+            // prórroga vencida entrara en la base: ahí no se midió.
+            'interes_mora', 'interes_prorroga_siesa',
+            function ($f) {
+                return $f->base_congelada !== null ? $f->base_congelada : $f->base_deterioro;
+            },
+            'pct_contable', 'deterioro_contable',
             'deterioro_fiscal_individual', 'deterioro_fiscal_general', 'fiscal_acumulado_anterior',
             'saldo_topado', 'deduccion_fiscal_ano', 'deterioro_fiscal_acumulado',
             'diferencia_temporaria', 'impuesto_diferido_activo', 'ano_reversion_fiscal',
@@ -532,6 +564,25 @@ class DeterioroExportador
             function ($f) {
                 return $f->duplicadas_evaluadas ? $f->cuotas_duplicadas : null;
             },
+            function ($f) {
+                $fuentes = [
+                    'TERCERO' => 'SIESA · saldo del tercero',
+                    'OPE' => 'SIESA · operación SIESA',
+                    'NOTA' => 'SIESA · nota contable',
+                ];
+                if ($f->capital_vencido_siesa === null && $f->interes_vencido_siesa === null) {
+                    return 'FACTORING';
+                }
+                return isset($fuentes[$f->origen_saldo_siesa]) ? $fuentes[$f->origen_saldo_siesa] : 'SIESA';
+            },
+            'capital_vencido', 'interes_vencido',
+            function ($f) {
+                return $f->suspendida ? 'SÍ' : 'NO';
+            },
+            function ($f) {
+                return $f->suspendida ? $f->origen_base : null;
+            },
+            'base_deterioro',
         ], 2);
 
         return $libro;

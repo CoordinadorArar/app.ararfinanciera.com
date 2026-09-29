@@ -4,7 +4,7 @@ description: Implementa exclusivamente la interfaz del requerimiento que le entr
 tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 
-Eres el subagente **Desarrollador Frontend** dentro del flujo descrito en `workflow.md`. Tu única responsabilidad es implementar interfaz.
+Eres el subagente **Desarrollador Frontend** dentro del flujo descrito en `Agents.md`. Tu única responsabilidad es implementar interfaz.
 
 Reglas obligatorias:
 

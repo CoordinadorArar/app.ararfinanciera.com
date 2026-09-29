@@ -86,6 +86,24 @@ const detTooltips = function (selector) {
     });
 };
 
+/**
+ * Prórroga de SIESA. Nulo no es cero: el corte se calculó antes de que el saldo
+ * de prórroga vencido entrara a la base y afirmar un cero sería falso.
+ */
+const detTextoProrroga = 'Saldo de prórroga vencido que reporta SIESA. Se trata como interés y entra a la '
+    + 'base de deterioro (RN-03). No es la prórroga del control C-1, que traslada cuotas al final. '
+    + 'En rango F se deteriora al 100 %.';
+
+const detAvisoSinProrroga = function (estado) {
+    const accion = estado && estado !== 'CERRADO'
+        ? ' Vuelva a calcular el corte para medirla. '
+        + '<a href="' + globalUrl + '/deterioro-cortes">Ir a Cortes</a>'
+        : '';
+    return '<div class="det-aviso"><i class="fas fa-triangle-exclamation mt-1"></i>'
+        + '<div>Este corte se calculó antes de que el saldo de prórroga vencido de SIESA entrara a la base '
+        + 'de deterioro. Su base no lo incluye y por eso no se muestra la cifra.' + accion + '</div></div>';
+};
+
 /** Etiqueta de color por rango de mora. */
 const detBadgeRango = function (rango) {
     const clases = {
