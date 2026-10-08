@@ -6,41 +6,19 @@ const mostrarProcesosAsesor = async function(idAsesor){
 setTimeout(() => {
     crearTablaResponsiva('table-procesos');
 },1000);
-
-/**Mostrar información del proceso seleccionado */
-const mostrarInfoProcesos = async function(idProceso){
-    $('#div-info-proceso').preloader();
-    document.querySelector('#div-info-proceso').style.display = 'block';
-    document.querySelector('#div-table-procesos').style.display = 'none';
-    let dataToSend = new FormData();
-    dataToSend.append('idProceso',idProceso); dataToSend.append('estado','');
-    let res = await makeOptionsFetch(`${globalUrl}/proceso-solo-info`,dataToSend,'post',$('meta[name="csrf-token-menus"]').attr('content'));
-    if(res.proceso){
-        console.log(res.proceso);
-        $('#div-info-proceso').preloader('remove');
-        let html = '';
-        res.proceso.forEach(element=>{
-            html += `<div class="card-body">
-                        <button class="btn btn-secondary btn-sm" onclick="backTable()"><i class="fa fa-arrow-left"></i> Volver</button>
-                        <h5 class="text-center">${element.NombresTercero} ${element.ApellidosTercero}</h5><hr>
-                        <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-12">
-                                
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12">
-                                <p>Pagaduria: ${element.NombrePagaduria}</p>
-                                <p></p>
-                            </div>
-                        </div>
-                    </div>`;
-        });
-        document.querySelector('#div-info-proceso').innerHTML = html;
-    }
-}
-
-const backTable = function(){
-    document.querySelector('#div-info-proceso').style.display = 'none';
-    document.querySelector('#div-table-procesos').style.display = 'block';
+let filasProcesos = null;
+let filtroProcesos = null;
+const filterTable = function(estado,boton){
+    if(!$.fn.dataTable.isDataTable('#table-procesos')) return;
+    const tabla = $('#table-procesos').DataTable();
+    filasProcesos = filasProcesos || tabla.rows().nodes().toArray();
+    filtroProcesos = filtroProcesos === estado ? null : estado;
+    tabla.clear().rows.add(filasProcesos.filter(fila=>{
+        const valor = Number(fila.dataset.estado);
+        return filtroProcesos === null || (filtroProcesos === 'any' ? [1,2,3,4].includes(valor) : valor === filtroProcesos);
+    })).draw();
+    $('#filter-buttons > button').removeClass('active');
+    $(boton).toggleClass('active',filtroProcesos !== null);
 }
 
 const crearGrafica = function(){

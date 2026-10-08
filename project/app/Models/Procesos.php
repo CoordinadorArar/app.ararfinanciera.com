@@ -54,11 +54,6 @@ class Procesos extends Model
         $procesos = DB::select($sql, $bindings);
         return $procesos;
     }
-    /**Mostrar proceso con tercero que llega desde formulario */
-    public static function mostrarTerceroProceso($idTercero,$estado=''){
-        $sql = "SELECT TOP 1 * FROM Procesos WHERE IdTercero = ? ORDER BY IdProceso DESC";
-        return DB::select($sql, [$idTercero]);
-    }
     /**---------------------------------------------------------------------- */
     public static function procesoAbierto($idTercero){
         $procesos = DB::select("SELECT IdProceso, EstadoProceso FROM Procesos WITH (UPDLOCK, HOLDLOCK) WHERE IdTercero = ? ORDER BY IdProceso DESC", [$idTercero]);
@@ -68,26 +63,6 @@ class Procesos extends Model
             }
         }
         return null;
-    }
-    /**---------------------------------------------------------------------- */
-    /**Mostrar datos de configuraciones para calcular cupos según pagadurias */
-    public static function showConfig($idPagaduria,$tipoDescuento=''){
-        $sql = "SELECT * FROM cuposconfigcalculos WHERE IdPagaduria = ?";
-        $bindings = [$idPagaduria];
-        if ($tipoDescuento != '') {
-            $sql .= " AND TipoDescuentoMaximo=?";
-            $bindings[] = $tipoDescuento;
-        }
-        $configuraciones = DB::select($sql, $bindings);
-        return $configuraciones;
-    }
-    /**---------------------------------------------------------------------- */
-    /**Mostrar resultados de la configuracion del calculo de cupo segun proceso*/
-    public static function mostrarResultadoConfiguracion($idProceso){
-        $sql = "SELECT * FROM CuposResultadosCalculo c
-                INNER JOIN Procesos p ON c.IdProceso=p.IdProceso WHERE c.IdProceso = ?";
-        $resultado = DB::select($sql, [$idProceso]);
-        return $resultado;
     }
     /**---------------------------------------------------------------------- */
     /**Guardar datos del resultado del calculo del cupo disponible */
@@ -225,52 +200,9 @@ class Procesos extends Model
         return ['contadores'=>$contadores,'estadosPendientes'=>$pendientes,'pendientes'=>$filas];
     }
 
-    /**Consultar informacion del proceso single  */
-    public static function mostarInfoProceso($idProceso){
-        $sql = "SELECT p.IdProceso,FechaCreacion=CONVERT(VARCHAR,p.FechaCreacion),p.EstadoProceso,p.ValorCreditoSolicitado,p.DocumentosCargados,
-                    t.IdTercero,t.NombresTercero,t.ApellidosTercero,t.DocumentoTercero
-                    FROM Procesos p
-                    INNER JOIN Terceros t ON p.IdTercero=t.IdTercero
-                    INNER JOIN TiposDocumentos td ON t.IdTipoDocumento=td.IdTipoDocumento
-                    WHERE p.IdProceso = ?";
-        $procesoInfo = DB::select($sql, [$idProceso]);
-        return ['status' => true, 'data' => $procesoInfo[0]];
-    }
-
     /**Consultar informacion del proceso segun la peticion requerida en la vista */
     public static function mostrarInfoProcesos($idProceso,$accion){
         switch ($accion){
-            case 'uploadDocs':
-                $proceso = DB::select("SELECT * FROM Procesos WHERE IdProceso = ?", [$idProceso]);
-                $idTercero = $proceso[0]->IdTercero;
-                $tratamientoAceptado = self::estadoTratamiento($idProceso)['completo'];
-                $procesoInfo = DB::select("SELECT p.IdProceso,FechaCreacion=CONVERT(VARCHAR,p.FechaCreacion),p.EstadoProceso,p.ValorCreditoSolicitado,p.DocumentosCargados,
-                                            t.IdTercero,t.NombresTercero,t.ApellidosTercero,t.DocumentoTercero,pa.IdPagaduria,pa.NombrePagaduria,cu.CupoDisponible
-                                            FROM Procesos p
-                                            INNER JOIN Terceros t ON p.IdTercero=t.IdTercero
-                                            INNER JOIN TiposDocumentos td ON t.IdTipoDocumento=td.IdTipoDocumento
-                                            INNER JOIN Users u ON p.IdUsuario=u.idUsuario
-                                            INNER JOIN Pagadurias pa ON t.IdPagaduria=pa.IdPagaduria
-                                            INNER JOIN CuposResultadosCalculo cu ON cu.IdProceso=p.IdProceso
-                                        WHERE p.IdProceso = ?", [$idProceso]);
-                $idPagaduria = $procesoInfo[0]->IdPagaduria;
-                $documentos = DB::select("SELECT * FROM DocumentosSolicitados ds
-                                            INNER JOIN PagaduriasDocumentos pd ON ds.IdDocumentoSolicitado=pd.IdDocumento
-                                            INNER JOIN Pagadurias p ON pd.IdPagaduria=p.IdPagaduria
-                                            WHERE p.IdPagaduria = ?", [$idPagaduria]);
-                return ['tratamiento' => $tratamientoAceptado, 'proceso' => $procesoInfo, 'documentos' => $documentos];
-            break;
-            case 'checkDocs':
-                $proceso = DB::select("SELECT * FROM Procesos p INNER JOIN Terceros t ON p.IdTercero=t.IdTercero WHERE IdProceso = ?", [$idProceso]);
-                $idTercero = $proceso[0]->IdTercero;
-                $tratamiento = DB::select("SELECT * FROM TratamientoDatos WHERE IdProceso=?", [$idProceso]);
-                $idPagaduria = $proceso[0]->IdPagaduria;
-                $documentos = DB::select("SELECT * FROM DocumentosSolicitados ds
-                                            INNER JOIN PagaduriasDocumentos pd ON ds.IdDocumentoSolicitado=pd.IdDocumento
-                                            INNER JOIN Pagadurias p ON pd.IdPagaduria=p.IdPagaduria
-                                            WHERE p.IdPagaduria = ?", [$idPagaduria]);
-                return ['proceso'=>$proceso, 'documentos'=>$documentos, 'tratamiento'=>$tratamiento];
-            break;
             case 'approveCredit':
                 $proceso = DB::select("SELECT *,FechaTerceroNacimiento=CONVERT(VARCHAR,FechaNacimientoTercero) FROM Procesos p
                                         INNER JOIN Terceros t ON p.IdTercero=t.IdTercero

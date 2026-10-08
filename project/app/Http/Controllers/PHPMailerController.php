@@ -10,10 +10,6 @@ use PHPMailer\PHPMailer\Exception;
 class PHPMailerController extends Controller
 {
     //
-    public function email(){
-        return view("procesos.email-body");
-    }
-
     public static function crearEmail($data) {
         require base_path("vendor/autoload.php");
         $mail = new PHPMailer(true);     // Passing `true` enables exceptions

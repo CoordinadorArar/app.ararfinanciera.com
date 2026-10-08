@@ -26,13 +26,13 @@
                         <div class="d-flex justify-content-between">
                             <h4>Procesos</h4>
                             <div class="d-flex" id="filter-buttons">
-                                <button class="btn btn-sm btn-danger me-1" onclick="filterTable(0)" title="Cancelados" data-toggle="tooltip">
+                                <button class="btn btn-sm btn-danger me-1" onclick="filterTable(0,this)" title="Cancelados" data-toggle="tooltip">
                                     <i class="fas fa-ban"></i>
                                 </button>
-                                <button class="btn btn-sm btn-success me-1" onclick="filterTable(5)" title="Exitosos" data-toggle="tooltip">
+                                <button class="btn btn-sm btn-success me-1" onclick="filterTable(5,this)" title="Exitosos" data-toggle="tooltip">
                                     <i class="fas fa-thumbs-up"></i>
                                 </button>
-                                <button class="btn btn-sm btn-warning me-1" onclick="filterTable('any')" title="En proceso..." data-toggle="tooltip">
+                                <button class="btn btn-sm btn-warning me-1" onclick="filterTable('any',this)" title="En proceso..." data-toggle="tooltip">
                                     <i class="fas fa-spinner"></i>
                                 </button>
                             </div>
@@ -51,21 +51,21 @@
                                 <tbody>
                                     @if($procesos)
                                         @foreach($procesos as $data)
-                                            <tr>
+                                            <tr data-estado="{{ $data->EstadoProceso }}">
                                                 <td>{{ $data->NombresTercero.' '.$data->ApellidosTercero }}</td>
                                                 <td>{{ $data->DocumentoTercero }}</td>
                                                 <td>{{ $data->FechaCreacion }}</td>
                                                 <td>
                                                     @if(in_array($data->EstadoProceso,[1,2,3,4]))
-                                                        <button class="btn btn-warning btn-sm" {{--onclick="mostrarInfoProcesos({{ $data->IdProceso }})"--}}>
+                                                        <button class="btn btn-warning btn-sm">
                                                             <i class="fas fa-spinner"></i>
                                                         </button>
                                                     @elseif($data->EstadoProceso == 0)
-                                                        <button class="btn btn-danger btn-sm" {{--onclick="mostrarInfoProcesos({{ $data->IdProceso }})"--}}>
+                                                        <button class="btn btn-danger btn-sm">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
                                                     @elseif($data->EstadoProceso == 5)
-                                                        <button class="btn btn-warning btn-sm" {{--onclick="mostrarInfoProcesos({{ $data->IdProceso }})"--}}>
+                                                        <button class="btn btn-warning btn-sm">
                                                             <i class="fas fa-thumbs-up"></i>
                                                         </button>
                                                     @endif
@@ -78,7 +78,6 @@
                         </div>
                     </div>
                 </div>
-                @include('administracion.usuario.asesores.info-proceso-individual')
             </div>
         </div>
     </div>

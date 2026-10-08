@@ -122,20 +122,6 @@ class Terceros extends Model
             'ContactoCorreo' => $datos->checkEmailContact
         ]);
     }
-    /**Creación de clientes en SIESA */
-    public static function validarUsuariosSiesa($fecha=''){
-        $sql = "SELECT c.IdCliente,ISNULL(a.f200_id,0) as IdSiesa,c.NomCliente,c.ApeCliente,isnull(b.f201_rowid_tercero,0) AS cliente,ISNULL(d.f202_rowid_tercero,0) as Idproveedortercero
-                FROM FactoringManagerDatos..Clientes c
-                LEFT JOIN UNOEEARAR..t200_mm_terceros a 
-                ON a.f200_id = CASE WHEN CHARINDEX('-',IdCliente) > 0 THEN LEFT(c.IdCliente,CHARINDEX('-',c.IdCliente)-1) ELSE c.IdCliente END 
-                COLLATE Modern_Spanish_CI_AS AND a.f200_id_cia = 7
-                LEFT JOIN UNOEEARAR..t201_mm_clientes b ON a.f200_rowid = b.f201_rowid_tercero
-                LEFT JOIN UNOEEARAR..t202_mm_proveedores d ON a.f200_rowid = d.f202_rowid_tercero
-                WHERE FecModifica >= '20220101'
-                GROUP BY c.IdCliente,a.f200_id,a.f200_id_cia,FecModifica,c.NomCliente,c.ApeCliente,b.f201_rowid_tercero,d.f202_rowid_tercero
-                ORDER BY FecModifica ASC";
-        return DB::select($sql);
-    }
     /**Cargar clientes de Factoring */
     public static function LoadClientes($idcliente){
         if(trim((string) $idcliente) === ''){
@@ -212,30 +198,5 @@ class Terceros extends Model
             'total' => $estado ? $contadores[$estado] : array_sum($contadores),
             'contadores' => $contadores,
         ];
-    }
-
-    public static function ValidarTerceros($idcliente){
-        $sql = "SELECT * FROM UNOEEARAR.dbo.t200_mm_terceros WHERE f200_id_cia = '7' AND f200_nit = ? ";
-        return DB::select($sql, [$idcliente]);
-    }
-
-    public static function ValidarCliente($idcliente){
-        $sql = "SELECT f200_id_cia AS Compañia ,f200_nit AS Nit,f200_razon_social AS Nombre,f200_apellido1,f200_apellido2,f200_nombres,b.f200_id_tipo_ident
-                ,f015_email AS mail,f015_celular AS Celular,f015_telefono AS Telefono,f015_direccion1 AS Direccion,f015_id_pais AS Pais,
-                f015_id_depto AS Dpto,f015_id_ciudad AS Ciudad
-                ,f201_id_sucursal,f201_id_vendedor,f201_id_cond_pago,f201_id_moneda,f015_rowid,a.f201_id_tipo_cli
-                FROM UNOEEARAR.dbo.t200_mm_terceros b
-                INNER JOIN UNOEEARAR.dbo.t201_mm_clientes a ON b.f200_rowid=a.f201_rowid_tercero
-                AND f201_id_sucursal='001'
-                INNER JOIN UNOEEARAR.dbo.t015_mm_contactos d ON  f015_rowid=f201_rowid_contacto
-                WHERE f200_nit = ? AND f200_id_cia = '7' ";
-        return DB::select($sql, [$idcliente]);
-    }
-
-    public static function ValidarProveedor($idcliente){
-        $sql = "SELECT * FROM UNOEEARAR.dbo.t200_mm_terceros a
-                JOIN UNOEEARAR.dbo.t202_mm_proveedores b ON a.f200_rowid = b.f202_rowid_tercero AND f202_id_cia = 7
-                WHERE f200_nit = ?";
-        return DB::select($sql, [$idcliente]);
     }
 }

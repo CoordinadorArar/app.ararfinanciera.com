@@ -247,12 +247,6 @@ class AdminController extends Controller
         $procesos = Procesos::showProcessByState('any');
     }
     /**----------------------------------------------- */
-    /** */
-    public function procesoSoloInfo(Request $request){
-        $proceso = Procesos::mostrarProcesos($request->input('estado'),$request->input('idProceso'));
-        return response()->json(compact('proceso'));
-    }
-
     public function mostrarInfoPagaduria(Request $request){
         $idPagaduria = $request->input('IdPagaduria',$request->input('idPagaduria'));
         $parametros = Admin::pagaduria($idPagaduria);
@@ -272,14 +266,6 @@ class AdminController extends Controller
         $reglasEdad = Admin::reglasEdadPagaduria($idPagaduria);
         $ultimaAuditoria = Admin::ultimaAuditoriaPagaduria($idPagaduria);
         return response()->json(compact('pagaduria','parametros','formulas','reglasEdad','rubros','ultimaAuditoria'));
-    }
-    /**----------------------------------------------- */
-    public function cantidadConfigPagaduria(Request $request){
-        $idPagaduria = $request->input('IdPagaduria');
-        $pagaduria = array_values(array_filter(Admin::mostrarInfoPagaduria($idPagaduria),function($fila){
-            return $fila->IdConfigCalculo !== null;
-        }));
-        return response()->json($pagaduria);
     }
     /**----------------------------------------------- */
     public function listarPagadurias(){
@@ -412,19 +398,6 @@ class AdminController extends Controller
     }
     private function errorValidacion($validate){
         return response()->json(['message'=>$validate->errors()->first(),'errors'=>$validate->errors()],422);
-    }
-    /**----------------------------------------------- */
-    public function mostrarRubrosPagaduria(Request $request){
-        $idPagaduria = $request->input('IdPagaduria');
-        $rubros = Admin::mostrarRubrosPagaduria($idPagaduria);
-        $html = '';
-        if($rubros){
-            $html = '<option value="">- Selecciona un dato para agregar -</option>';
-            foreach($rubros as $data){
-                $html .= '<option value="'.e($data->NombreRubro).'">'.e($data->NombreRubro).'</option>';
-            }
-        }
-        return response()->json($html);
     }
     /**----------------------------------------------- */
     /**Guardar datos de pagaduria */

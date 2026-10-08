@@ -16,6 +16,7 @@ node_modules/
 # Generados en tiempo de ejecución
 /project/storage/
 /project/bootstrap/cache/
+/project/.phpunit.result.cache
 /web/writable/
 /web/builds/
 

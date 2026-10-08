@@ -4,7 +4,6 @@
 <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 <link href="{{ asset('css/font-awesome/all.min.css')}}" rel="stylesheet">
 <link href="{{ asset('css/navbar-sidebar.css') }}" rel="stylesheet">
-{{-- <link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet"> --}}
 <link href="{{ asset('css/jquery.datetimepicker.min.css') }}" rel="stylesheet">
 <link href="{{ asset('css/preloader.css') }}" rel="stylesheet">
 <style>
@@ -67,8 +66,6 @@
 <script src="{{ asset('js/font-awesome/brands.min.js') }}"></script>
 <script src="{{ asset('js/font-awesome/regular.min.js') }}"></script>
 <script src="{{ asset('js/font-awesome/solid.min.js') }}"></script>
-<!--<script src="{{ asset('js/main.js') }}"></script>-->
-<!--<script src="{{ asset('js/funciones-globales.js') }}"></script>-->
 <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
 <script src="{{ asset('js/jquery.preloader.min.js') }}"></script>
 <script>

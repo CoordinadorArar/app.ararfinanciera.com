@@ -8,7 +8,6 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use SweetAlert;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
@@ -41,18 +40,7 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        //$idRol = User::obtenerRol(auth()->id());
-        //Session::put('idRol',$idRol[0]->IdRol);
     }
-
-    // public function authenticated(Request $request, Auth $user){
-    //     $user = Auth::
-    //     if(Auth::login()){
-    //         alert()->success('Bienvenido ', 'Optional Title');
-    //         return ;
-    //     }
-    //     return response()->json(['respuesta'=>$user]);
-    // }
 
     public function login(Request $request){
         $request->validate([

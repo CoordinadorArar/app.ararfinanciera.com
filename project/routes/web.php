@@ -104,14 +104,11 @@ Route::group(['middleware'=>['auth','submenu.accion:/gestion-usuarios']],functio
 Route::group(['middleware'=>['auth','submenu.accion:/gestion-asesores']],function(){
     /**Gestion de asesores */
     Route::post('/mostrar-procesos-asesor', [AdminController::class, 'mostrarProcesosAsesor'])->name('mostrar-procesos-asesor');
-    Route::post('/proceso-solo-info', [AdminController::class, 'procesoSoloInfo'])->name('proceso-solo-info');
 });
 Route::group(['middleware'=>['auth','submenu.accion:/crear-pagadurias']],function(){
     /**Gestión de pagadurias */
     Route::post('/guardar-pagaduria', [AdminController::class, 'guardarPagaduria'])->name('guardar-pagaduria');
     Route::post('/mostrar-info-pagaduria', [AdminController::class, 'mostrarInfoPagaduria'])->name('mostrar-info-pagaduria');
-    Route::post('/cantidad-config-pagaduria', [AdminController::class, 'cantidadConfigPagaduria'])->name('cantidad-config-pagaduria');
-    Route::post('/mostrar-rubros-pagaduria', [AdminController::class, 'mostrarRubrosPagaduria'])->name('mostrar-rubros-pagaduria');
     Route::post('/guardar-pagaduria-info', [AdminController::class, 'guardarPagaduriaInfo'])->name('guardar-pagaduria-info');
     Route::post('/guardar-rubro-configuracion', [AdminController::class, 'guardarRubroConfiguracion'])->name('guardar-rubro-configuracion');
     Route::post('/listar-pagadurias-admin', [AdminController::class, 'listarPagadurias'])->name('listar-pagadurias-admin');
@@ -174,12 +171,9 @@ Route::group(['middleware' => ['auth','submenu.accion:/crear-cliente-siesa']],fu
 /**Rutas de procesos, estados y vistas relacionadas */
 Route::group(['middleware'=>['auth','submenu.accion:/lista-procesos']],function(){
     Route::post('/lista-procesos-filtro', [ProcesosController::class, 'listaProcesos'])->name('lista-procesos-filtro');
-    Route::post('/mostrar-info-proceso', [ProcesosController::class, 'mostrarInfoProcesos'])->name('mostrar-info-proceso');
-    //Route::post('/verify-documents-all-procesos', [ProcesosController::class, 'verifyDocumentsAllprocesos'])->name('verify-documents-all-procesos');
     Route::post('/centrales-estado', [ProcesosController::class, 'centralesEstado'])->name('centrales-estado');
     Route::post('/centrales-consultar', [ProcesosController::class, 'centralesConsultar'])->name('centrales-consultar');
     Route::post('/centrales-resultados', [ProcesosController::class, 'centralesResultados'])->name('centrales-resultados');
-    Route::post('/verificar-todos-los-documentos', [ProcesosController::class, 'verificarDocumentos'])->name('verificar-todos-los-documentos');
     Route::post('/subir-documentos-soporte', [ProcesosController::class, 'subirDocumentosSoporte'])->name('subir-documentos-soporte');
     Route::get('/ver-documento-soporte/{idDocumento}/{idProceso}', [ProcesosController::class, 'verDocumentoSoporte'])->where(['idDocumento'=>'[0-9]+','idProceso'=>'[0-9]+'])->name('ver-documento-soporte');
     Route::post('/gestion-documentos-proceso', [ProcesosController::class, 'gestionDocumentosSoporte'])->name('gestion-documentos-proceso');
@@ -188,7 +182,6 @@ Route::group(['middleware'=>['auth','submenu.accion:/lista-procesos']],function(
     Route::post('/calcular-condiciones-proceso',[ProcesosController::class, 'calcularCondicionesProceso'])->name('calcular-condiciones-proceso');
     Route::get('/descargar-info-credito/{idProceso}', [ProcesosController::class, 'descargarInfoCredito'])->name('descargar-info-credito');
     Route::post('/cambiar-estado-proceso', [ProcesosController::class, 'cambiarEstadoProceso'])->name('cambiar-estado-proceso');
-    Route::post('/historial-proceso', [ProcesosController::class, 'historialProceso'])->name('historial-proceso');
     Route::post('/detalle-proceso', [ProcesosController::class, 'detalleProceso'])->name('detalle-proceso');
     Route::post('/motivos-rechazo', [ProcesosController::class, 'motivosRechazo'])->name('motivos-rechazo');
 });

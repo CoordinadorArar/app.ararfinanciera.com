@@ -58,19 +58,7 @@ const gestionRol = async function(accion,idRol=''){
         }
     }
     document.getElementById('cancelRol').style.display = 'inline-block';
-    //selectSubmenus();
 }
-// const selectSubmenus = async function(idRol){
-//     let inputs = document.getElementsByClassName('checkboxRol');
-//     for(let i=0; i<inputs.length; i++){
-//         if(inputs[i].checked){
-//             console.log();
-//         }
-//     }
-//     let dataToSend = new FormData();
-//     dataToSend.append('idRol', idRol);
-//     let res = await makeOptionsFetch(`${globalUrl}/mostrar-info-admin`,dataToSend,'post',$('meta[name="csrf-token-admin-management"]').prop('content'));
-// }
 const guardarRol = async function(e){
     e.preventDefault();
     let inputs = document.getElementsByClassName('checkboxRol');
