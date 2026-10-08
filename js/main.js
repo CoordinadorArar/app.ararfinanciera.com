@@ -26,6 +26,22 @@ document.addEventListener('DOMContentLoaded',function(){
     };
     contenedor.addEventListener('shown.bs.collapse', guardar);
     contenedor.addEventListener('hidden.bs.collapse', guardar);
+    let ultimoGrupo = null;
+    let cerrarOtros = function(actual){
+        contenedor.querySelectorAll('.submenu-collapse.show').forEach(el=>{
+            if(el !== actual) bootstrap.Collapse.getOrCreateInstance(el, {toggle:false}).hide();
+        });
+    };
+    contenedor.addEventListener('show.bs.collapse', function(e){
+        if(!e.target.classList.contains('submenu-collapse')) return;
+        ultimoGrupo = e.target;
+        cerrarOtros(e.target);
+    });
+    contenedor.addEventListener('shown.bs.collapse', function(e){
+        if(!e.target.classList.contains('submenu-collapse')) return;
+        if(e.target !== ultimoGrupo) bootstrap.Collapse.getOrCreateInstance(e.target, {toggle:false}).hide();
+        else cerrarOtros(e.target);
+    });
     contenedor.addEventListener('click', function(e){
         if(e.target.closest('[data-logout]')){
             e.preventDefault();
@@ -56,8 +72,10 @@ async function mostrarMenu(){
         try{
             abiertos = JSON.parse(localStorage.getItem(MENU_ABIERTOS)) || [];
         }catch(e){}
-        plantilla.content.querySelectorAll('.submenu-collapse').forEach(grupo=>{
-            if(abiertos.includes(grupo.id)){
+        let grupos = Array.from(plantilla.content.querySelectorAll('.submenu-collapse'));
+        let restaurar = grupos.some(g=>g.classList.contains('show')) ? undefined : abiertos.map(id=>grupos.find(g=>g.id === id)).find(Boolean);
+        grupos.forEach(grupo=>{
+            if(grupo === restaurar){
                 let boton = plantilla.content.querySelector(`[aria-controls="${grupo.id}"]`);
                 grupo.classList.add('show');
                 boton && boton.classList.remove('collapsed');
