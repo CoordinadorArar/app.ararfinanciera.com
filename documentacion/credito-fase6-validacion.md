@@ -142,3 +142,9 @@ retirarlo.**
   - rol `[4]` → 4 pendientes en el estado 2;
   - rol `[5]` → 4;
   - rol `[3]` → 0 (no hay procesos en el estado 4).
+
+## Despliegue: HTTPS
+
+- En producción el `.env` debe tener `APP_URL=https://app.ararfinanciera.com`. Con ese valor `AppServiceProvider` fuerza el esquema `https` en `asset()`, `route()` y `url()`.
+- Después de ajustar el `.env`, ejecutar `php artisan config:clear` (o `php artisan config:cache` si el servidor usa caché de configuración).
+- En local `APP_URL` puede seguir en `http://`; en ese caso no se fuerza el esquema.
