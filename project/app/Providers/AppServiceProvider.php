@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Procesos;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if (str_starts_with(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
         View::composer(['layouts.navbar.navbar', 'home'], function ($view) {
             static $datos;
             if ($datos === null) {
