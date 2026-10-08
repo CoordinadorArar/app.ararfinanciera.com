@@ -20,9 +20,11 @@
     <link href="{{ asset('css/jquery.datetimepicker.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/preloader.css') }}" rel="stylesheet">
     <link href="{{ asset('css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/ui.css') }}" rel="stylesheet">
+    @stack('styles')
 </head>
 <body>
-    <div class="container py-4">
+    <div class="@yield('contenedor', 'container py-4')">
         <main>
             @yield('content')
         </main>
@@ -41,5 +43,6 @@
     <script src="{{ asset('js/jquery.preloader.min.js') }}"></script>
     <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
+    @stack('scripts')
 </body>
 </html>
