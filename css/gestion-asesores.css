@@ -7,9 +7,6 @@
     transform: scale(1.04);
     cursor: pointer;
 }
-#div-info-proceso{
-    display: none;
-}
 #filter-buttons > button{
     border-radius: 15px;
 }

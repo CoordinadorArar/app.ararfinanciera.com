@@ -1,131 +1,176 @@
 window.onload = function(){
-    $(function(){
-        $('#fechaEdad').datetimepicker({
-            format:'Y/m/d',
-            timepicker:false,
-            datepicker:true
-        });
+    $('#fechaEdad').datetimepicker({
+        format:'d/m/Y',
+        timepicker:false,
+        datepicker:true,
+        maxDate:0,
+        scrollInput:false
     });
+    cargarPagaduriasSimulador();
 }
-const validarPeriodo = async function(element){
-    //validarfecha
-    let edad = element.value;
-    let dataToSend = new FormData(); 
-    dataToSend.append('edadFecha', edad);
-    let res = await makeOptionsFetch(`${globalUrl}/validar-meses`,dataToSend,'post',$('meta[name="csrf-token-simulador"]').attr('content'));
-    if(res.estado == 'menor'){
-        Swal.fire({
-            title:'Oops!',
-            text:'No parece que el cliente sea mayor de edad',
-            icon:'error',
-            confirmButtonText:'Entendido',
-            allowOutsideClick:false,
-            allowEscapeKey:false
-        }).then((value)=>{
-            if(value.isConfirmed){
-                element.value = '';
-                element.focus();
-            }
-        })
-    }else{
-        document.getElementById('periodoCredito').innerHTML = res.html;
-    }
+const tokenSimulador = function(){
+    return $('meta[name="csrf-token-simulador"]').attr('content');
 }
-
-const calcular = async function(){
-    let errores = document.getElementsByClassName('invalid-feedback');
-    for($i = 0; $i < errores.length; $i++){ /**Ocultar span de errores */
-        errores[$i].style = 'display:none';
+const fechaSimulador = function(){
+    let partes = document.getElementById('fechaEdad').value.trim().split('/');
+    return partes.length == 3 && partes[2].length == 4 ? `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}` : '';
+}
+const edadLocal = function(fecha){
+    let nacimiento = new Date(fecha+'T00:00:00');
+    let hoy = new Date();
+    let edad = hoy.getFullYear()-nacimiento.getFullYear();
+    if(hoy.getMonth() < nacimiento.getMonth() || (hoy.getMonth() == nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate())){
+        edad--;
     }
-    periodoCredito = document.getElementById('periodoCredito').value;
-    fechaEdad = document.getElementById('fechaEdad').value;
-    valorCredito = document.getElementById('valorCredito').value;
-    tasaInteres = document.getElementById('tasaInteres').value;
-    tasaInteres = tasaInteres.replace(/,/g, '.');
+    return isNaN(edad) ? null : edad;
+}
+const errorCampoSimulador = function(campo,mensaje){
+    let input = document.getElementById(campo);
+    input.classList.toggle('is-invalid',!!mensaje);
+    document.getElementById('error-'+campo).textContent = mensaje || '';
+}
+const cargarPagaduriasSimulador = async function(){
+    let res = await makeOptionsFetch(`${globalUrl}/mostrar-pagadurias`,new FormData(),'post',$('meta[name="csrf-token-menus"]').attr('content'));
+    let html = '<option value="">Selecciona una pagaduría</option>';
+    res.pagadurias.forEach(item=>{
+        html += `<option value="${escapeHtml(item.IdPagaduria)}">${escapeHtml(String(item.NombrePagaduria).trim())}</option>`;
+    });
+    document.getElementById('idPagaduria').innerHTML = html;
+}
+const plazoSimulador = function(plazos,texto){
+    let select = document.getElementById('periodoCredito');
+    let anterior = select.value;
+    let html = `<option value="">${escapeHtml(texto)}</option>`;
+    plazos.forEach(plazo=>{
+        html += `<option value="${plazo}"${plazo == anterior ? ' selected' : ''}>${plazo} ${plazo == 1 ? 'mes' : 'meses'}</option>`;
+    });
+    select.innerHTML = html;
+    select.disabled = plazos.length == 0;
+}
+const avisoPlazo = function(texto){
+    document.getElementById('aviso-plazo').innerHTML = texto ? `<div class="ui-alerta ui-alerta-adv mb-0" role="status"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span class="ui-alerta-texto">${escapeHtml(texto)}</span></div>` : '';
+}
+const validarPeriodo = async function(){
+    let idPagaduria = document.getElementById('idPagaduria').value;
+    let fecha = fechaSimulador();
+    let edad = fecha ? edadLocal(fecha) : null;
+    errorCampoSimulador('idPagaduria',''); errorCampoSimulador('fechaEdad',''); errorCampoSimulador('periodoCredito','');
+    avisoPlazo('');
+    document.getElementById('ayuda-edad').textContent = edad != null && edad >= 0 ? `Edad: ${edad} años` : '';
+    if(document.getElementById('fechaEdad').value.trim() != '' && (!fecha || edad == null)){
+        errorCampoSimulador('fechaEdad','Usa el formato dd/mm/aaaa.');
+    }else if(edad != null && edad < 0){
+        errorCampoSimulador('fechaEdad','La fecha de nacimiento no puede ser futura.');
+        fecha = '';
+    }
+    if(!idPagaduria || !fecha){
+        plazoSimulador([],'Selecciona pagaduría y fecha');
+        return;
+    }
     let dataToSend = new FormData();
-    dataToSend.append('periodoCredito', periodoCredito); dataToSend.append('fechaEdad', fechaEdad); dataToSend.append('valorCredito', valorCredito);
-    dataToSend.append('tasaInteres', tasaInteres);
-    let res = await makeOptionsFetch(`${globalUrl}/simulacion-credito`,dataToSend,'post',$('meta[name="csrf-token-simulador"]').attr('content'));
-    if(res.errors){
-        showErrors(res);
-    }else if(res.error){
-        Swal.fire({title:'Oops!',text:res.error,icon:'error',allowOutsideClick:false,allowEscapeKey:false});
-    }else{
-        document.getElementById('tbodySimulacion').innerHTML = res.html;
-        dataToSend.append('info', true);
-        let info = await makeOptionsFetch(`${globalUrl}/simulacion-credito`,dataToSend,'post',$('meta[name="csrf-token-simulador"]').attr('content'));
-        document.getElementById('tablaInformacion').innerHTML = info.html;
-    }
-}
-
-function formatNumber(n) {
-    // format number 1000000 to 1,234,567
-    return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-}
-
-function formatCurrency(input, blur) {
-    // appends $ to value, validates decimal side
-    // and puts cursor back in right position.
-
-    // get input value
-    let input_val = input.value;
-
-    // don't validate empty input
-    if (input_val === "") { return; }
-
-    // original length
-    var original_len = input_val.length;
-
-    // initial caret position 
-    var caret_pos = input.selectionStart;
-        
-    // check for decimal
-    if(input_val.indexOf(".") >= 0){
-
-        // get position of first decimal
-        // this prevents multiple decimals from
-        // being entered
-        var decimal_pos = input_val.indexOf(".");
-
-        // split number by decimal point
-        var left_side = input_val.substring(0, decimal_pos);
-        var right_side = input_val.substring(decimal_pos);
-
-        // add commas to left side of number
-        left_side = formatNumber(left_side);
-
-        // validate right side
-        right_side = formatNumber(right_side);
-        
-        // On blur make sure 2 numbers after decimal
-        if (blur === "blur") {
-        right_side += "00";
+    dataToSend.append('edadFecha',fecha); dataToSend.append('idPagaduria',idPagaduria);
+    try{
+        let res = await makeOptionsFetch(`${globalUrl}/validar-meses`,dataToSend,'post',tokenSimulador(),true);
+        if(res.estado == 'menor'){
+            errorCampoSimulador('fechaEdad','El cliente debe ser mayor de edad.');
+            plazoSimulador([],'Selecciona pagaduría y fecha');
+        }else if(!res.plazos || res.plazos.length == 0){
+            plazoSimulador([],'Sin plazos disponibles');
+            avisoPlazo(`La pagaduría no tiene plazos para ${res.edad} años.`);
+        }else{
+            document.getElementById('ayuda-edad').textContent = `Edad: ${res.edad} años · Plazo máximo ${res.plazoMaximo} meses`;
+            plazoSimulador(res.plazos,'Selecciona el plazo');
         }
-        
-        // Limit decimal to only 2 digits
-        right_side = right_side.substring(0, 2);
-
-        // join number by .
-        input_val = "$ " + left_side + "." + right_side;
-    }else{
-        // no decimal entered
-        // add commas to number
-        // remove all non-digits
-        input_val = formatNumber(input_val);
-        input_val = "$ " + input_val;
-        
-        // final formatting
-        if (blur === "blur") {
-        //   input_val += ".00";
+    }catch(error){
+        plazoSimulador([],'Sin plazos disponibles');
+        if(error.data && error.data.errors && error.data.errors.edadFecha){
+            errorCampoSimulador('fechaEdad',[].concat(error.data.errors.edadFecha)[0]);
+        }else if(error.status == 422){
+            avisoPlazo(edad != null ? `La pagaduría no tiene plazos para ${edad} años.` : error.message);
+        }else if(error.status && error.status != 403){
+            mostrarErrorHttp(error.data,error.status);
         }
     }
-    // send updated string to input
-    input.value = input_val;
-
-    // put caret back in the right position
-    var updated_len = input_val.length;
-    caret_pos = updated_len - original_len + caret_pos;
-    input.setSelectionRange(caret_pos, caret_pos);
 }
-
-// }
+const tarjetaSimulador = function(etiqueta,valor,destacada=false){
+    return `<div class="ui-tarjeta${destacada ? ' destacada' : ''}"><span class="ui-cifra-etiqueta">${etiqueta}</span><span class="ui-cifra">${formatearMoneda(valor)}</span></div>`;
+}
+const pintarSimulacion = function(datos,tabla){
+    let totales = {cuota:0,capital:0,interes:0,seguro:0,cuotaTotal:0};
+    let filas = `<tr><td>0</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">${formatearMoneda(datos.monto)}</td></tr>`;
+    tabla.forEach(fila=>{
+        Object.keys(totales).forEach(campo=>{ totales[campo] += Number(fila[campo]) || 0; });
+        filas += `<tr><td>${escapeHtml(fila.numero)}</td>${['cuota','capital','interes','seguro','cuotaTotal','saldo'].map(campo=>`<td class="num">${formatearMoneda(fila[campo])}</td>`).join('')}</tr>`;
+    });
+    document.getElementById('resultado-simulacion').innerHTML = `
+        <section class="ui-card" aria-labelledby="titulo-resumen">
+            <div class="ui-card-cab"><h2 id="titulo-resumen" tabindex="-1">Resumen de la simulación</h2></div>
+            <div class="ui-tarjetas">
+                ${tarjetaSimulador('Cuota',datos.cuota)}
+                ${tarjetaSimulador('Seguro',datos.seguro)}
+                ${tarjetaSimulador('Cuota total',datos.cuotaTotal,true)}
+                ${tarjetaSimulador('Monto',datos.monto)}
+            </div>
+            <p class="ui-descripcion mb-0">Plazo ${escapeHtml(datos.plazo)} meses · Tasa ${formatearPorcentaje(datos.tasa)} mensual · Seguro ${formatearPorcentaje(datos.porcentajeSeguro*100,4)} del monto · Edad ${escapeHtml(datos.edad)} años</p>
+        </section>
+        <section class="ui-card" aria-labelledby="titulo-amortizacion">
+            <div class="ui-card-cab"><h2 id="titulo-amortizacion">Tabla de amortización</h2></div>
+            <div class="ui-scroll ui-scroll-amortizacion">
+                <table class="ui-tabla ui-tabla-amortizacion">
+                    <thead>
+                        <tr><th scope="col">N°</th><th scope="col" class="num">Cuota</th><th scope="col" class="num">Capital</th><th scope="col" class="num">Interés</th><th scope="col" class="num">Seguro</th><th scope="col" class="num">Cuota total</th><th scope="col" class="num">Saldo</th></tr>
+                    </thead>
+                    <tbody>${filas}</tbody>
+                    <tfoot>
+                        <tr><td>Total</td>${['cuota','capital','interes','seguro','cuotaTotal'].map(campo=>`<td class="num">${formatearMoneda(totales[campo])}</td>`).join('')}<td></td></tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>`;
+    document.getElementById('titulo-resumen').focus();
+}
+const calcular = async function(e){
+    e.preventDefault();
+    let campos = {
+        idPagaduria:document.getElementById('idPagaduria').value,
+        fechaEdad:fechaSimulador(),
+        periodoCredito:document.getElementById('periodoCredito').value,
+        valorCredito:numeroLimpio(document.getElementById('valorCredito').value)
+    };
+    let mensajes = {
+        idPagaduria:'Selecciona una pagaduría.',
+        fechaEdad:'Ingresa la fecha de nacimiento.',
+        periodoCredito:'Selecciona el plazo.',
+        valorCredito:'Ingresa un monto mayor a cero.'
+    };
+    let valido = true;
+    Object.keys(campos).forEach(campo=>{
+        let falta = campo == 'valorCredito' ? !(Number(campos[campo]) > 0) : campos[campo] === '';
+        if(campo == 'fechaEdad' && document.getElementById('fechaEdad').classList.contains('is-invalid')){
+            falta = true;
+        }else{
+            errorCampoSimulador(campo,falta ? mensajes[campo] : '');
+        }
+        valido = valido && !falta;
+    });
+    if(!valido){
+        return;
+    }
+    let dataToSend = new FormData();
+    Object.keys(campos).forEach(campo=>dataToSend.append(campo,campos[campo]));
+    let boton = document.getElementById('btnCalcular');
+    boton.disabled = true;
+    try{
+        let res = await makeOptionsFetch(`${globalUrl}/simulacion-credito`,dataToSend,'post',tokenSimulador(),true);
+        pintarSimulacion(res.datos,res.tabla);
+    }catch(error){
+        let errores = (error.data && error.data.errors) || {};
+        let enLinea = Object.keys(errores).filter(campo=>document.getElementById('error-'+campo));
+        enLinea.forEach(campo=>errorCampoSimulador(campo,[].concat(errores[campo])[0]));
+        if(!enLinea.length && error.data){
+            mostrarErrorHttp(error.data,error.status);
+        }
+    }finally{
+        boton.disabled = false;
+    }
+}

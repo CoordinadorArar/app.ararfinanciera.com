@@ -1,31 +1,80 @@
-#form-datos-financieros, #data-finished, #form-upload-file, #form-tratamiento-datos, #btnEditState{
+#alerta-monto:empty {
     display: none;
 }
-.forms-datos-tercero{
-    zoom: 95%;
+.registro-tercero .ui-paso-cab {
+    margin-bottom: 1.25rem;
 }
-.proccess-forms .btn{
-    border-radius: 20px !important;
+.registro-tercero .ui-titulo-paso {
+    font-size: 1.15rem;
 }
-/* .forms-datos-tercero > .container{
+.registro-tercero [tabindex="-1"]:focus {
+    outline: 0;
+}
+.registro-tercero .form-control,
+.registro-tercero .form-select,
+.registro-tercero .input-group-text {
+    min-height: 44px;
+}
+.registro-tercero .ui-asistente-acciones .btn {
+    min-height: 44px;
+}
+.registro-tercero .ui-vista-previa-cab {
     display: flex;
-    justify-content: center;
-} */
-.forms-datos-tercero > .container > button{
-    position: absolute;
-    left: 75px;
-    border-radius: 15px;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .75rem;
 }
-#form-tratamiento-datos img{
-    height: 150px !important;
+.registro-tercero .ui-vista-previa-detalle {
+    margin: 0;
+    font-size: var(--ui-fs-sm);
+    color: var(--ui-texto-2);
+    font-variant-numeric: tabular-nums;
 }
-#form-tratamiento-datos .alert:hover{
-    transform: scale(1.1);
-    cursor: pointer;
+.registro-tercero .ui-vista-previa-pie {
+    margin: .35rem 0 0;
+    font-size: .74rem;
+    color: var(--ui-texto-4);
 }
-.inputs-values-config{
-    width: max-content !important;
-    margin-bottom: 5px !important;
-    display: inline-block !important;
-    margin-right: 5px !important;
+.registro-tercero .ui-vista-previa .ui-alerta {
+    margin: .75rem 0 0;
+}
+.registro-tercero .ui-cargando-linea {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: var(--ui-fs-sm);
+    color: var(--ui-texto-3);
+}
+.registro-tercero .ui-panel-opcion {
+    margin-top: .25rem;
+}
+.registro-tercero .ui-destinatario {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .85rem 1rem;
+    border: 1px solid var(--ui-borde);
+    border-radius: var(--ui-radio);
+    background: var(--ui-fondo);
+}
+.registro-tercero .ui-destinatario-texto strong {
+    font-size: var(--ui-fs-base);
+    overflow-wrap: anywhere;
+}
+.registro-tercero .ui-campo-boton {
+    padding-top: 1.55rem;
+}
+@media (max-width: 767.98px) {
+    .registro-tercero .ui-campo-boton {
+        padding-top: 0;
+    }
+}
+@media (max-width: 575.98px) {
+    .registro-tercero .ui-destinatario .ui-acciones,
+    .registro-tercero .ui-destinatario .btn {
+        width: 100%;
+    }
 }

@@ -1,131 +1,93 @@
 @extends('layouts.app')
-<link rel="stylesheet" href="{{ asset('css/pagadurias.css') }}">
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/pagadurias.css') }}">
+@endpush
 @section('content')
-    <div class="text-center">
-        <h4>Pagadurias</h4><hr>
-        <div class="row">
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">Pagadurias registradas</h5><hr>
-                        <select name="lista-pagadurias" id="lista-pagadurias" class="form-select" onchange="validarTipoDescuento(this.value)">
-                            <option value="">--Elije una pagaduria--</option>
-                            @if($pagadurias)
-                                @foreach($pagadurias as $data)
-                                    <option value="{{ $data->IdPagaduria }}">{{ $data->NombrePagaduria }}</option>
-                                @endforeach
-                            @endif
-                        </select><br>
-                        <select name="id-configuracion" id="id-configuracion" class="form-select"></select>
-                    </div>
-                </div><br>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">Nueva pagaduria</h5><hr>
-                        <form action="{{ route('guardar-pagaduria') }}" method="post" id="form-pagaduria">
-                            <meta name="csrf-token-form-pagaduria" content="{{ csrf_token() }}" />
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <label for="nombrePagaduria">Nombre pagaduria</label>
-                                        <input type="text" id="nombrePagaduria" name="nombrePagaduria" class="form-control" value="{{ old('nombrePagaduria') }}" placeholder="Ingresa nombre de la pagaduria" onkeypress="return noStrangeCharacters(event)">
-                                    </div>
-                                    <span class="invalid-feedback" role="alert" id="error-nombrePagaduria">
-                                </div>
-                            </div><br>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary" id="" onclick="guardarPagaduria(event)">Guardar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+    <div class="ui-contenedor">
+        <meta name="csrf-token-pagadurias" content="{{ csrf_token() }}" />
+        <header class="ui-encabezado">
+            <div>
+                <h1 class="ui-titulo">Pagadurías</h1>
+                <p class="ui-descripcion">Fórmulas de cupo, parámetros y reglas por edad</p>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="card-body" id="card-1">
-                        <input type="hidden" id="id-config-pagaduria" onkeypress="return noStrangeCharacters(event)">
-                        <div id="form-configuracion">
-
-                        </div>
-                    </div>
-                </div>
+            <div class="ui-acciones">
+                <button type="button" class="btn btn-primary ui-btn" onclick="abrirModalPagaduria(false)">
+                    <i class="fas fa-plus" aria-hidden="true"></i><span>Nueva pagaduría</span>
+                </button>
             </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="card-body" id="card-2">
-                        <h5 class="text-center">Nuevo Rubro</h5>
-                        <form action="{{ route('guardar-rubro-configuracion') }}" method="post" id="form-rubro-config">
-                            <meta name="csrf-token-form-rubro" content="{{ csrf_token() }}" />
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="text" id="nombreRubro" name="nombreRubro" class="form-control" value="{{ old('nombreRubro') }}" placeholder="Ingresa nombre de rubro" onkeypress="return noStrangeCharacters(event)">
-                                    </div>
-                                    <span class="invalid-feedback" role="alert" id="error-nombreRubro">
-                                </div>
-                            </div>
-                            <div class="d-grid mt-1">
-                                <button type="submit" class="btn btn-primary" id="" onclick="guardarRubro(event)">Guardar</button>
-                            </div>
-                        </form>
-                        <hr>
-                        <h5 class="text-center">Agregar elementos a la operación</h5>
-                        <div id="form-datos-configuracion">
-                            <div class="form-group">
-                                <select name="datosVariables" id="datosVariables" class="form-select" onchange="botonRubro(this.value)">
-                                    <option value="">Elije un dato...</option>
-                                </select>
-                            </div><br>
-                            <div id="botonRubro">
-
-                            </div>
-                            <hr>
-                            <div id="numeros&operadores">
-                                <div id="fila-1">
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_1">1</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_2">2</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_3">3</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_/">/</button>
-                                </div>
-                                <div id="fila-2">
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_4">4</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_5">5</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_6">6</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_x">x</button>
-                                </div>
-                                <div id="fila-3">
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_7">7</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_8">8</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_9">9</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_+">+</button>
-                                </div>
-                                <div id="fila-4">
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_0">0</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_(">(</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_)">)</button>
-                                    <button class="btn btn-symbol-2" draggable="true" ondragstart="insertarElementoOperacion(this)" id="symbol_-">-</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        </header>
+        <div class="row g-3">
+            <div class="col-12 col-lg-3">
+                <div class="d-lg-none mb-1">
+                    <label for="selectPagaduria" class="form-label">Pagaduría</label>
+                    <select id="selectPagaduria" class="form-select" onchange="seleccionarPagaduria(this.value)"></select>
                 </div>
+                <section class="ui-card d-none d-lg-block" aria-labelledby="titulo-lista-pagadurias">
+                    <div class="ui-card-cab">
+                        <h2 id="titulo-lista-pagadurias">Pagadurías</h2>
+                        <span class="ui-badge ui-badge-info" id="totalPagadurias"></span>
+                    </div>
+                    <div class="mb-2 d-none" id="buscadorPagadurias">
+                        <label for="buscarPagaduria" class="visually-hidden">Buscar pagaduría</label>
+                        <input type="search" id="buscarPagaduria" class="form-control form-control-sm" placeholder="Buscar…" autocomplete="off" oninput="pintarListaPagadurias()">
+                    </div>
+                    <div class="list-group list-group-flush ui-lista-pagadurias" id="listaPagadurias"></div>
+                </section>
+            </div>
+            <div class="col-12 col-lg-9">
+                <section class="ui-card" id="panelPagaduria"></section>
             </div>
         </div>
     </div>
-    <!--Modal edición de operacion-->
-    <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog">
+    <div class="modal fade ui-modal" id="modalPagaduria" tabindex="-1" aria-labelledby="tituloModalPagaduria" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <form class="modal-content" novalidate onsubmit="guardarNombrePagaduria(event)">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-6" id="tituloModalPagaduria">Nueva pagaduría</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="nombrePagaduria" class="form-label">Nombre de la pagaduría</label>
+                    <input type="text" id="nombrePagaduria" class="form-control" maxlength="50" autocomplete="off" aria-describedby="error-nombrePagaduria" oninput="this.classList.remove('is-invalid')" onkeypress="return noStrangeCharacters(event)">
+                    <span class="invalid-feedback" role="alert" id="error-nombrePagaduria"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary ui-btn" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark" aria-hidden="true"></i><span>Cancelar</span>
+                    </button>
+                    <button type="submit" class="btn btn-primary ui-btn" id="btnGuardarPagaduria">
+                        <i class="fas fa-floppy-disk" aria-hidden="true"></i><span>Guardar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade ui-modal" id="modalProbarFormula" tabindex="-1" aria-labelledby="tituloProbarFormula" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-body p-2">
-                    <div id="vistaPreviaEdicion" class="text-center">
-
+                <div class="modal-header">
+                    <h2 class="modal-title fs-6" id="tituloProbarFormula">Probar fórmula</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="ui-descripcion mb-3" id="probarSubtitulo"></p>
+                    <div class="row g-3" id="probarValores"></div>
+                    <div class="ui-probar-resultado mt-4" aria-live="polite">
+                        <span class="ui-cifra-etiqueta">Fórmula con los valores</span>
+                        <p class="ui-operacion" id="probarOperacion">—</p>
+                        <span class="ui-cifra-etiqueta">Cupo resultante</span>
+                        <span class="ui-cifra" id="probarResultado">—</span>
                     </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-secondary" id="btnCancelarEdicion">Cancelar</button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn ui-btn ui-btn-sec" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark" aria-hidden="true"></i><span>Cerrar</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 @endsection
-<script src="{{ asset('js/pagadurias.js') }}"></script>
+@push('scripts')
+    <script src="{{ asset('js/pagadurias.js') }}"></script>
+@endpush

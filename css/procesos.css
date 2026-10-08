@@ -1,94 +1,100 @@
-#aprobacion-creditos, #revision-documentos, #consulta-centrales, #documentos-soporte, #btn-guardar-datos-financieros{
-    display: none;
-    margin-bottom: 10px;
+.proc-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .75rem;
 }
-#botones-filtro-procesos > .btn{
-    border-radius: 15px;
-    padding-left: 8px;
-    padding-right: 8px;
+
+.proc-resumen {
+    margin: 0;
+    font-size: .8rem;
+    color: var(--ui-texto-3);
 }
-#botones-filtro-procesos > .btn:hover{
-    transform: scale(1.1);
+
+.proc-sub {
+    display: block;
+    font-size: .74rem;
+    font-weight: 400;
+    color: var(--ui-texto-4);
+    font-variant-numeric: tabular-nums;
 }
-#btn-centrales{
-    background-color: #ffc107 !important;
-    border-color: #ffc107 !important;
+
+.proc-orden {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
 }
-#btn-documentos{
-    background-color: #e96868 !important;
-    border-color: #e96868 !important;
+
+.proc-orden i { font-size: .65rem; color: var(--ui-texto-4); }
+.proc-orden:focus-visible { outline: 0; box-shadow: var(--ui-foco); border-radius: var(--ui-radio-sm); }
+
+.proc td.ui-celda-accion { text-align: right; white-space: nowrap; }
+
+.proc-paginador {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .75rem;
 }
-#btn-aprobados{
-    background-color: #207424 !important;
-    border-color: #207424 !important;
+
+.proc-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
 }
-#div-busqueda-documento{
-    width: 25% !important;
+
+.proc-linea {
+    margin: -.25rem 0 1.25rem;
+    font-size: .82rem;
+    color: var(--ui-texto-3);
 }
-@media(max-width:768px){
-    #div-busqueda-documento{
-        width: 50% !important;
+
+.proc-detalles {
+    margin-top: 1rem;
+    padding: .6rem .8rem;
+    border: 1px solid var(--ui-borde);
+    border-radius: var(--ui-radio);
+}
+
+.proc-detalles > summary {
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--ui-primario-osc);
+    cursor: pointer;
+}
+
+.ui-doc-error { grid-column: 1 / -1; margin-top: -.35rem; }
+
+.proc-modal .modal-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ui-texto);
+}
+
+@media (max-width: 576px) {
+    .proc-paginador { justify-content: center; }
+    .proc-detalle .ui-card-pie {
+        flex-direction: column-reverse;
+        align-items: stretch;
     }
-}
-#div-tabla-procesos .table-responsive{
-    max-height: 55vh;
-    height: 55vh;
-}
-#backButton{
-    border-radius: 10px;
-    float: left;
-}
-#btnEnviarDocs:hover{
-    transform: scale(1.1);
-}
-#infoProceso > table th{
-    width: 35% !important;
-}
-#listaDocumentos .alert{
-    padding: 3px !important;
-    margin-bottom: 0 !important;
-}
-#tablaInfoProceso tr{
-    text-align: center !important;
-}
-.btn-acept-docs:hover{
-    transform: scale(1.1);
-}
-.display-5{
-    text-align: center !important;
-    color: #b5b5b5 !important;
-}
-#aprobacion-creditos .title-credit{
-    color: #5a5a5a;
-}
-.btn-credit, .btn-central-aprobar{
-    padding: 15px !important;
-    border-radius: 50% !important;
-    font-size: x-large !important;
-}
-.btn-credit:hover, .btn-central-aprobar:hover{
-    transform: scale(1.1);
-}
-#textoEstado{
-    display: none;
-}
-#tablaInformacion{
-    border: solid 0.5px #cfcfcf;
-    border-radius: 10px !important;
-}
-#tablaInformacion td{
-    padding: 10px !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border: solid 0.5px #cfcfcf;
-}
-.table > thead{
-    vertical-align: middle !important;
-}
-#consulta-centrales td{
-    text-align: center;
-}
-.border-r{
-    border-right: solid 1px;
-    border-color: inherit;
+    .proc-detalle .ui-card-pie > .ui-campo-ayuda { text-align: center; }
+    .proc .btn,
+    .proc .form-control,
+    .proc .form-select { min-height: 44px; }
+    .proc .page-link {
+        display: flex;
+        align-items: center;
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+    }
 }

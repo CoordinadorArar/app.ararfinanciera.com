@@ -1,5 +1,7 @@
 @extends('layouts.app')
-<link rel="stylesheet" href="{{ asset('css/perfil-usuario.css') }}">
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/perfil-usuario.css') }}">
+@endpush
 @section('content')
     @if($user)
         @foreach($user as $data)
@@ -122,4 +124,6 @@
         @endforeach
     @endif
 @endsection
-<script src="{{ asset('js/perfil-usuario.js') }}"></script>
+@push('scripts')
+    <script src="{{ asset('js/perfil-usuario.js') }}"></script>
+@endpush

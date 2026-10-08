@@ -4,7 +4,6 @@
 <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 <link href="{{ asset('css/font-awesome/all.min.css')}}" rel="stylesheet">
 <link href="{{ asset('css/navbar-sidebar.css') }}" rel="stylesheet">
-{{-- <link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet"> --}}
 <link href="{{ asset('css/jquery.datetimepicker.min.css') }}" rel="stylesheet">
 <link href="{{ asset('css/preloader.css') }}" rel="stylesheet">
 <style>
@@ -67,11 +66,10 @@
 <script src="{{ asset('js/font-awesome/brands.min.js') }}"></script>
 <script src="{{ asset('js/font-awesome/regular.min.js') }}"></script>
 <script src="{{ asset('js/font-awesome/solid.min.js') }}"></script>
-<!--<script src="{{ asset('js/main.js') }}"></script>-->
-<!--<script src="{{ asset('js/funciones-globales.js') }}"></script>-->
 <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
 <script src="{{ asset('js/jquery.preloader.min.js') }}"></script>
 <script>
+    const urlsFormato = @json($urlsFormato);
     const enviar = async function(e){
         e.preventDefault();
         let checkData = document.getElementById('checkData');
@@ -93,22 +91,15 @@
                 if(value.isConfirmed){
                     Swal.fire({title:'Espera',text:'Generando documento',icon:'info',showConfirmButton:false,allowEscapeKey:false,allowOutsideClick:false,timer:2500})
                     .then(async()=>{
-                        let idProceso = document.getElementById('idProceso').value;
-                        window.open('http://app.ararfinanciera.com/generar-formato-autorizacion/'+idProceso);
+                        let permisos = '1'+($('#checkTelefonoContact').prop('checked') ? '1' : '0')+($('#checkEmailContact').prop('checked') ? '1' : '0');
+                        window.open(urlsFormato[permisos]);
                     });
                 }
             });
         }else{
             Swal.fire({title:'Espera',text:'Generando documento',icon:'info',showConfirmButton:false,allowEscapeKey:false,allowOutsideClick:false,timer:2500})
             .then(async()=>{
-                let idProceso = document.getElementById('idProceso').value;
-                let permisos = {
-                    checkData:($('#checkData').prop('checked'))? '1' : '0',
-                    checkTelefonoContact:($('#checkTelefonoContact').prop('checked'))? '1' : '0',
-                    checkEmailContact:($('#checkEmailContact').prop('checked'))? '1' : '0'
-                };
-                console.log(permisos);
-                window.open('http://app.ararfinanciera.com/generar-formato-autorizacion/'+idProceso+'/'+JSON.stringify(permisos));
+                window.open(urlsFormato['111']);
             });
         }
     }

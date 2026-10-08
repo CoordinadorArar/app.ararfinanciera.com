@@ -10,10 +10,6 @@ use PHPMailer\PHPMailer\Exception;
 class PHPMailerController extends Controller
 {
     //
-    public function email(){
-        return view("procesos.email-body");
-    }
-
     public static function crearEmail($data) {
         require base_path("vendor/autoload.php");
         $mail = new PHPMailer(true);     // Passing `true` enables exceptions
@@ -46,13 +42,10 @@ class PHPMailerController extends Controller
             $mail->Body    = $data['cuerpo'];
             // $mail->AltBody = plain text version of email body;
  
-            if(!$mail->send()){
-                return back()->with("failed", "Correo no enviado.")->withErrors($mail->ErrorInfo);
-            }else{
-                return back()->with("success", "Correo enviado.");
-            }
+            return $mail->send();
         }catch(Exception $e){
-            return back()->with('error','El mensaje no pudo ser enviado.');
+            report($e);
+            return false;
         }
     }
 }

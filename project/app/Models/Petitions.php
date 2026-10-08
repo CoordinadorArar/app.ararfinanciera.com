@@ -11,8 +11,8 @@ class Petitions extends Model
 {
     use HasFactory;
 
-    public static function mostrarPagadurias(){
-        $sql = "SELECT * FROM Pagadurias ORDER BY NombrePagaduria ASC";
+    public static function mostrarPagadurias($todas=false){
+        $sql = "SELECT * FROM Pagadurias ".($todas ? "" : "WHERE EstadoPagaduria = 1 ")."ORDER BY NombrePagaduria ASC";
         $pagadurias = DB::select($sql);
         return $pagadurias;
     }
@@ -33,12 +33,6 @@ class Petitions extends Model
         $sql = "SELECT * FROM TiposDocumentos";
         $tipos = DB::select($sql);
         return $tipos;
-    }
-
-    public static function mostrarSalarioMinimo(){
-        $sql = "SELECT * FROM ValoresVariables WHERE NombreValorVariable = 'SalarioMinimoMensual'";
-        $salario = DB::select($sql);
-        return $salario;
     }
 
     public static function totalUsuarios($idUsuario=''){
@@ -70,12 +64,6 @@ class Petitions extends Model
                 FROM users u LEFT JOIN rolusuario ru ON u.idUsuario=ru.IdUsuario LEFT JOIN roles r ON ru.IdRol=r.IdRol WHERE r.IdRol=4";
         $asesores = DB::connection('identidad')->select($sql);
         return $asesores;
-    }
-    /**Trae los datos de la tabla de valores variables */
-    public static function mostrarValorVariable($valor){
-        $sql = "SELECT * FROM ValoresVariables WHERE NombreValorVariable=?";
-        $resultado = DB::select($sql, [$valor]);
-        return $resultado;
     }
     /**Mostrar valores variables de tabla eje: salario minimo, tasa de interes */
     public static function mostrarValoresVariables($id=''){

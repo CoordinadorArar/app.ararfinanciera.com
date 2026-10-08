@@ -35,10 +35,12 @@ return [
     | operaciones y terceros vía SOAP.
     */
     'siesa' => [
-        'usuario' => env('SIESA_WS_USUARIO'),
+        'url' => env('SIESA_WS_URL') ?: 'http://172.28.254.19/WSUNOEE/WSUNOEE.asmx',
+        'usuario' => env('SIESA_WS_USUARIO') ?: 'web_rotacion',
         'clave' => env('SIESA_WS_CLAVE'),
-        'conexion' => env('SIESA_WS_CONEXION', 'Real'),
-        'id_cia' => env('SIESA_WS_ID_CIA', 7),
+        'conexion' => env('SIESA_WS_CONEXION') ?: 'Real',
+        'id_cia' => env('SIESA_WS_ID_CIA') ?: 7,
+        'envio_habilitado' => (bool) env('SIESA_ENVIO_HABILITADO', false),
     ],
 
     /*

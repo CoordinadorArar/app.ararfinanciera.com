@@ -27,13 +27,13 @@ class RoutesController extends Controller
     }
     /**Vista creación de clientes siesa */
     public function crearClienteSiesa(){
-        $validarUsuariosSiesa = Terceros::validarUsuariosSiesa(''); 
-        return view('perfilamiento.crear-cliente-siesa',compact('validarUsuariosSiesa'));
+        $rol = User::obtenerRol(auth()->id());
+        return view('perfilamiento.crear-cliente-siesa',compact('rol'));
     }
     /**Vista de todos los procesos ya iniciados en estado 2=consulta de centrales de riesgo para hacer gestion segun rol iniciado */
     public function listaProcesos(){
         $rol = User::obtenerRol(auth()->id());
-        $procesos = Procesos::listaProcesos(auth()->id());
+        $procesos = [];
         return view('procesos.main',compact('procesos','rol'));
     }
     /**Vista documento contable */
@@ -58,7 +58,7 @@ class RoutesController extends Controller
     }
     /**Vista creacion de pagadurias */
     public function crearPagaduria(){
-        $pagadurias = Petitions::mostrarPagadurias();
+        $pagadurias = Petitions::mostrarPagadurias(true);
         return view('administracion.pagadurias.crear-pagaduria',compact('pagadurias'));
     }
     /**Vista administración de asesores */

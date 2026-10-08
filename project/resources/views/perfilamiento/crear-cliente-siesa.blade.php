@@ -1,50 +1,55 @@
 @extends('layouts.app')
-<link rel="stylesheet" href="{{ asset('css/crear-cliente-siesa.css') }}">
 @section('content')
-    <div style="min-height: 500px" id="div-crear-cliente">
-        <h4 class="text-center">Creacion Clientes Siesa</h4>
-        <div class="container">
-            <meta name="csrf-token-crear-cliente" content="{{ csrf_token() }}" />
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12">
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Documento</th>
-                                        <th>Nombres</th>
-                                        <th>Apellidos</th>
-                                        <th>Gestionar</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbodyClientes">
-                                    @if($validarUsuariosSiesa != 0)
-                                        
-                                        @foreach($validarUsuariosSiesa as $data)
-                                            @if($data->IdSiesa == 0 || $data->cliente == 0 || $data->Idproveedortercero === 0)
-                                                
-                                                <tr>
-                                                    <td>{{ $data->IdCliente }}</td>
-                                                    <td>{{ $data->NomCliente }}</td>
-                                                    <td>{{ $data->ApeCliente }}</td>
-                                                    <td>
-                                                        <button data-toggle="tooltip" title="Creacion Cliente" class="btn btn-primary" id="btn_crear" name="btn_crear" 
-                                                        onclick="CrearCliente({{ $data->IdCliente }});">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            @endif
-                                        @endforeach
-                                    @endif
-                                </tbody>
-                            </table>    
-                        </div>               
+    <div class="ui-contenedor" id="clientesSiesa" data-admin="{{ collect($rol)->contains('IdRol',1) ? 1 : 0 }}">
+        <header class="ui-encabezado">
+            <div>
+                <h1 class="ui-titulo" id="tituloClientes" tabindex="-1">Clientes en SIESA</h1>
+                <p class="ui-descripcion">Creación de tercero, cliente y proveedor a partir de FactoringManager</p>
+            </div>
+            <div class="ui-acciones" id="badgeEnvio"></div>
+        </header>
+        <div id="alertaEnvio"></div>
+        <div class="ui-contadores" role="group" aria-label="Filtrar por estado en SIESA" id="contadores"></div>
+        <div class="ui-barra">
+            <div class="ui-buscador" role="search">
+                <label for="busquedaCliente" class="visually-hidden">Buscar por NIT o nombre</label>
+                <i class="fas fa-magnifying-glass ui-buscador-icono" aria-hidden="true"></i>
+                <input type="text" id="busquedaCliente" class="form-control" placeholder="Buscar por NIT o nombre" maxlength="100" autocomplete="off">
+                <button type="button" class="ui-buscador-limpiar d-none" id="limpiarBusqueda" aria-label="Limpiar búsqueda" onclick="limpiarBusqueda()"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <p class="ui-resumen" id="resumenClientes" aria-live="polite"></p>
+        </div>
+        <section class="ui-card" aria-labelledby="tituloClientes">
+            <div id="bandejaClientes"></div>
+        </section>
+        <div class="modal fade" id="modalSiesa" tabindex="-1" aria-labelledby="tituloSiesa" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-sm-down">
+                <div class="modal-content ui-modal">
+                    <div class="modal-header align-items-start">
+                        <div>
+                            <h2 class="modal-title" id="tituloSiesa" tabindex="-1"></h2>
+                            <span class="ui-modal-sub" id="subSiesa"></span>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mt-2" id="estadoSiesa"></div>
+                        </div>
+                        <button type="button" class="btn-close" id="cerrarSiesa" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="ui-pestanas" role="tablist" aria-label="Creación en SIESA" id="pestanasSiesa" onkeydown="teclaPestana(event)"></div>
+                        <div class="ui-pestana-panel" role="tabpanel" id="panel-validacion" aria-labelledby="tab-validacion" tabindex="0"></div>
+                        <div class="ui-pestana-panel" role="tabpanel" id="panel-vista" aria-labelledby="tab-vista" tabindex="0" hidden></div>
+                        <div class="ui-pestana-panel" role="tabpanel" id="panel-ejecucion" aria-labelledby="tab-ejecucion" tabindex="0" hidden></div>
+                    </div>
+                    <div class="modal-footer flex-column-reverse flex-sm-row align-items-stretch align-items-sm-center">
+                        <button type="button" class="btn ui-btn ui-btn-sec me-sm-auto" id="btnCerrarSiesa" data-bs-dismiss="modal">Cerrar</button>
+                        <p class="ui-campo-ayuda m-0 order-last order-sm-0" id="ayudaEjecutar"></p>
+                        <button type="button" class="btn ui-btn ui-btn-sec" id="btnValidar" onclick="validar()"><i class="fas fa-rotate-right" aria-hidden="true"></i><span>Validar de nuevo</span></button>
+                        <button type="button" class="btn btn-primary ui-btn" id="btnEjecutar" onclick="ejecutar()"></button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
-<script src="{{ asset('js/crear-cliente-siesa.js') }}"></script>
+@push('scripts')
+    <script src="{{ asset('js/crear-cliente-siesa.js') }}"></script>
+@endpush

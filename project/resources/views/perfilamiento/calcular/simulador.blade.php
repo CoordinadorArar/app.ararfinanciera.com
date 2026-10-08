@@ -1,85 +1,88 @@
 @extends('layouts.app')
-<link rel="stylesheet" href="{{ asset('css/simulador.css') }}">
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/simulador.css') }}">
+@endpush
 @section('content')
-    <div class="text-center">
-        <h3 class="text-center">Simulador de Cr&eacutedito</h3><hr>
-        <div class="container">
-            <div class="row">
-                <meta name="csrf-token-simulador" content="{{ csrf_token() }}"/>
-                <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 text-center mb-2">
-                    <h5 class="text-start">Valores para realizar la simulación</h5><hr>
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-10">
-                        <input type="text" max="{{ $fecha_actual }}" class="form-control"
-                            id="fechaEdad" name="fechaEdad" data-toggle="tooltip" data-bs-placement="top" title="Fecha Nacimiento"  data-bs-html="true" 
-                            onclick="validarPeriodo(this)" onchange="validarPeriodo(this)" placeholder="Ingresa Fecha de nacimiento" onkeypress="return noStrangeCharacters(event)">
-                        <span class="invalid-feedback" role="alert" id="error-fechaEdad"></span>
+    @php($tasaVigente = \App\Services\CalculadoraCredito::valorVariable('TasaInteres'))
+    <div class="ui-contenedor">
+        <meta name="csrf-token-simulador" content="{{ csrf_token() }}"/>
+        <header class="ui-encabezado">
+            <div>
+                <h1 class="ui-titulo">Simulador de crédito</h1>
+                <p class="ui-descripcion">Calcula cuota, seguro y amortización</p>
+            </div>
+        </header>
+        <div class="row g-3">
+            <div class="col-12 col-lg-4">
+                <section class="ui-card" aria-labelledby="titulo-datos-simulacion">
+                    <div class="ui-card-cab">
+                        <h2 id="titulo-datos-simulacion">Datos</h2>
                     </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-10 mt-2">
-                        <select class="form-select" name="periodoCredito" id="periodoCredito">
-                            <option value=" ">- Selecciona periodo de crédito -</option>
-                        </select>
-                        <span class="invalid-feedback" role="alert" id="error-periodoCredito"></span>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-10 mt-2">
-                        <input type="text" class="form-control" placeholder="Ingresa Valor Credito..." id="valorCredito" data-type="currency" onblur="formatCurrency(this,'blur')" onkeyup="formatCurrency(this)" onkeypress="return soloNumeros(event)">
-                        <span class="invalid-feedback" role="alert" id="error-valorCredito"></span>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-10 mt-2">
-                        <input type="text" class="form-control" placeholder="Ingresa Tasa Credito..." id="tasaInteres" onkeypress="return noStrangeCharacters(event)">
-                        <span class="invalid-feedback" role="alert" id="error-tasaInteres"></span>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-10 mt-2">
-                        <button data-toggle="tooltip" title="Calcular" class="btn btn-primary" type="button" id="btnCalcular" onclick="calcular()">
-                            <i class="fas fa-calculator"></i> Calcular
-                        </button>
-                    </div>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8 col-xl-8">
-                    <table id="tablaInformacion">
-                        <tr>
-                            <td>Valor Credito : $ </td>
-                        </tr>
-                        <tr>
-                            <td>Valor Cuota Mensual : $ </td>
-                        </tr>
-                        <tr>
-                            <td>Numero Cuota : </td>
-                        </tr>
-                        <tr>
-                            <td>Tipo Credito : </td>
-                        </tr>
-                        <tr>
-                            <td>Tasa Mensual : % </td>
-                        </tr>
-                        <tr style="border-top: 0.5px solid;">
-                            <td><h2 style="font-size: 18px;font-weight: 700;">Tabla de simulaci&oacuten de cr&eacutedito</h2></td>
-                        </tr>
-                    </table>
-                    <div class="table-responsive">
-                        <table class="table" id="tablaSimulacion">
-                            <thead>
-                                <tr class="bg-primary">
-                                    <th>Cuota N°</th>
-                                    <th>Cuota</th>
-                                    <th>Capital</th>
-                                    <th>Interes</th>
-                                    <th>Seguros</th>
-                                    <th>Valor Cuota</th>
-                                    <th>Saldo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodySimulacion">
-                                <tr>
-                                    <td colspan="7" style="text-align:center;color:#b5b5b5;">
-                                        <h4 class="display-5">Ingresa los valores para la simulación</h4>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <form id="form-simulador" novalidate onsubmit="calcular(event)">
+                        <div class="mb-3">
+                            <label for="idPagaduria" class="form-label">Pagaduría</label>
+                            <select class="form-select" id="idPagaduria" aria-describedby="error-idPagaduria" onchange="validarPeriodo()">
+                                <option value="">Selecciona una pagaduría</option>
+                            </select>
+                            <span class="invalid-feedback" role="alert" id="error-idPagaduria"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fechaEdad" class="form-label">Fecha de nacimiento</label>
+                            <input type="text" class="form-control" id="fechaEdad" autocomplete="off" placeholder="dd/mm/aaaa" aria-describedby="ayuda-edad error-fechaEdad" onchange="validarPeriodo()">
+                            <span class="invalid-feedback" role="alert" id="error-fechaEdad"></span>
+                            <span class="ui-campo-ayuda" id="ayuda-edad" aria-live="polite"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="periodoCredito" class="form-label">Plazo</label>
+                            <select class="form-select" id="periodoCredito" aria-describedby="error-periodoCredito" disabled onchange="this.classList.remove('is-invalid')">
+                                <option value="">Selecciona pagaduría y fecha</option>
+                            </select>
+                            <span class="invalid-feedback" role="alert" id="error-periodoCredito"></span>
+                            <div id="aviso-plazo" class="mt-2"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valorCredito" class="form-label">Monto</label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text">$</span>
+                                <input type="text" inputmode="numeric" class="form-control" id="valorCredito" autocomplete="off" aria-describedby="error-valorCredito" oninput="formatearInputMoneda(this);this.classList.remove('is-invalid')">
+                                <span class="invalid-feedback" role="alert" id="error-valorCredito"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <p class="form-label mb-0">Tasa mensual</p>
+                            <p class="form-control-plaintext py-1" id="tasaSimulador">
+                                {{ is_numeric($tasaVigente) ? number_format($tasaVigente,2,',','.').' % mensual' : 'Sin definir' }}
+                                <i class="fas fa-lock text-secondary ms-1" aria-hidden="true"></i>
+                            </p>
+                            <span class="ui-campo-ayuda mt-0">Definida en Administración › Variables</span>
+                            @unless(is_numeric($tasaVigente))
+                                <div class="ui-alerta ui-alerta-adv mt-2 mb-0" role="status">
+                                    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span class="ui-alerta-texto">No hay tasa configurada en Variables</span>
+                                </div>
+                            @endunless
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary ui-btn" id="btnCalcular" @unless(is_numeric($tasaVigente)) disabled @endunless>
+                                <i class="fas fa-calculator" aria-hidden="true"></i><span>Calcular</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+            <div class="col-12 col-lg-8">
+                <div id="resultado-simulacion" aria-live="polite">
+                    <section class="ui-card">
+                        <div class="ui-vacio">
+                            <i class="fas fa-calculator" aria-hidden="true"></i>
+                            <p class="ui-vacio-titulo">Completa los datos y pulsa Calcular</p>
+                            <p class="ui-vacio-texto mb-0">Verás la cuota, el seguro y la tabla de amortización.</p>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
     </div>
 @endsection
-<script src="{{ asset('js/simulador.js') }}"></script>
+@push('scripts')
+    <script src="{{ asset('js/simulador.js') }}"></script>
+@endpush

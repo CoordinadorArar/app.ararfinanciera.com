@@ -21,7 +21,6 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \App\Http\Middleware\CORS::class
     ];
 
     /**
@@ -65,9 +64,8 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'jwt.verify' => \App\Http\Middleware\JwtMiddleware::class,
-        'CORS' => \App\Http\Middleware\CORS::class,
         'submenu.permiso' => \App\Http\Middleware\CheckSubmenuPermission::class,
         'deterioro.permiso' => \App\Http\Middleware\CheckDeterioroPermiso::class,
+        'submenu.accion' => \App\Http\Middleware\CheckSubmenuAccion::class,
     ];
 }

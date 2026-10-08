@@ -16,6 +16,7 @@ node_modules/
 # Generados en tiempo de ejecución
 /project/storage/
 /project/bootstrap/cache/
+/project/.phpunit.result.cache
 /web/writable/
 /web/builds/
 
@@ -24,6 +25,8 @@ node_modules/
 
 # Clon divergente del proyecto
 /Powerbi/
+/project08-18/
+/webservice-2026-08-31/
 
 # Sistema operativo y editores
 Thumbs.db
@@ -47,3 +50,15 @@ Desktop.ini
 # en el servidor y una carpeta recreada sin él queda abierta.
 /project/soportes-suspension/*
 !/project/soportes-suspension/.htaccess
+
+# Llaves, certificados y peticiones de TransUnion con credenciales
+*.pfx
+*.jks
+*.cer
+*.key
+*.rar
+/project/app/Http/Controllers/transunion/*
+!/project/app/Http/Controllers/transunion/.htaccess
+/project/config/transunion/*
+!/project/config/transunion/.htaccess
+/project/config/Consultas-TransUnion.xml

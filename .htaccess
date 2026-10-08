@@ -20,6 +20,11 @@
     Deny from all
 </FilesMatch>
 
+<FilesMatch "\.(pem|key|pfx|jks|cer|crt|rar|xml|sql|log|example)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
 # Protección contra inyección de código
 RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
 RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
@@ -34,6 +39,9 @@ RewriteRule ^(.*)$ - [F,L]
     </IfModule>
 
     RewriteEngine On
+
+    RewriteRule ^webservice(/.*)?$ - [F,L,NC]
+    RewriteRule ^project/storage(/.*)?$ - [F,L,NC]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
