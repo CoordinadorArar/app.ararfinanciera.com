@@ -11,8 +11,8 @@ class Petitions extends Model
 {
     use HasFactory;
 
-    public static function mostrarPagadurias(){
-        $sql = "SELECT * FROM Pagadurias ORDER BY NombrePagaduria ASC";
+    public static function mostrarPagadurias($todas=false){
+        $sql = "SELECT * FROM Pagadurias ".($todas ? "" : "WHERE EstadoPagaduria = 1 ")."ORDER BY NombrePagaduria ASC";
         $pagadurias = DB::select($sql);
         return $pagadurias;
     }

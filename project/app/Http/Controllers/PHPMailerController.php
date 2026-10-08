@@ -46,13 +46,10 @@ class PHPMailerController extends Controller
             $mail->Body    = $data['cuerpo'];
             // $mail->AltBody = plain text version of email body;
  
-            if(!$mail->send()){
-                return back()->with("failed", "Correo no enviado.")->withErrors($mail->ErrorInfo);
-            }else{
-                return back()->with("success", "Correo enviado.");
-            }
+            return $mail->send();
         }catch(Exception $e){
-            return back()->with('error','El mensaje no pudo ser enviado.');
+            report($e);
+            return false;
         }
     }
 }

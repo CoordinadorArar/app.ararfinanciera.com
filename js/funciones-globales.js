@@ -1,8 +1,92 @@
 /**Peticion fetch solicita, url, data a enviar, metodo de la solictud y token */
-async function makeOptionsFetch(url,dataToSend,method,token){
-    let response = await fetch(url,{method:method,body:dataToSend,headers:{'X-CSRF-TOKEN':token}})
-    let data = await response.json();
+async function makeOptionsFetch(url,dataToSend,method,token,silencioso=false){
+    let response;
+    try{
+        response = await fetch(url,{method:method,body:dataToSend,headers:{'X-CSRF-TOKEN':token,'X-Requested-With':'XMLHttpRequest'}});
+    }catch(e){
+        let data = {message:MENSAJE_SIN_RED};
+        if(!silencioso){
+            mostrarErrorHttp(data,0);
+        }
+        throw Object.assign(new Error(data.message),{data:data,status:0});
+    }
+    let data = response.ok ? await response.json() : await response.json().catch(()=>({}));
+    if(!response.ok){
+        let bloqueante = response.status == 401 || response.status == 419 || (response.status == 403 && data.res == 'inactivo');
+        data = response.status >= 500 ? {message:MENSAJE_ERROR_SERVIDOR} : data;
+        if(!silencioso || response.status == 403 || bloqueante){
+            mostrarErrorHttp(data,response.status);
+        }
+        if(bloqueante){
+            return new Promise(()=>{});
+        }
+        throw Object.assign(new Error(mensajeErrorHttp(data)),{data:data,status:response.status});
+    }
     return data;
+}
+const MENSAJE_SIN_RED = 'No hay conexión con el servidor. Verifica tu red e intenta de nuevo.';
+const MENSAJE_ERROR_SERVIDOR = 'Ocurrió un error en el servidor. Intenta de nuevo; si continúa, avisa al área de desarrollo.';
+let avisoBloqueanteMostrado = false;
+const avisoBloqueante = function(titulo,texto,icono,boton,destino){
+    if(avisoBloqueanteMostrado){
+        return;
+    }
+    avisoBloqueanteMostrado = true;
+    $(document.body).preloader('remove');
+    Swal.fire({title:titulo,text:texto,icon:icono,confirmButtonText:boton,confirmButtonColor:'rgb(65,110,195)',allowOutsideClick:false,allowEscapeKey:false}).then(()=>{ window.location = `${window.location.origin}${destino}`; });
+}
+const formatearMoneda = function(valor,simbolo=true){
+    let numero = Number(valor) || 0;
+    return simbolo ? new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0,maximumFractionDigits:0}).format(numero) : numero.toLocaleString('es-CO',{maximumFractionDigits:0});
+}
+const formatearPorcentaje = function(valor,decimales=2){
+    return (Number(valor) || 0).toLocaleString('es-CO',{minimumFractionDigits:Math.min(2,decimales),maximumFractionDigits:decimales})+' %';
+}
+const notificar = function(texto){
+    let toast = document.getElementById('ui-toast');
+    if(!toast){
+        toast = document.createElement('div');
+        toast.id = 'ui-toast';
+        toast.className = 'ui-toast d-none';
+        toast.setAttribute('role','status');
+        toast.setAttribute('aria-live','polite');
+        document.body.appendChild(toast);
+    }
+    toast.textContent = texto;
+    toast.classList.remove('d-none');
+    clearTimeout(toast.temporizador);
+    toast.temporizador = setTimeout(()=>toast.classList.add('d-none'),3000);
+}
+const numeroLimpio = function(texto){
+    return String(texto == null ? '' : texto).trim().replace(/[.,]\d{1,2}$/,'').replace(/\D/g,'');
+}
+const formatearInputMoneda = function(input){
+    let digitos = input.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+    input.value = digitos === '' ? '' : formatearMoneda(digitos,false);
+}
+const escapeHtml = function(str){
+    return (str == null ? '' : String(str)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+const mensajeErrorHttp = function(data){
+    let errores = (data && data.errors) ? Object.values(data.errors) : [];
+    let mensaje = errores.length ? [].concat(errores[0])[0] : ((data && data.message) || 'No fue posible completar la solicitud. Intenta de nuevo.');
+    return (data && data.montoMaximo != null) ? mensaje+' Monto máximo prestable: '+formatearMoneda(data.montoMaximo)+'.' : mensaje;
+}
+const mostrarErrorHttp = function(data,status){
+    if(status == 401 || status == 419){
+        return avisoBloqueante('Tu sesión expiró','Por seguridad, la sesión se cerró tras un tiempo sin actividad. Inicia sesión de nuevo para continuar; lo que no hayas guardado se perderá.','info','Iniciar sesión','/login');
+    }
+    if(status == 403 && data && data.res == 'inactivo'){
+        return avisoBloqueante('Usuario inactivo',data.message || 'El usuario está inactivo, la sesión no puede continuar.','error','Entendido','/login');
+    }
+    $(document.body).preloader('remove');
+    Swal.fire({
+        title: status == 403 ? 'Acción no permitida' : 'No fue posible continuar',
+        text: status >= 500 ? MENSAJE_ERROR_SERVIDOR : mensajeErrorHttp(data),
+        icon: status == 403 ? 'warning' : 'error',
+        confirmButtonText:'Entendido',
+        confirmButtonColor:'rgb(65,110,195)'
+    });
 }
 /**Mostrar mensajes de errores */
 const showErrors = async function(data){

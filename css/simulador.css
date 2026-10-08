@@ -1,3 +1,22 @@
-#btnCalcular:hover{
-    transform: scale(1.1);
+.ui-scroll-amortizacion {
+    max-height: 32rem;
+    overflow: auto;
 }
+.ui-tabla-amortizacion thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.ui-tabla-amortizacion th:first-child,
+.ui-tabla-amortizacion td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--ui-blanco);
+    font-weight: 600;
+}
+.ui-tabla-amortizacion thead th:first-child {
+    z-index: 2;
+    background: var(--ui-fondo);
+}
+.ui-tabla-amortizacion tfoot td:first-child { background: var(--ui-fondo); }
+.ui-tabla-amortizacion tbody tr:hover td:first-child { background: #F9FBFE; }

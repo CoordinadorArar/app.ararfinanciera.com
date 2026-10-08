@@ -86,6 +86,7 @@ Route::group(['middleware'=>'auth'],function(){
 /**Rutas de administrador */
 Route::group(['middleware'=>'auth'],function(){
     Route::post('/menus',[AdminController::class, 'obtenerMenus'])->name('get-menus');
+    Route::post('/inicio-resumen',[HomeController::class, 'inicioResumen'])->name('inicio-resumen');
     Route::post('/submenus',[AdminController::class, 'obtenerSubMenus'])->name('get-submenus');
     Route::post('/informacion-usuario', [UserController::class, 'obtenerRol'])->name('get-rol');
     Route::post('/editar-datos-usuario', [AdminController::class, 'editarUsuario'])->name('editar-datos-usuario');
@@ -93,12 +94,19 @@ Route::group(['middleware'=>'auth'],function(){
     Route::post('/subir-foto-perfil', [AdminController::class, 'subirFotoPerfil'])->name('subir-foto-perfil');
     Route::get('/mostrar-foto-perfil/{imagen}', [AdminController::class, 'mostrarFotoPerfil'])->name('mostrar-foto-perfil');
     Route::post('/cambiar-ambiente', [AdminController::class, 'cambiarAmbiente'])->name('cambiar-ambiente');
+});
+Route::group(['middleware'=>['auth','submenu.accion:/gestion-usuarios']],function(){
     /**Gestion de usuarios */
     Route::post('/mostrar-info-usuario', [AdminController::class, 'mostrarInfoUsuario'])->name('mostrar-info-usuario');
     Route::post('/editar-usuarios', [AdminController::class, 'editarUsuarios'])->name('editar-usuarios');
+    Route::post('/mostrar-roles', [PetitionsController::class, 'mostrarRoles'])->name('mostrar-roles');
+});
+Route::group(['middleware'=>['auth','submenu.accion:/gestion-asesores']],function(){
     /**Gestion de asesores */
     Route::post('/mostrar-procesos-asesor', [AdminController::class, 'mostrarProcesosAsesor'])->name('mostrar-procesos-asesor');
     Route::post('/proceso-solo-info', [AdminController::class, 'procesoSoloInfo'])->name('proceso-solo-info');
+});
+Route::group(['middleware'=>['auth','submenu.accion:/crear-pagadurias']],function(){
     /**Gestión de pagadurias */
     Route::post('/guardar-pagaduria', [AdminController::class, 'guardarPagaduria'])->name('guardar-pagaduria');
     Route::post('/mostrar-info-pagaduria', [AdminController::class, 'mostrarInfoPagaduria'])->name('mostrar-info-pagaduria');
@@ -106,9 +114,20 @@ Route::group(['middleware'=>'auth'],function(){
     Route::post('/mostrar-rubros-pagaduria', [AdminController::class, 'mostrarRubrosPagaduria'])->name('mostrar-rubros-pagaduria');
     Route::post('/guardar-pagaduria-info', [AdminController::class, 'guardarPagaduriaInfo'])->name('guardar-pagaduria-info');
     Route::post('/guardar-rubro-configuracion', [AdminController::class, 'guardarRubroConfiguracion'])->name('guardar-rubro-configuracion');
+    Route::post('/listar-pagadurias-admin', [AdminController::class, 'listarPagadurias'])->name('listar-pagadurias-admin');
+    Route::post('/cambiar-estado-pagaduria', [AdminController::class, 'cambiarEstadoPagaduria'])->name('cambiar-estado-pagaduria');
+    Route::post('/eliminar-rubro-configuracion', [AdminController::class, 'eliminarRubroConfiguracion'])->name('eliminar-rubro-configuracion');
+    Route::post('/guardar-regla-edad', [AdminController::class, 'guardarReglaEdad'])->name('guardar-regla-edad');
+    Route::post('/eliminar-regla-edad', [AdminController::class, 'eliminarReglaEdad'])->name('eliminar-regla-edad');
+    Route::post('/probar-formula', [AdminController::class, 'probarFormula'])->name('probar-formula');
+});
+Route::group(['middleware'=>['auth','submenu.accion:/gestion-sitio']],function(){
     /**Gestión de roles, variables y mas elementos del aplicativo... */
     Route::post('/mostrar-info-admin', [AdminController::class, 'mostrarInfoAdmin'])->name('mostrar-info-admin');
     Route::post('/guardar-datos-sitio', [AdminController::class, 'guardarDatosSitio'])->name('guardar-datos-sitio');
+    Route::post('/centrales-config-listar', [AdminController::class, 'centralesConfigListar'])->name('centrales-config-listar');
+    Route::post('/centrales-config-guardar', [AdminController::class, 'centralesConfigGuardar'])->name('centrales-config-guardar');
+    Route::post('/centrales-probar-conexion', [AdminController::class, 'centralesProbarConexion'])->name('centrales-probar-conexion');
 });
 /**Rutas de peticiones multiples */
 Route::group(['middleware'=>'auth'],function(){
@@ -116,56 +135,62 @@ Route::group(['middleware'=>'auth'],function(){
     Route::post('/mostrar-pagadurias', [PetitionsController::class, 'mostrarPagadurias'])->name('mostrar-pagadurias');
     Route::post('/mostrar-departamentos', [PetitionsController::class, 'mostrarDepartamentos'])->name('mostrar-departamentos');
     Route::post('/mostrar-ciudades', [PetitionsController::class, 'mostrarCiudades'])->name('mostrar-ciudades');
-    Route::post('/mostrar-roles', [PetitionsController::class, 'mostrarRoles'])->name('mostrar-roles');
 });
 /**Rutas de registro de datos*/
-Route::group(['middleware'=>'auth'],function(){
+Route::group(['middleware'=>['auth','submenu.accion:/form-crear-tercero']],function(){
     Route::post('/validar-documento', [ProcesosController::class, 'validarDocumento'])->name('validar-documento');
+    Route::post('/estado-registro', [ProcesosController::class, 'estadoRegistro'])->name('estado-registro');
     Route::post('/guardar-datos-personales', [ProcesosController::class, 'guardarDatosPersonales'])->name('guardar-datos-personales');
     Route::post('/mostrar-config-inputs', [ProcesosController::class, 'mostrarConfigInputs'])->name('mostrar-config-inputs');
-    Route::post('/verificar-edad-tercero', [ProcesosController::class, 'verificarEdadTercero'])->name('verificar-edad-tercero');
+    Route::post('/calcular-datos-financieros', [ProcesosController::class, 'calcularDatosFinancieros'])->name('calcular-datos-financieros');
     Route::post('/guardar-datos-financieros', [ProcesosController::class, 'guardarDatosFinancieros'])->name('guardar-datos-financieros');
-    Route::post('/editar-estado-proceso', [ProcesosController::class, 'editarEstadoProceso'])->name('editar-estado-proceso');
+    Route::get('/formato-tratamiento-datos/{idProceso?}', [ProcesosController::class, 'formatoTratamientoDatos'])->where('idProceso','[0-9]+')->name('formato-tratamiento-datos');
     Route::post('/enviar-email-aprobacion-datos', [ProcesosController::class, 'enviarEmailAprobacionDatos'])->name('enviar-email-aprobacion-datos');
     Route::post('/subir-archivo-tratamiento-datos', [ProcesosController::class, 'subirArchivoTratamientoDatos'])->name('subir-archivo-tratamiento-datos');
 });
-//ruta de generación de formato de autorización digital
-Route::group(['middleware'=>['CORS']],function(){
-    Route::get('/generar-formato-autorizacion/{idProceso}/{permisos}', [ProcesosController::class, 'generarFormatoAutorizacion'])->name('generar-formato-autorizacion');
+Route::group(['middleware'=>['auth','submenu.accion:/form-crear-tercero,/lista-procesos']],function(){
+    Route::post('/verificar-edad-tercero', [ProcesosController::class, 'verificarEdadTercero'])->name('verificar-edad-tercero');
+    Route::post('/editar-estado-proceso', [ProcesosController::class, 'editarEstadoProceso'])->name('editar-estado-proceso');
 });
-Route::get('/aceptar-tratamiento-datos/{idProceso}/{documento}', [ProcesosController::class, 'aceptarTratamientoDatos'])->name('aceptar-tratamiento-datos');
+//ruta de generación de formato de autorización digital
+Route::group(['middleware'=>['signed:relative']],function(){
+    Route::get('/generar-formato-autorizacion/{idProceso}/{permisos}', [ProcesosController::class, 'generarFormatoAutorizacion'])->where(['idProceso'=>'[0-9]+','permisos'=>'1[01]{2}'])->name('generar-formato-autorizacion');
+    Route::get('/aceptar-tratamiento-datos/{idProceso}/{documento}', [ProcesosController::class, 'aceptarTratamientoDatos'])->where('idProceso','[0-9]+')->name('aceptar-tratamiento-datos');
+});
 /**Rutas Perfilamiento */
-Route::group(['middleware'=>'auth'],function(){
+Route::group(['middleware'=>['auth','submenu.accion:/simulacion-credito']],function(){
     //Route::post('/show-active-process', [ProcesosController::class, 'showActiveProcess'])->name('show-active-process');
-    Route::post('/mostrar-valores-proceso', [ProcesosController::class, 'mostrarValoresProceso'])->name('mostrar-valores-proceso');/**eliminar ruta */
     //Route::post('/calculate', [ProcesosController::class, 'calculate'])->name('calculate');
-    Route::post('/iniciar-proceso-credito', [ProcesosController::class, 'iniciarProcesoCredito'])->name('iniciar-proceso-credito');
     Route::post('/validar-meses',[ProcesosController::class, 'validarMeses'])->name('validar-meses');
-    Route::post('/simulacion-credito',[ProcesosController::class, 'simulacionCredito'])->name('simulacion-credito');
+    Route::post('/simulacion-credito',[ProcesosController::class, 'simulacionCredito'])->name('simulacion-credito-calcular');
 });
 /**Rutas creación de cliente y relacionados en SIESA */
-Route::group(['middleware' => 'auth'],function(){
-    Route::post('/creacion-tercero-siesa', [TerceroSiesaController::class, 'creacionTerceroSiesa'])->name('creacion-tercero-siesa');
-    Route::post('/creacion-cliente-siesa', [TerceroSiesaController::class, 'creacionClienteSiesa'])->name('creacion-cliente-siesa');
-    Route::post('/creacion-proveedor', [TerceroSiesaController::class, 'creacionProveedor'])->name('creacion-proveedor');
-    Route::post('/creacion-impretension', [TerceroSiesaController::class, 'creacionImpretension'])->name('creacion-impretension');
-    Route::post('/creacion-impretencion-proveedor', [TerceroSiesaController::class, 'creacionImpretencionProveedor'])->name('creacion-impretencion-proveedor');
-    Route::post('/crear-pagoelec-bancolombia', [TerceroSiesaController::class, 'crearPagoelecBancolombia'])->name('crear-pagoelec-bancolombia');
-    Route::post('/crear-pagoelec-bancobogota', [TerceroSiesaController::class, 'crearPagoelecBancobogota'])->name('crear-pagoelec-bancobogota');
+Route::group(['middleware' => ['auth','submenu.accion:/crear-cliente-siesa']],function(){
+    Route::post('/siesa-clientes', [TerceroSiesaController::class, 'siesaClientes'])->name('siesa-clientes');
+    Route::post('/siesa-validar', [TerceroSiesaController::class, 'siesaValidar'])->name('siesa-validar');
+    Route::post('/siesa-vista-previa', [TerceroSiesaController::class, 'siesaVistaPrevia'])->name('siesa-vista-previa');
+    Route::post('/siesa-ejecutar-paso', [TerceroSiesaController::class, 'siesaEjecutarPaso'])->name('siesa-ejecutar-paso');
 });
 /**Rutas de procesos, estados y vistas relacionadas */
-Route::group(['middleware'=>'auth'],function(){
+Route::group(['middleware'=>['auth','submenu.accion:/lista-procesos']],function(){
     Route::post('/lista-procesos-filtro', [ProcesosController::class, 'listaProcesos'])->name('lista-procesos-filtro');
     Route::post('/mostrar-info-proceso', [ProcesosController::class, 'mostrarInfoProcesos'])->name('mostrar-info-proceso');
     //Route::post('/verify-documents-all-procesos', [ProcesosController::class, 'verifyDocumentsAllprocesos'])->name('verify-documents-all-procesos');
-    Route::post('/consulta-centrales-riesgo', [ProcesosController::class, 'consultaCentralesRiesgo'])->name('consulta-centrales-riesgo');
+    Route::post('/centrales-estado', [ProcesosController::class, 'centralesEstado'])->name('centrales-estado');
+    Route::post('/centrales-consultar', [ProcesosController::class, 'centralesConsultar'])->name('centrales-consultar');
+    Route::post('/centrales-resultados', [ProcesosController::class, 'centralesResultados'])->name('centrales-resultados');
     Route::post('/verificar-todos-los-documentos', [ProcesosController::class, 'verificarDocumentos'])->name('verificar-todos-los-documentos');
     Route::post('/subir-documentos-soporte', [ProcesosController::class, 'subirDocumentosSoporte'])->name('subir-documentos-soporte');
-    Route::get('/ver-documento-soporte/{nombreDocumento}/{idProceso}', [ProcesosController::class, 'verDocumentoSoporte'])->name('ver-documento-soporte');
+    Route::get('/ver-documento-soporte/{idDocumento}/{idProceso}', [ProcesosController::class, 'verDocumentoSoporte'])->where(['idDocumento'=>'[0-9]+','idProceso'=>'[0-9]+'])->name('ver-documento-soporte');
     Route::post('/gestion-documentos-proceso', [ProcesosController::class, 'gestionDocumentosSoporte'])->name('gestion-documentos-proceso');
     Route::post('/enviar-email-credito', [ProcesosController::class, 'enviarEmailCredito'])->name('enviar-email-credito');
     Route::post('/editar-proceso',[ProcesosController::class, 'editarProceso'])->name('editar-proceso');
+    Route::post('/calcular-condiciones-proceso',[ProcesosController::class, 'calcularCondicionesProceso'])->name('calcular-condiciones-proceso');
     Route::get('/descargar-info-credito/{idProceso}', [ProcesosController::class, 'descargarInfoCredito'])->name('descargar-info-credito');
+    Route::post('/cambiar-estado-proceso', [ProcesosController::class, 'cambiarEstadoProceso'])->name('cambiar-estado-proceso');
+    Route::post('/historial-proceso', [ProcesosController::class, 'historialProceso'])->name('historial-proceso');
+    Route::post('/detalle-proceso', [ProcesosController::class, 'detalleProceso'])->name('detalle-proceso');
+    Route::post('/motivos-rechazo', [ProcesosController::class, 'motivosRechazo'])->name('motivos-rechazo');
 });
 /**Rutas vistas contables */
 Route::group(['middleware'=>'auth'],function(){

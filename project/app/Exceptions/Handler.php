@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -36,6 +38,18 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (AuthenticationException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Tu sesión expiró. Ingresa de nuevo.'], 401);
+            }
+        });
+
+        $this->renderable(function (HttpException $e, $request) {
+            if ($e->getStatusCode() === 419 && $request->expectsJson()) {
+                return response()->json(['message' => 'Tu sesión expiró. Recarga la página e ingresa de nuevo.'], 419);
+            }
         });
     }
 }

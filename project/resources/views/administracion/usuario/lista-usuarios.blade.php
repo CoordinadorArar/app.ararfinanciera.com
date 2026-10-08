@@ -1,5 +1,7 @@
 @extends('layouts.app')
-<link rel="stylesheet" href="{{ asset('css/lista-usuarios.css') }}">
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/lista-usuarios.css') }}">
+@endpush
 @section('content')
     <div class="text-center">
         <h4>Administración de usuarios</h4><hr>
@@ -71,4 +73,6 @@
         </div>
     </div>
 @endsection
-<script src="{{ asset('js/lista-usuarios.js') }}"></script>
+@push('scripts')
+    <script src="{{ asset('js/lista-usuarios.js') }}"></script>
+@endpush

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CIFIN>
+  <Tercero>
+    <TipoIdentificacion>CC</TipoIdentificacion>
+    <NumeroIdentificacion>1000000001</NumeroIdentificacion>
+    <NombreTitular>PRUEBA ANONIMA UNO</NombreTitular>
+    <CodigoCiiu>0010</CodigoCiiu>
+    <Estado>VIGENTE</Estado>
+    <FechaExpedicion>01/02/2005</FechaExpedicion>
+    <LugarExpedicion>CIUDAD FICTICIA</LugarExpedicion>
+    <RangoEdad>36-45</RangoEdad>
+    <Entidad>ENTIDAD CONSULTANTE</Entidad>
+    <NumeroInforme>0000001</NumeroInforme>
+    <Fecha>07/10/2026</Fecha>
+    <Hora>10:15:00</Hora>
+    <Consolidado>
+      <ResumenPrincipal>
+        <Registro>
+          <PaqueteInformacion>FINANCIERO</PaqueteInformacion>
+          <NumeroObligaciones>3</NumeroObligaciones>
+          <TotalSaldo>14500</TotalSaldo>
+          <ParticipacionDeuda>90</ParticipacionDeuda>
+          <NumeroObligacionesDia>1</NumeroObligacionesDia>
+          <SaldoObligacionesDia>9000</SaldoObligacionesDia>
+          <CuotaObligacionesDia>400</CuotaObligacionesDia>
+          <CantidadObligacionesMora>2</CantidadObligacionesMora>
+          <SaldoObligacionesMora>5500</SaldoObligacionesMora>
+          <CuotaObligacionesMora>350</CuotaObligacionesMora>
+          <ValorMora>700</ValorMora>
+        </Registro>
+        <Registro>
+          <PaqueteInformacion>REAL</PaqueteInformacion>
+          <NumeroObligaciones>1</NumeroObligaciones>
+          <TotalSaldo>1500</TotalSaldo>
+          <ParticipacionDeuda>10</ParticipacionDeuda>
+          <NumeroObligacionesDia>1</NumeroObligacionesDia>
+          <SaldoObligacionesDia>1500</SaldoObligacionesDia>
+          <CuotaObligacionesDia>100</CuotaObligacionesDia>
+          <CantidadObligacionesMora>0</CantidadObligacionesMora>
+          <SaldoObligacionesMora>0</SaldoObligacionesMora>
+          <CuotaObligacionesMora>0</CuotaObligacionesMora>
+          <ValorMora>0</ValorMora>
+        </Registro>
+      </ResumenPrincipal>
+    </Consolidado>
+    <SectorFinancieroAlDia>
+      <Obligacion>
+        <FechaCorte>31/08/2026</FechaCorte>
+        <ModalidadCredito>CONSUMO</ModalidadCredito>
+        <NumeroObligacion>000111</NumeroObligacion>
+        <TipoEntidad>BCO</TipoEntidad>
+        <NombreEntidad>BANCO FICTICIO UNO</NombreEntidad>
+        <Ciudad>CIUDAD FICTICIA</Ciudad>
+        <Calidad>PRIN</Calidad>
+        <FechaApertura>15/03/2022</FechaApertura>
+        <NumeroCuotasPactadas>60</NumeroCuotasPactadas>
+        <CuotasCanceladas>20</CuotasCanceladas>
+        <NumeroCuotasMora>0</NumeroCuotasMora>
+        <ValorInicial>15000</ValorInicial>
+        <SaldoObligacion>9000</SaldoObligacion>
+        <ValorCuota>400</ValorCuota>
+        <ValorMora>0</ValorMora>
+        <EstadoObligacion>VIGENTE</EstadoObligacion>
+      </Obligacion>
+    </SectorFinancieroAlDia>
+    <SectorFinancieroEnMora>
+      <Obligacion>
+        <FechaCorte>31/08/2026</FechaCorte>
+        <ModalidadCredito>TARJETA</ModalidadCredito>
+        <NumeroObligacion>000222</NumeroObligacion>
+        <NombreEntidad>TARJETAS FICTICIAS DOS</NombreEntidad>
+        <Calidad>PRIN</Calidad>
+        <FechaApertura>01/07/2020</FechaApertura>
+        <NumeroCuotasMora>2</NumeroCuotasMora>
+        <SaldoObligacion>2500</SaldoObligacion>
+        <ValorCuota>150</ValorCuota>
+        <ValorMora>300</ValorMora>
+        <EdadMora>60</EdadMora>
+        <EstadoObligacion>MORA</EstadoObligacion>
+      </Obligacion>
+      <Obligacion>
+        <FechaCorte>31/08/2026</FechaCorte>
+        <ModalidadCredito>CONSUMO</ModalidadCredito>
+        <NumeroObligacion>000333</NumeroObligacion>
+        <NombreEntidad>FINANCIERA FICTICIA TRES</NombreEntidad>
+        <Calidad>PRIN</Calidad>
+        <FechaApertura>10/01/2023</FechaApertura>
+        <NumeroCuotasMora>3</NumeroCuotasMora>
+        <SaldoObligacion>3000</SaldoObligacion>
+        <ValorCuota>200</ValorCuota>
+        <ValorMora>400</ValorMora>
+        <EdadMora>90</EdadMora>
+        <EstadoObligacion>MORA</EstadoObligacion>
+      </Obligacion>
+    </SectorFinancieroEnMora>
+    <SectorFinancieroExtinguidas>
+      <Obligacion>
+        <ModalidadCredito>CONSUMO</ModalidadCredito>
+        <NombreEntidad>BANCO FICTICIO UNO</NombreEntidad>
+        <SaldoObligacion>0</SaldoObligacion>
+        <ValorCuota>0</ValorCuota>
+        <EstadoObligacion>PAGO VOLUNTARIO</EstadoObligacion>
+      </Obligacion>
+    </SectorFinancieroExtinguidas>
+    <SectorRealAlDia>
+      <Obligacion>
+        <ModalidadCredito>SERVICIOS</ModalidadCredito>
+        <NombreEntidad>COMERCIO FICTICIO CUATRO</NombreEntidad>
+        <SaldoObligacion>1500</SaldoObligacion>
+        <ValorCuota>100</ValorCuota>
+        <ValorMora>0</ValorMora>
+      </Obligacion>
+    </SectorRealAlDia>
+    <HuellaConsulta>
+      <Consulta>
+        <FechaConsulta>01/09/2026</FechaConsulta>
+        <NombreEntidad>BANCO FICTICIO UNO</NombreEntidad>
+        <MotivoConsulta>ESTUDIO DE CREDITO</MotivoConsulta>
+      </Consulta>
+      <Consulta>
+        <FechaConsulta>15/08/2026</FechaConsulta>
+        <NombreEntidad>FINANCIERA FICTICIA TRES</NombreEntidad>
+      </Consulta>
+    </HuellaConsulta>
+    <Score>
+      <Puntaje>640</Puntaje>
+    </Score>
+  </Tercero>
+</CIFIN>

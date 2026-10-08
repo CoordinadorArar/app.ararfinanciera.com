@@ -1,28 +1,31 @@
-<div class="sticky-top">
-    <meta name="csrf-token-ambiente" content="{{ csrf_token() }}" />
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <button class="btn btn-primary" type="button" id="sidebar-show-button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">
-                <i class="fa fa-bars"></i> Menú
+<header class="shell-barra">
+    <div class="shell-barra-fila">
+        <button class="btn ui-btn ui-btn-sec shell-btn-menu d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#shellMenu" aria-controls="shellMenu" aria-label="Abrir menú">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <a class="shell-marca-movil d-lg-none" href="{{ url('/home') }}"><img src="{{ asset('images/LogoArar.png') }}" alt="Arar Financiera"></a>
+        <div class="dropdown ms-auto">
+            <button type="button" class="shell-usuario" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="shell-avatar" aria-hidden="true">{{ $shellUsuario['iniciales'] }}</span>
+                <span class="shell-usuario-datos">
+                    <span class="shell-usuario-nombre">{{ $shellUsuario['nombre'] }}</span>
+                    <span class="shell-usuario-rol">{{ $shellUsuario['rol'] }}</span>
+                </span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
             </button>
-            <button class="btn btn-dark d-inline-block d-lg-none ml-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fa fa-bars"></i>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="nav navbar-nav ms-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="#">
-                            <i class="fa fa-bell position-relative">
-                            </i>
-                            <span class="position-absolute translate-middle badge rounded-pill bg-danger" id="icon-notifications">
-                                99+
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <ul class="dropdown-menu dropdown-menu-end shell-usuario-menu">
+                <li class="dropdown-item-text">
+                    <strong class="d-block">{{ $shellUsuario['nombre'] }}</strong>
+                    <span class="d-block text-break">{{ $shellUsuario['correo'] }}</span>
+                    <span class="shell-usuario-rol">{{ $shellUsuario['rol'] }}</span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ route('perfil-usuario') }}"><i class="fas fa-user fa-fw" aria-hidden="true"></i>Mi perfil</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button type="button" class="dropdown-item" onclick="logOut()"><i class="fas fa-right-from-bracket fa-fw" aria-hidden="true"></i>Cerrar sesión</button></li>
+            </ul>
         </div>
-    </nav>
+    </div>
     @if(config('database.ambiente') === 'demo')
         <div class="amb-franja">
             <span><i class="fas fa-flask"></i> <strong>Ambiente demo</strong></span>
@@ -30,4 +33,4 @@
             <button type="button" class="btn" onclick="conmutarAmbiente('produccion')">Volver a Producción</button>
         </div>
     @endif
-</div>
+</header>

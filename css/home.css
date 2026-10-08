@@ -1,0 +1,4 @@
+.inicio-cols { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--ui-esp-5); align-items: start; }
+.inicio-cols > .ui-card { margin-bottom: 0; }
+@media (max-width: 991.98px) { .inicio-cols { grid-template-columns: 1fr; } }
+.inicio-cols li.ui-doc > .ui-badge { justify-self: start; }

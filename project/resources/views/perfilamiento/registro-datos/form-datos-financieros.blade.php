@@ -1,62 +1,59 @@
-<div id="form-datos-financieros" class="forms-datos-tercero">
-    <div class="container">
-        <button class="btn btn-secondary btn-sm float-left" onclick="volverFormularioPersonal('form-datos-personales','form-datos-financieros')">
-            <i class="fa fa-arrow-left"></i> Atras
-        </button>
-        <h4 class="text-center">Ingreso de datos requeridos</h4>
+<section id="form-datos-financieros" class="ui-card ui-paso-card d-none" aria-labelledby="titulo-paso-2">
+    <div class="ui-paso-cab">
+        <h2 class="ui-titulo ui-titulo-paso" id="titulo-paso-2" tabindex="-1">Datos financieros</h2>
+        <p class="ui-descripcion">Pagaduría, ingresos, deducciones y monto solicitado</p>
     </div>
-    <div class="card w-75 ms-auto me-auto mb-5">
-        <div class="card-body">
-            <form id="form-financiero" action="{{ route('guardar-datos-financieros') }}" method="post">
-                <meta name="csrf-token-form-financial-data" content="{{ csrf_token() }}" />
-                <p class="lead">Datos financieros (*)</p>
-                <div class="row mb-2">
-                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                        <div class="form-group mb-2">
-                            <input type="hidden" id="idProcesoHidden" name="idProcesoHidden">
-                            <label for="">Ingresos Básicos</label>
-                            <input type="number" id="ingresosMensuales" name="ingresosMensuales" class="form-control" placeholder="Digite ingresos" value="{{ old('ingresosMensuales') }}" onkeypress="return soloNumeros(event)">
-                        </div>
-                        <span class="invalid-feedback" role="alert" id="error-ingresosMensuales">
-                        </span>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <div class="form-group mb-2">
-                            <label for="">Pagaduría</label>
-                            <select id="pagaduriaTercero" name="pagaduriaTercero" class="form-select" value="{{ old('pagaduriaTercero') }}" onchange="cambiarPagaduria()"></select>
-                        </div>
-                        <span class="invalid-feedback" role="alert" id="error-pagaduriaTercero">
-                        </span>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <div class="form-group mb-2">
-                            <label for="">Valor solicitado</label>
-                            <input type="number" id="valorSolicitado" name="valorSolicitado" class="form-control" placeholder="Digite valor a solicitar" value="{{ old('valorSolicitado') }}" onkeypress="return soloNumeros(event)">                            
-                        </div>
-                        <span class="invalid-feedback" role="alert" id="error-valorSolicitado">
-                        </span>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <div class="form-group mb-2">
-                            <label for="">Número cuotas</label>
-                            <select name="numeroCuotas" id="numeroCuotas" class="form-select" value="{{ old('numeroCuotas') }}">
-                                <option value="0">Elija número de cuotas...</option>
-                            </select>
-                        </div>
-                        <span class="invalid-feedback" role="alert" id="error-numeroCuotas">
-                        </span>
-                    </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-primary" id="show-inputs-btn" onclick="mostrarInputs()">Continuar</button>
-                    </div>
-                </div><hr>
-            </form>
-            <div id="inputs-config">
+    <div id="avisoFinanciero" aria-live="polite"></div>
+    <form id="form-financiero" novalidate onsubmit="return false">
+        <meta name="csrf-token-form-financial-data" content="{{ csrf_token() }}" />
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label for="pagaduriaTercero" class="form-label">Pagaduría</label>
+                <select id="pagaduriaTercero" name="pagaduriaTercero" class="form-select" aria-describedby="error-pagaduriaTercero" onchange="cambiarPagaduria()">
+                    <option value="">Selecciona una pagaduría</option>
+                </select>
+                <span class="invalid-feedback" role="alert" id="error-pagaduriaTercero"></span>
             </div>
-            <div id="cupoDisponible">
+            <div class="col-12 col-md-6">
+                <label for="ingresosMensuales" class="form-label">Ingresos básicos</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text">$</span>
+                    <input type="text" inputmode="numeric" autocomplete="off" id="ingresosMensuales" name="ingresosMensuales" class="form-control" aria-describedby="error-ingresosMensuales" oninput="formatearInputMoneda(this);marcarError('ingresosMensuales','')" onchange="cargarRubros()">
+                    <span class="invalid-feedback" role="alert" id="error-ingresosMensuales"></span>
+                </div>
             </div>
-            <button onclick="enviarDatosFinancieros(event)" class="btn btn-primary" id="btnSendValues" disabled>Calcular</button>
-            <button onclick="editarEstadoProceso()" class="btn btn-primary" id="btnEditState">Siguiente</button>
+            <div class="col-12 col-md-6">
+                <label for="valorSolicitado" class="form-label">Valor solicitado</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text">$</span>
+                    <input type="text" inputmode="numeric" autocomplete="off" id="valorSolicitado" name="valorSolicitado" class="form-control" aria-describedby="error-valorSolicitado alerta-monto" oninput="editarMontoSolicitado(this)">
+                    <span class="invalid-feedback" role="alert" id="error-valorSolicitado"></span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <label for="numeroCuotas" class="form-label">Plazo (número de cuotas)</label>
+                <select name="numeroCuotas" id="numeroCuotas" class="form-select" aria-describedby="ayuda-numeroCuotas error-numeroCuotas" disabled onchange="marcarError('numeroCuotas','')">
+                    <option value="0">Selecciona una pagaduría</option>
+                </select>
+                <span class="invalid-feedback" role="alert" id="error-numeroCuotas"></span>
+                <span class="ui-campo-ayuda" id="ayuda-numeroCuotas"></span>
+            </div>
+            <div class="col-12" id="alerta-monto" role="alert"></div>
+        </div>
+    </form>
+    <div id="inputs-config"></div>
+    <div id="cupoDisponible" class="mt-4"></div>
+    <div class="ui-asistente-acciones">
+        <button type="button" class="btn ui-btn ui-btn-sec" onclick="irAPaso(1)">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i><span>Atrás</span>
+        </button>
+        <div class="ui-acciones">
+            <button type="button" onclick="calcularFinancieros(this)" class="btn btn-primary ui-btn" id="btnSendValues">
+                <i class="fas fa-calculator" aria-hidden="true"></i><span>Calcular</span>
+            </button>
+            <button type="button" onclick="confirmarFinancieros(this)" class="btn btn-primary ui-btn d-none" id="btnEditState">
+                <span>Confirmar y continuar</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
         </div>
     </div>
-</div>
+</section>

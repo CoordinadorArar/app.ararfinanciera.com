@@ -1,130 +1,102 @@
-html{
-    min-height: 100%;
-    position: relative;
-}
-body{
-    margin: 0;
-    margin-bottom: 40px;
-}
-.navbar-expand-lg{
-    background-color: rgb(65,110,195,0.6) !important;
-}
-#navbarSupportedContent .fa-bell{
-    animation: rotate-bell 1.5s linear infinite;
-    margin-right: 10px;
-    font-size: medium;
-    z-index: 100;
-
-}
-#sidebar-show-button{
-    padding: 3px 8px !important;
-    border-radius: 13px !important;
-}
-.offcanvas-start{
-    width: 20% !important;
-    background-color: rgb(65,110,195) !important;
-}
-.offcanvas-header{
-    background-color: rgb(255,255,255,0.8);
-}
-.offcanvas-header button{
-    background-color: rgb(65,110,195) !important;
-    border-radius: 13px !important;
-    padding: 5px !important;
-}
-.offcanvas-header i{
-    color: rgb(255,255,255) !important;
-}
-.navbar-brand h5{
-    display: none;
-}
-#menu a{
-    color: rgb(255,255,255) !important;
-    font-size: 16px;
-}
-#menu > li{
-    width: 100%;
-}
-#menu > li > a:hover{
-    background-color: rgb(255,255,255,0.8);
-    color: rgb(65,110,195) !important;
-}
-#menu > li > a > span{
-    display: inline !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-/**Menu padre que despliega sus submenus debajo */
-#menu .submenu-toggle{
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-#menu .submenu-toggle > span{
+:root{ scroll-padding-top: 4rem; }
+body.shell{ --shell-menu-ancho: 16rem; --shell-barra-alto: 3.5rem; --shell-menu-fondo: var(--ui-primario-osc); min-height: 100vh; }
+.shell-saltar{ position: absolute; left: .75rem; top: -4rem; z-index: 1100; padding: .5rem .9rem; background: var(--ui-blanco); color: var(--ui-primario-osc); font-weight: 600; font-size: var(--ui-fs-sm); border-radius: var(--ui-radio); box-shadow: var(--ui-sombra); }
+.shell-saltar:focus{ top: .5rem; outline: 0; box-shadow: var(--ui-foco); }
+body.shell .shell-cuerpo{ display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+body.shell .shell-main{ flex: 1 0 auto; padding: .75rem .75rem 1rem; }
+body.shell .shell-main:focus{ outline: 0; }
+.shell-barra{ position: sticky; top: 0; z-index: 1020; background: var(--ui-blanco); border-bottom: 1px solid var(--ui-borde); }
+.shell-barra-fila{ display: flex; align-items: center; gap: .5rem; min-height: var(--shell-barra-alto); padding: 0 .75rem; }
+.shell-btn-menu{ width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.shell-marca-movil img{ height: 28px; width: auto; }
+.shell-usuario{ margin-left: auto; display: flex; align-items: center; gap: .6rem; min-height: 44px; padding: .25rem .5rem; border: 0; background: none; border-radius: var(--ui-radio); color: var(--ui-texto); text-align: left; }
+.shell-usuario:hover{ background: var(--ui-fondo); }
+.shell-usuario:focus-visible{ outline: 0; box-shadow: var(--ui-foco); }
+.shell-usuario > .fa-chevron-down{ font-size: .7rem; color: var(--ui-texto-3); }
+.shell-avatar{ flex: 0 0 2rem; width: 2rem; height: 2rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--ui-primario-suave); border: 1px solid var(--ui-primario-borde); color: var(--ui-primario-osc); font-size: .75rem; font-weight: 700; }
+.shell-usuario-nombre{ display: block; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .84rem; font-weight: 600; line-height: 1.2; }
+.shell-usuario-rol{ display: block; font-size: var(--ui-fs-xs); color: var(--ui-texto-3); }
+.shell-usuario-menu{ min-width: 15rem; font-size: var(--ui-fs-sm); }
+.shell-usuario-menu .dropdown-item{ min-height: 40px; display: flex; align-items: center; gap: .5rem; }
+.shell-menu{ --bs-offcanvas-width: min(18rem, 85vw); background: var(--shell-menu-fondo); color: #fff; }
+.shell-menu .offcanvas-header{ background: var(--ui-blanco); min-height: var(--shell-barra-alto); border-bottom: 1px solid var(--ui-borde); }
+.shell-menu .offcanvas-header .btn-close{ width: 44px; height: 44px; }
+.shell-menu-marca{ display: flex; align-items: center; min-height: var(--shell-barra-alto); margin: -.5rem 0 .5rem; padding: 0 1rem; background: var(--ui-blanco); border-bottom: 1px solid var(--ui-borde); }
+.shell-menu-marca img{ height: 32px; width: auto; }
+.shell-menu .offcanvas-body{ padding: .5rem 0 1rem; }
+.shell-menu #menu > li{ width: 100%; }
+.shell-menu #menu .nav-link{ display: flex; align-items: center; gap: .6rem; width: 100%; min-height: 2.75rem; padding: .5rem 1rem; border: 0; border-radius: 0; background: none; color: rgba(255,255,255,.92) !important; font-size: .9rem; font-weight: 600; text-align: left; }
+.shell-menu #menu > li > .nav-link:hover{ background: rgba(255,255,255,.1); color: #fff !important; }
+.shell-menu #menu > li > a.nav-link.active{ margin: .125rem .5rem; width: calc(100% - 1rem); border-radius: 6px; background: #fff !important; color: var(--ui-primario-osc) !important; }
+.shell-menu #menu .nav-link:focus-visible{ outline: 2px solid #fff; outline-offset: -2px; box-shadow: none; }
+.shell-menu #menu .nav-link.active:focus-visible{ outline-color: var(--ui-primario); }
+.shell-menu button:hover, .shell-barra button:hover{ transform: none; }
+.shell-menu-esqueleto{ display: block; height: .75rem; margin: .9rem 1rem; border-radius: var(--ui-radio-sm); background: rgba(255,255,255,.15); }
+.shell-menu-error{ margin: 1rem; font-size: var(--ui-fs-sm); color: #fff; }
+.shell-menu #menu .submenu-toggle > span{
     flex: 1 1 auto;
     min-width: 0;
 }
-#menu .submenu-caret{
+.shell-menu #menu .submenu-caret{
     flex: 0 0 auto;
     font-size: 11px;
     transition: transform .2s ease-in-out;
 }
-#menu .submenu-toggle[aria-expanded="true"]{
+.shell-menu #menu .submenu-toggle[aria-expanded="true"]{
     background-color: rgb(255,255,255,0.15);
 }
-#menu .submenu-toggle[aria-expanded="true"] .submenu-caret{
+.shell-menu #menu .submenu-toggle[aria-expanded="true"] .submenu-caret{
     transform: rotate(180deg);
 }
-/**Submenus desplegados debajo del menu padre, no sobrepuestos */
-#menu .submenu-collapse{
+.shell-menu #menu .submenu-collapse{
     width: 100%;
     background-color: rgb(0,0,0,0.13);
     box-shadow: inset 0 7px 6px -7px rgb(0,0,0,0.45), inset 0 -7px 6px -7px rgb(0,0,0,0.45);
 }
-/**Guia vertical que agrupa los items bajo su menu padre */
-#menu .submenu-nav{
+.shell-menu #menu .submenu-nav{
     gap: 2px;
     margin-left: 21px;
     padding: 8px 8px 8px 0;
     border-left: 2px solid rgb(255,255,255,0.22);
 }
-#menu .submenu-item{
+.shell-menu #menu .submenu-item{
     display: flex;
     align-items: center;
     gap: 9px;
+    width: auto;
+    min-height: 2.25rem;
     margin-left: 9px;
     padding: 6px 12px;
     font-size: 14.5px;
+    font-weight: 400;
     line-height: 1.35;
     border-radius: 6px;
     transition: background-color .15s ease-in-out, color .15s ease-in-out;
 }
-#menu .submenu-icon{
+.shell-menu #menu .submenu-icon{
     flex: 0 0 16px;
     font-size: 13px;
     text-align: center;
     opacity: .85;
 }
-#menu .submenu-text{
+.shell-menu #menu .submenu-text{
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-#menu .submenu-item:hover{
+.shell-menu #menu .submenu-item:hover{
     background-color: rgb(255,255,255,0.18);
 }
-/**Pagina abierta: pastilla blanca, como un nav-pill activo */
-#menu .submenu-item.active{
+.shell-menu #menu .submenu-item.active{
     background-color: rgb(255,255,255) !important;
     color: rgb(65,110,195) !important;
     font-weight: 600;
     box-shadow: 0 1px 3px rgb(0,0,0,0.2);
 }
-#menu .submenu-item.active .submenu-icon{
+.shell-menu #menu .submenu-item.active .submenu-icon{
     opacity: 1;
 }
-/**Franja global visible mientras la sesion trabaja en el ambiente demo */
+.shell-pie{ display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; padding: .75rem; border-top: 1px solid var(--ui-borde); font-size: var(--ui-fs-xs); color: var(--ui-texto-4); }
 .amb-franja{
     display: flex;
     flex-wrap: wrap;
@@ -162,55 +134,16 @@ body{
 .bg-primary{
     background-color: rgb(65,110,195) !important;
 }
-footer{
-    background-color: rgb(65,110,195);
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-footer input{
-    background-color: rgb(0 0 0 / 0%);
-    color: White;
-    font-family: Nunito, sans-serif;
-    font-size: 10pt;
-    text-align: center;
-    border: 0;
-    border-radius: 15px;
-}
 @media(max-width: 576px){
     .amb-franja .amb-texto{
         display: none;
     }
 }
-@media(max-width: 478px){
-    .offcanvas-start {
-        width: 80% !important;
-    }
+@media (min-width: 992px){
+    .shell-menu.offcanvas-lg{ position: fixed; top: 0; bottom: 0; left: 0; width: var(--shell-menu-ancho); z-index: 1030; display: flex; flex-direction: column; background-color: var(--shell-menu-fondo) !important; }
+    .shell-menu.offcanvas-lg .offcanvas-body{ display: block; flex: 1 1 auto; overflow-y: auto; padding: .5rem 0 1rem; }
+    body.shell .shell-cuerpo{ margin-left: var(--shell-menu-ancho); }
 }
-@media(min-width:479px) and (max-width:748px){
-    .offcanvas-start {
-        width: 50% !important;
-    }
-}
-@media(min-width: 749px) and (max-width: 800px){
-    .offcanvas-start {
-        width: 40% !important;
-    }
-}
-@media(min-width: 801px) and (max-width: 1000px){
-    .offcanvas-start {
-        width: 30% !important;
-    }
-}
-@keyframes rotate-bell{
-    0%{ transform: rotate(0deg); }
-    50%{ transform: rotate(45deg); }
-    100%{ transform: rotate(0deg); }
+@media (max-width: 575.98px){
+    .shell-usuario-datos{ position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 }
