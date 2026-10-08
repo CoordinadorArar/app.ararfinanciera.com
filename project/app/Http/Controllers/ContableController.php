@@ -61,6 +61,8 @@ class ContableController extends Controller
 
     /**Envío de documentos contables a siesa */
     public function documentoContableEnvioSiesa(Request $request){
+        set_time_limit(0);
+        $errores = [];
         $idOperacion = $request->get('idOperacion');
         $tipoDocumento = $request->get('tipoDocumento');
         // require_once('nusoap.php');
@@ -259,7 +261,14 @@ class ContableController extends Controller
 
                     $parameters .= "</Datos>\r\n</Importar>";
 
-                    $response = $this->procesarPeticionSiesa($parameters);
+                    $resultado = $this->procesarPeticionSiesa($parameters);
+                    if($resultado !== 'ok'){
+                        $errores[$numero] = implode("\n", array_map(function($e){
+                            $detalle = (string) $e['f_detalle'];
+                            $detalle = mb_check_encoding($detalle, 'UTF-8') ? $detalle : mb_convert_encoding($detalle, 'UTF-8', 'ISO-8859-1');
+                            return 'Línea '.$e['f_nro_linea'].': '.$detalle.' ('.$e['f_valor'].')';
+                        }, $resultado));
+                    }
     
                     // $parameters .= "</Datos>\r\n</Importar>]]>\r\n</tem:pvstrDatos>\r\n<tem:printTipoError>1</tem:printTipoError>\r\n</tem:ImportarXML>";
                     // print_r($parameters);
@@ -301,6 +310,7 @@ class ContableController extends Controller
                     // }
                 }
             }
+            $response = empty($errores) ? 'ok' : ['errores' => $errores];
         }else{
             $response = ['error' => 'No existe el registro en la base de datos'];
         }
@@ -309,6 +319,8 @@ class ContableController extends Controller
 
     /**Envío de notas credito contables a siesa */
     public function NotaCreditoContableEnvioSiesa(Request $request){
+        set_time_limit(0);
+        $errores = [];
         $idOperacion = $request->get('idOperacion');
         $tipoDocumento = $request->get('tipoDocumento');
         require_once('nusoap.php');
@@ -513,7 +525,14 @@ class ContableController extends Controller
 
                     $parameters .= "</Datos>\r\n</Importar>";
 
-                    $response = $this->procesarPeticionSiesa($parameters);
+                    $resultado = $this->procesarPeticionSiesa($parameters);
+                    if($resultado !== 'ok'){
+                        $errores[$numero] = implode("\n", array_map(function($e){
+                            $detalle = (string) $e['f_detalle'];
+                            $detalle = mb_check_encoding($detalle, 'UTF-8') ? $detalle : mb_convert_encoding($detalle, 'UTF-8', 'ISO-8859-1');
+                            return 'Línea '.$e['f_nro_linea'].': '.$detalle.' ('.$e['f_valor'].')';
+                        }, $resultado));
+                    }
     
                     // $parameters .= "</Datos>\r\n</Importar>]]>\r\n</tem:pvstrDatos>\r\n<tem:printTipoError>1</tem:printTipoError>\r\n</tem:ImportarXML>";              
                     // $result = $client->call('ImportarXML',$parameters);
@@ -553,6 +572,7 @@ class ContableController extends Controller
                     // }
                 }
             }
+            $response = empty($errores) ? 'ok' : ['errores' => $errores];
         }else{
             $response = ['error' => 'No existe el registro en la base de datos'];
         }
