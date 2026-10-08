@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use App\Http\Controllers\PHPMailerController;
 use Laravel\Sanctum\HasApiTokens;
 
 //JWT Subject
@@ -69,6 +71,16 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims(){
         return [];
+    }
+    public function sendPasswordResetNotification($token){
+        $cuerpo = view('emails.restablecer-contrasena', [
+            'nombre' => $this->nombreUsuario,
+            'url' => url(route('password.reset', ['token' => $token, 'email' => $this->email], false)),
+            'minutos' => config('auth.passwords.users.expire')
+        ])->render();
+        if(!PHPMailerController::crearEmail(['asunto'=>'Restablecer contraseña - Arar Financiera','destinatario'=>$this->email,'cuerpo'=>$cuerpo,'copiaA'=>'','emailBcc'=>''])){
+            throw ValidationException::withMessages(['email' => 'No fue posible enviar el correo en este momento. Intenta de nuevo más tarde.']);
+        }
     }
     public static function obtenerRol($idUser){
         $sql = "SELECT * FROM rolusuario WHERE idUsuario=?";

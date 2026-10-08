@@ -206,3 +206,28 @@ const noStrangeCharacters = (e)=>{
   e.preventDefault();
   return false; // Bloquea la tecla no permitida
 }
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.auth-toggle');
+  if (!btn) return;
+  const input = btn.parentNode.querySelector('input');
+  const ver = input.type === 'password';
+  input.type = ver ? 'text' : 'password';
+  btn.setAttribute('aria-pressed', ver);
+  btn.setAttribute('aria-label', ver ? 'Ocultar contraseña' : 'Mostrar contraseña');
+});
+
+document.addEventListener('submit', (e) => {
+  const btn = e.target.querySelector('.auth-btn[data-cargando]');
+  if (!btn || e.defaultPrevented) return;
+  btn.dataset.texto = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>' + btn.dataset.cargando;
+});
+
+window.addEventListener('pageshow', () => {
+  document.querySelectorAll('.auth-btn[data-cargando]:disabled').forEach((btn) => {
+    btn.disabled = false;
+    if (btn.dataset.texto) btn.innerHTML = btn.dataset.texto;
+  });
+});

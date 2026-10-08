@@ -51,11 +51,11 @@ class LoginController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['email' => 'Usuario no encontrado']);
+            return response()->json(['res' => 'error', 'details' => 'invalido', 'message' => 'Usuario no encontrado']);
         }
 
         if ($user->estadoUsuario != '1' || $user->estadoUsuario != true) {
-            return back()->withErrors(['email' => 'El usuario no está activo']);
+            return response()->json(['res' => 'error', 'details' => 'invalido', 'message' => 'El usuario no está activo']);
         }
 
         $securePasswordUser = $user->contrasenaSegura;
