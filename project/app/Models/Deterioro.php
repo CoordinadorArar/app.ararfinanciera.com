@@ -3404,7 +3404,8 @@ class Deterioro extends Model
                        rango = ISNULL(calificacion_abc, 'Corriente'),
                        capital_corriente, capital_vencido, interes_corriente, interes_vencido,
                        interes_mora, interes_prorroga_siesa,
-                       capital_vencido_siesa, interes_vencido_siesa, origen_saldo_siesa,
+                       capital_vencido_siesa, interes_vencido_siesa, origen_saldo_siesa, saldo_siesa,
+                       interes_siesa = CASE WHEN saldo_siesa IS NULL THEN NULL ELSE ISNULL(si.saldo_interes, 0) END,
                        base_deterioro, suspendida, base_congelada, origen_base,
                        pct_contable, deterioro_contable,
                        deterioro_fiscal_individual, deterioro_fiscal_general,
@@ -3419,8 +3420,14 @@ class Deterioro extends Model
                        duplicadas_evaluadas = CASE WHEN EXISTS (SELECT 1 FROM det_corte_cuadre q
                            WHERE q.id_corte = det_deterioro_operacion.id_corte
                              AND q.codigo = 'C-DUPLICADAS') THEN 1 ELSE 0 END
-                FROM det_deterioro_operacion WHERE id_corte = ?";
-        $bind = [$idCorte];
+                FROM det_deterioro_operacion
+                LEFT JOIN (SELECT id_operacion_nota, saldo_interes = SUM(saldo)
+                           FROM det_corte_saldo_siesa
+                           WHERE id_corte = ? AND componente = 'INTERES' AND id_operacion_nota IS NOT NULL
+                           GROUP BY id_operacion_nota) si
+                       ON si.id_operacion_nota = det_deterioro_operacion.id_operacion
+                WHERE det_deterioro_operacion.id_corte = ?";
+        $bind = [$idCorte, $idCorte];
 
         if (!empty($filtros['producto'])) {
             $sql .= ' AND producto = ?';

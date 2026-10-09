@@ -515,15 +515,19 @@ class DeterioroExportador
 
         $hoja->fromArray([['OPERACIÓN', 'DOCUMENTO', 'CLIENTE', 'PRODUCTO', 'SUBPRODUCTO',
             'FECHA INICIAL MORA', 'CUOTAS', 'DIAS MORA', 'RANGO',
-            'CAPITAL CORRIENTE', 'CAPITAL VENCIDO', 'INTERES CORRIENTE', 'INTERES VENCIDO',
-            'INTERES MORA', 'PRORROGA VENCIDA SIESA',
+            'CAPITAL CORRIENTE FACTORING', 'CAPITAL VENCIDO', 'INTERES CORRIENTE FACTORING', 'INTERES VENCIDO',
+            'INTERES MORA FACTORING', 'PRORROGA VENCIDA SIESA',
             'BASE DETERIORO', '% CONTABLE', 'DETERIORO CONTABLE',
             'FISCAL INDIVIDUAL', 'FISCAL GENERAL', 'ACUMULADO FISCAL ANTERIOR',
             'SALDO TOPADO', 'DEDUCCION FISCAL AÑO', 'FISCAL ACUMULADO',
             'DIFERENCIA TEMPORARIA', 'IMPUESTO DIFERIDO', 'AÑO REVERSION', 'ESTADO REVERSION',
-            'CAPITAL MES ANTERIOR', 'VARIACION CAPITAL', 'CUOTAS REPETIDAS',
+            'CAPITAL MES ANTERIOR FACTORING', 'VARIACION CAPITAL FACTORING', 'CUOTAS REPETIDAS',
             'FUENTE VENCIDOS', 'CAPITAL VENCIDO FACTORING', 'INTERES VENCIDO FACTORING',
-            'SUSPENDIDA', 'ORIGEN BASE', 'BASE SIN SUSPENDER']], null, 'A1');
+            'SUSPENDIDA', 'ORIGEN BASE', 'BASE SIN SUSPENDER',
+            'CAPITAL TOTAL FACTORING', 'CAPITAL SIESA', 'DIFERENCIA CAPITAL (SIESA - FACTORING)',
+            'INTERES SIESA', 'DIFERENCIA INTERES (SIESA - VENCIDO FACTORING)',
+            'CAPITAL VENCIDO SIESA', 'INTERES VENCIDO SIESA',
+            'DIFERENCIA INTERES VENCIDO (SIESA - FACTORING)']], null, 'A1');
 
         self::volcar($hoja, Deterioro::detalleOperaciones($idCorte, $filtros), [
             'id_operacion', 'id_cliente', 'cliente', 'producto', 'nom_operacion',
@@ -583,6 +587,21 @@ class DeterioroExportador
                 return $f->suspendida ? $f->origen_base : null;
             },
             'base_deterioro',
+            function ($f) {
+                return (string) ($f->capital_corriente + $f->capital_vencido);
+            },
+            'saldo_siesa',
+            function ($f) {
+                return (string) round(($f->saldo_siesa !== null ? $f->saldo_siesa : 0) - $f->capital_corriente - $f->capital_vencido, 4);
+            },
+            'interes_siesa',
+            function ($f) {
+                return (string) round(($f->interes_siesa !== null ? $f->interes_siesa : 0) - $f->interes_vencido, 4);
+            },
+            'capital_vencido_siesa', 'interes_vencido_siesa',
+            function ($f) {
+                return (string) round(($f->interes_vencido_siesa !== null ? $f->interes_vencido_siesa : 0) - $f->interes_vencido, 4);
+            },
         ], 2);
 
         return $libro;
