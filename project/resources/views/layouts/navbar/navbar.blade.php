@@ -3,6 +3,9 @@
         <button class="btn ui-btn ui-btn-sec shell-btn-menu d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#shellMenu" aria-controls="shellMenu" aria-label="Abrir menú">
             <i class="fas fa-bars" aria-hidden="true"></i>
         </button>
+        <button id="shellBtnMenuEscritorio" class="btn ui-btn ui-btn-sec shell-btn-menu d-none d-lg-inline-flex" type="button" aria-controls="shellMenu" aria-expanded="true" aria-label="Ocultar menú" title="Ocultar menú">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
         <a class="shell-marca-movil d-lg-none" href="{{ url('/home') }}"><img src="{{ asset('images/LogoArar.png') }}" alt="Arar Financiera"></a>
         <div class="dropdown ms-auto">
             <button type="button" class="shell-usuario" data-bs-toggle="dropdown" aria-expanded="false">

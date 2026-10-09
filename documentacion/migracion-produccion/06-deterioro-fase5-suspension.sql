@@ -1,7 +1,28 @@
 /*
+ * MIGRACION A PRODUCCION - Paso 06
+ * Copia de documentacion/deterioro-fase5-ddl.sql. Lo unico que cambia respecto del original es
+ * esta cabecera, el bloque de opciones SET inicial, la guarda de base
+ * (ArarFinanciera_PRUEBAS -> ArarFinanciera) y las lineas que indicaban
+ * ejecutar sobre pruebas. La logica es identica a la validada en pruebas.
+ * Equivale a: migrate 2026_09_03_110000_create_det_suspension_tables
+ * Prerrequisitos: paso 05. Crea un indice unico FILTRADO: exige QUOTED_IDENTIFIER y ANSI_NULLS en ON (bloque SET de abajo; con sqlcmd use ademas -I).
+ * La reversion para produccion esta en rollback/ (no descomentar el bloque de
+ * abajo).
+ */
+
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+SET ANSI_PADDING ON;
+SET ANSI_WARNINGS ON;
+SET ARITHABORT ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET NUMERIC_ROUNDABORT OFF;
+GO
+
+/*
  * Deterioro de Cartera - Fase 5a (suspension de causacion de intereses: esquema,
  * parametrica y motor)
- * Esquema para ArarFinanciera_PRUEBAS.
+ * Esquema para ArarFinanciera (produccion).
  *
  * Equivale a `php artisan migrate` de
  * 2026_09_03_110000_create_det_suspension_tables.php. El DDL reproduce
@@ -39,9 +60,9 @@
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-IF DB_NAME() <> N'ArarFinanciera_PRUEBAS'
+IF DB_NAME() <> N'ArarFinanciera'
 BEGIN
-    THROW 50000, 'Este script solo debe ejecutarse sobre ArarFinanciera_PRUEBAS.', 1;
+    THROW 50000, 'Este script solo debe ejecutarse sobre ArarFinanciera (produccion).', 1;
 END
 
 BEGIN TRY
@@ -141,20 +162,12 @@ GO
  *
  * El indice filtrado se suelta antes de la tabla, igual que en la migracion.
  *
- * Descomentar y ejecutar solo sobre ArarFinanciera_PRUEBAS.
+ * NO descomentar: en produccion use rollback/ de migracion-produccion.
 
 BEGIN TRY
     BEGIN TRANSACTION;
 
     DELETE FROM det_corte_cuadre WHERE codigo = N'C-SUSPENSION';
-
-    DECLARE @sql NVARCHAR(MAX) = '';
-    SELECT @sql += 'ALTER TABLE [dbo].[det_deterioro_operacion] DROP CONSTRAINT '
-                 + OBJECT_NAME([default_object_id]) + ';'
-    FROM sys.columns
-    WHERE [object_id] = OBJECT_ID('[dbo].[det_deterioro_operacion]')
-      AND [name] IN ('suspendida') AND [default_object_id] <> 0;
-    EXEC(@sql);
 
     ALTER TABLE det_deterioro_operacion DROP COLUMN
         suspendida, id_suspension, interes_vencido_congelado,

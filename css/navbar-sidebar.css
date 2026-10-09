@@ -143,6 +143,14 @@ body.shell .shell-main:focus{ outline: 0; }
     .shell-menu.offcanvas-lg{ position: fixed; top: 0; bottom: 0; left: 0; width: var(--shell-menu-ancho); z-index: 1030; display: flex; flex-direction: column; background-color: var(--shell-menu-fondo) !important; }
     .shell-menu.offcanvas-lg .offcanvas-body{ display: block; flex: 1 1 auto; overflow-y: auto; padding: .5rem 0 1rem; }
     body.shell .shell-cuerpo{ margin-left: var(--shell-menu-ancho); }
+    html.shell-menu-anim .shell-menu.offcanvas-lg{ transition: transform .25s ease, visibility .25s; }
+    html.shell-menu-anim body.shell .shell-cuerpo{ transition: margin-left .25s ease; }
+    html.shell-menu-oculto .shell-menu.offcanvas-lg{ transform: translateX(-100%); visibility: hidden; }
+    html.shell-menu-oculto body.shell .shell-cuerpo{ margin-left: 0; }
+    html.shell-menu-oculto .shell-marca-movil{ display: inline-block !important; }
+}
+@media (min-width: 992px) and (prefers-reduced-motion: reduce){
+    html.shell-menu-anim .shell-menu.offcanvas-lg, html.shell-menu-anim body.shell .shell-cuerpo{ transition: none; }
 }
 @media (max-width: 575.98px){
     .shell-usuario-datos{ position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }

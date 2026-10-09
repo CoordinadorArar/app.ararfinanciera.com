@@ -18,6 +18,25 @@ let htmlMenu = false;
 // });
 const MENU_ABIERTOS = 'arar.menu.abiertos';
 document.addEventListener('DOMContentLoaded',function(){
+    let raiz = document.documentElement;
+    let btnMenu = document.getElementById('shellBtnMenuEscritorio');
+    let marcarMenu = function(){
+        let oculto = raiz.classList.contains('shell-menu-oculto');
+        let texto = oculto ? 'Mostrar menú' : 'Ocultar menú';
+        btnMenu.setAttribute('aria-expanded', oculto ? 'false' : 'true');
+        btnMenu.setAttribute('aria-label', texto);
+        btnMenu.title = texto;
+    };
+    if(btnMenu){
+        marcarMenu();
+        btnMenu.addEventListener('click', function(){
+            raiz.classList.add('shell-menu-anim');
+            let oculto = raiz.classList.toggle('shell-menu-oculto');
+            try{ localStorage.setItem('shellMenuOculto', oculto ? '1' : '0'); }catch(e){}
+            marcarMenu();
+            setTimeout(()=>window.dispatchEvent(new Event('resize')), 260);
+        });
+    }
     let contenedor = document.getElementById('div-menu-content');
     let guardar = function(){
         try{

@@ -8,6 +8,7 @@
     @auth
         <meta name="csrf-token-menus" content="{{ csrf_token() }}">
         <meta name="csrf-token-ambiente" content="{{ csrf_token() }}">
+        <script>try{if(localStorage.getItem('shellMenuOculto')==='1')document.documentElement.classList.add('shell-menu-oculto')}catch(e){}</script>
     @endauth
 
     <title>{{ config('database.ambiente') === 'demo' ? 'DEMO · ' : '' }}{{ config('app.name', 'Laravel') }}</title>
