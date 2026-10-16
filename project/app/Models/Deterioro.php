@@ -1032,6 +1032,11 @@ class Deterioro extends Model
      * de modo que los dos toman ya la base con prórroga. `valor_nominal_siesa`
      * no cambia, porque ya sumaba la prórroga por las dos vías.
      *
+     * Con atribución SIESA (`capital_vencido_siesa` no nulo) la base es el
+     * capital vencido más el interés vencido más la prórroga vencida de SIESA,
+     * con `origen_base` 'SIESA'. Sin ella se conserva la base de factoring más
+     * la prórroga, con `origen_base` 'FACTORING'.
+     *
      * `interes_prorroga_siesa` lleva `ISNULL(…, 0)` y no el nulo de la unión, a
      * diferencia de `saldo_siesa`: como el `UPDATE` recorre todas las
      * operaciones del corte, el cero significa «se midió y no hay prórroga» y el
@@ -1089,7 +1094,11 @@ class Deterioro extends Model
                         WHEN s.opes > 0 AND u.id_operacion IS NULL THEN s.capital_ope_vencido
                         ELSE s.capital_vencido END,
                     interes_vencido_siesa = CASE WHEN c.capital IS NULL THEN NULL ELSE s.interes_vencido END,
-                    base_deterioro = o.base_deterioro + ISNULL(s.prorroga, 0)
+                    base_deterioro = CASE WHEN c.capital IS NULL THEN o.base_deterioro
+                        WHEN s.opes > 0 AND u.id_operacion IS NULL THEN ISNULL(s.capital_ope_vencido, 0) + ISNULL(s.interes_vencido, 0)
+                        ELSE ISNULL(s.capital_vencido, 0) + ISNULL(s.interes_vencido, 0) END
+                        + ISNULL(s.prorroga, 0),
+                    origen_base = CASE WHEN c.capital IS NULL THEN 'FACTORING' ELSE 'SIESA' END
                 FROM det_deterioro_operacion o
                 LEFT JOIN (".self::sqlSaldoSiesaPorOperacion('@idCorte').") s
                        ON s.id_operacion_nota = o.id_operacion
@@ -1141,14 +1150,12 @@ class Deterioro extends Model
      * (fecha_reactivacion IS NULL OR fecha_reactivacion > fecha de corte):
      * levantar una marca hoy no puede cambiar un corte ya calculado.
      *
-     * interes_vencido y base_deterioro NO se tocan aquí: son el insumo de
-     * C-INTERES y C-BASE contra el detalle de cuotas de origen más la prórroga
-     * vencida del snapshot, que enlazarSaldoSiesa() es el único paso que suma a
-     * la base. El congelamiento vive en columnas propias.
+     * interes_vencido, base_deterioro y origen_base NO se tocan aquí: los
+     * escriben la consolidación y enlazarSaldoSiesa(). El congelamiento vive en
+     * columnas propias.
      *
-     * Con atribución SIESA (capital_vencido_siesa no nulo) la base de una
-     * operación suspendida es el capital vencido más el interés vencido más la
-     * prórroga vencida de SIESA, con origen_base 'SIESA'. Sin ella es el
+     * Con origen_base 'SIESA' la base congelada es la misma base SIESA que
+     * enlazarSaldoSiesa() dejó en base_deterioro. Con 'FACTORING' es el
      * capital vencido a la fecha de corte más el interés congelado más la
      * prórroga vencida de SIESA:
      * el capital que todavía no ha vencido no entra al cálculo, igual que en las
@@ -1169,7 +1176,6 @@ class Deterioro extends Model
      * valor_nominal_siesa para el tope fiscal R de RN-09; ninguna de las dos es
      * base. El parámetro siesa_manda_sobre_base tampoco se consulta aquí.
      *
-     * origen_base queda en 'SIESA' o 'FACTORING' según la fuente de la base;
      * C-SUSPENSION sólo cubre las 'FACTORING' y C-SIESA-BASE las 'SIESA'.
      *
      * interes_no_facturado sólo se llena para productos con
@@ -1190,12 +1196,9 @@ class Deterioro extends Model
                     suspendida = 1,
                     id_suspension = s.id_suspension,
                     interes_vencido_congelado = s.interes_congelado,
-                    base_congelada = CASE WHEN o.capital_vencido_siesa IS NOT NULL
-                                     THEN o.capital_vencido_siesa + ISNULL(o.interes_vencido_siesa, 0)
-                                     ELSE o.capital_vencido + s.interes_congelado END
-                                     + ISNULL(o.interes_prorroga_siesa, 0),
-                    origen_base = CASE WHEN o.capital_vencido_siesa IS NOT NULL
-                                  THEN 'SIESA' ELSE 'FACTORING' END,
+                    base_congelada = CASE WHEN o.origen_base = 'SIESA' THEN o.base_deterioro
+                                     ELSE o.capital_vencido + s.interes_congelado
+                                          + ISNULL(o.interes_prorroga_siesa, 0) END,
                     interes_no_facturado = CASE
                         WHEN ISNULL(pi.sigue_calculando_suspendido, 0) = 1
                         THEN CASE WHEN o.interes_vencido - s.interes_congelado > 0
@@ -1602,7 +1605,7 @@ class Deterioro extends Model
     /**
      * Controles de RN-12 y de las fases posteriores. Desde la fase 6 entran
      * los tres que dependen de SIESA: la extracción, la conciliación de C-3 y
-     * C-SIESA-BASE, que cubre las suspendidas con base tomada de SIESA.
+     * C-SIESA-BASE, que cubre las operaciones con base tomada de SIESA.
      *
      * Un control cuyo insumo no existe en el corte se registra en N/A con el
      * motivo, no en FALLA: los cortes calculados antes de las fases 2 y 3 no
@@ -1628,9 +1631,27 @@ class Deterioro extends Model
              FROM det_corte_detalle_cuota WHERE id_corte = ? AND duplicada_de IS NULL', [$idCorte]);
 
         $duplicadas = DB::selectOne(
-            'SELECT filas = COUNT(*), operaciones = COUNT(DISTINCT id_operacion),
-                    base = ISNULL(SUM(capital_vencido + interes_vencido), 0)
-             FROM det_corte_detalle_cuota WHERE id_corte = ? AND duplicada_de IS NOT NULL', [$idCorte]);
+            "SELECT filas = COUNT(*), operaciones = COUNT(DISTINCT d.id_operacion),
+                    base = ISNULL(SUM(CASE WHEN ISNULL(o.origen_base, 'FACTORING') = 'FACTORING'
+                        THEN d.capital_vencido + d.interes_vencido ELSE 0 END), 0)
+             FROM det_corte_detalle_cuota d
+             LEFT JOIN det_deterioro_operacion o
+                    ON o.id_corte = d.id_corte AND o.id_operacion = d.id_operacion
+             WHERE d.id_corte = ? AND d.duplicada_de IS NOT NULL", [$idCorte]);
+
+        $baseFactoring = DB::selectOne(
+            "SELECT operaciones = COUNT(*), base = ISNULL(SUM(o.base_deterioro), 0),
+                    detalle = ISNULL(SUM(d.vencido), 0) + ISNULL(SUM(p.saldo), 0)
+             FROM det_deterioro_operacion o
+             OUTER APPLY (SELECT vencido = SUM(c.capital_vencido + c.interes_vencido)
+                          FROM det_corte_detalle_cuota c
+                          WHERE c.id_corte = o.id_corte AND c.id_operacion = o.id_operacion
+                            AND c.duplicada_de IS NULL) d
+             OUTER APPLY (SELECT saldo = SUM(s.saldo)
+                          FROM det_corte_saldo_siesa s
+                          WHERE s.id_corte = o.id_corte AND s.componente = 'PRORROGA'
+                            AND s.id_operacion_nota = o.id_operacion) p
+             WHERE o.id_corte = ? AND o.origen_base = 'FACTORING'", [$idCorte]);
 
         $oper = DB::selectOne(
             'SELECT operaciones = COUNT(*), cuotas = SUM(cuotas),
@@ -1642,9 +1663,7 @@ class Deterioro extends Model
 
         // La prórroga vencida que entró a la base, medida por el camino
         // independiente: el snapshot de SIESA y no la columna que el enlace
-        // escribió. Es el lado detalle que C-BASE le suma al detalle de cuotas
-        // —donde la prórroga no existe, porque no viene de factoring— y el lado
-        // resumen de C-SIESA-PRORROGA.
+        // escribió. Es el lado resumen de C-SIESA-PRORROGA.
         //
         // Se restringe a las operaciones que existen en el corte: el snapshot
         // también atribuye filas a operaciones de fuera, que el enlace descarta
@@ -1683,7 +1702,7 @@ class Deterioro extends Model
         // D-15 por el camino contrario al del motor: éste suma la columna que
         // el motor escribió, aquél rearma la base desde sus dos componentes.
         $siesaBase = DB::selectOne(
-            "SELECT operaciones = COUNT(*), base = ISNULL(SUM(base_congelada), 0),
+            "SELECT operaciones = COUNT(*), base = ISNULL(SUM(ISNULL(base_congelada, base_deterioro)), 0),
                     componentes = ISNULL(SUM(ISNULL(capital_vencido_siesa, 0) + ISNULL(interes_vencido_siesa, 0)
                                              + ISNULL(interes_prorroga_siesa, 0)), 0)
              FROM det_deterioro_operacion WHERE id_corte = ? AND origen_base = 'SIESA'", [$idCorte]);
@@ -1941,7 +1960,9 @@ class Deterioro extends Model
         // Los tres controles de la fase 6 siguen la misma regla: sin insumo van
         // a N/A con el motivo, nunca a OK con cero.
         $sinSiesaBase = (int) $siesaBase->operaciones === 0
-            ? 'el corte no tiene operaciones suspendidas con la base tomada de SIESA' : null;
+            ? 'el corte no tiene operaciones con la base tomada de SIESA' : null;
+        $sinBaseFactoring = (int) $baseFactoring->operaciones === 0
+            ? 'todas las operaciones del corte tomaron su base de SIESA y las vigila C-SIESA-BASE' : null;
         $sinSnapshot = (int) $snapshot->filas === 0 || (int) $enlaceSiesa->operaciones === 0
             ? 'el corte no tiene extraído el saldo de SIESA o ninguna operación cruzó contra un OPE' : null;
         $sinPartidas = (int) $conciliacion->partidas === 0
@@ -2022,8 +2043,8 @@ class Deterioro extends Model
                 $origen->interes, $oper->interes],
             ['C-PARTIC', 'Capital corriente más vencido contra el capital total',
                 $origen->capital, $origen->corriente + $origen->vencido],
-            ['C-BASE', 'Base de deterioro contra capital vencido más interés vencido más prórroga vencida de SIESA',
-                $oper->base, $origen->vencido + $origen->ivencido + $prorrogaSiesa->valor],
+            ['C-BASE', 'Base de deterioro de las operaciones con base de factoring contra su capital vencido más interés vencido más prórroga vencida de SIESA',
+                $baseFactoring->base, $baseFactoring->detalle, $sinBaseFactoring],
             // Cuánto dejó fuera del cálculo la marca de cuotas repetidas.
             // Informativo y nunca en falla: es una cifra que hay que poder ver
             // y explicar, no un descuadre. Su presencia en det_corte_cuadre es
@@ -2049,7 +2070,7 @@ class Deterioro extends Model
             // conteo: es la magnitud contable del faltante.
             ['C-MARCAS', 'Base de las operaciones con marca de suspensión aplicable que no se pudieron congelar por no traer interés congelado',
                 $marcasSinCongelar->base_pendiente, 0, $sinMarcas],
-            ['C-SIESA-BASE', 'Base congelada de las suspendidas con base de SIESA contra capital vencido más interés vencido más prórroga vencida de SIESA',
+            ['C-SIESA-BASE', 'Base efectiva de las operaciones con base de SIESA contra capital vencido más interés vencido más prórroga vencida de SIESA',
                 $siesaBase->base, $siesaBase->componentes, $sinSiesaBase],
             ['C-SIESA-EXTRAC', 'Saldo de SIESA que el motor dejó en las operaciones contra el que el snapshot tiene para esas mismas operaciones',
                 $enlaceSiesa->motor, $snapshotEnlazado->snapshot, $sinSnapshot],
@@ -2215,7 +2236,7 @@ class Deterioro extends Model
 
             // Va antes del cálculo: valor_nominal_siesa alimenta el tope fiscal
             // R del deterioro fiscal y saldo_siesa la conciliación, y las dos
-            // tienen que estar ya en la fila. La base ya no depende de SIESA.
+            // tienen que estar ya en la fila, igual que la base de deterioro.
             $t = microtime(true);
             $saldosSiesa = self::extraerSaldoSiesa($idCorte, $corte->fecha_corte);
             self::enlazarSaldoSiesa($idCorte);

@@ -302,7 +302,7 @@ const confirmarMarcar = function () {
         && !document.getElementById('marcarSoporte').files[0];
     Swal.fire({
         title: '¿Marcar esta operación?',
-        text: 'El interés reconocido a la fecha del evento queda congelado. La base pasa a tomarse de SIESA si la operación tiene saldo atribuido allí; si no, es el capital vencido de factoring más el interés congelado. '
+        text: 'El interés reconocido a la fecha del evento queda congelado. La base de toda operación, con o sin suspensión, se toma de lo vencido en SIESA cuando tiene saldo atribuido allí; si no lo tiene, usa el capital vencido de factoring más el interés congelado. '
             + 'El capital se sigue deteriorando normal. La marca se puede levantar después, pero queda en bitácora.'
             + (rechazado ? ' El archivo que eligió fue rechazado: la marca quedará sin soporte.' : ''),
         icon: 'warning', showCancelButton: true,

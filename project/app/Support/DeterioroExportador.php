@@ -167,8 +167,9 @@ class DeterioroExportador
      *
      * DESDE AGOSTO DE 2026 LA COLUMNA I NO ES G + H, y no es un descuadre. La
      * columna I —«VALORES EN MORA CAPITAL/INTERES»— es `base_deterioro`, que
-     * ahora incluye la prórroga vencida de SIESA, mientras G y H siguen siendo
-     * el capital y el interés vencidos que entregó factoring. La matriz
+     * sale de lo vencido en SIESA más la prórroga (factoring sólo cuando la
+     * operación no está en SIESA), mientras G y H siguen siendo el capital y
+     * el interés vencidos que entregó factoring. La matriz
      * `CARTERA <producto>` del bloque T tampoco la lleva: suma
      * `capital_vencido + interes_vencido`. Son 82.170.273 en cinco operaciones
      * —2133, 2316, 1276, 1238 y 2136— en el corte de agosto de 2026.
@@ -584,7 +585,7 @@ class DeterioroExportador
                 return $f->suspendida ? 'SÍ' : 'NO';
             },
             function ($f) {
-                return $f->suspendida ? $f->origen_base : null;
+                return $f->origen_base;
             },
             'base_deterioro',
             function ($f) {

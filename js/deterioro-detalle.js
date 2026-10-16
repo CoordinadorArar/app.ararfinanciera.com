@@ -228,7 +228,7 @@ const cargarDetalle = async function () {
                 || detAusente('La operación no tiene año de reversión proyectado')) + '</td>'
             + '<td class="text-end"><button class="btn btn-light btn-sm py-0 px-2" title="Ver cuotas" '
             + 'onclick="verCuotas(' + o.id_operacion + ',' + Number(o.interes_prorroga_siesa || 0)
-            + ')"><i class="fas fa-magnifying-glass"></i></button></td>'
+            + ',\'' + (o.origen_base || '') + '\')"><i class="fas fa-magnifying-glass"></i></button></td>'
             + '</tr>';
     });
     document.getElementById('tbodyDetalle').innerHTML = html
@@ -277,18 +277,24 @@ const detCeldaBase = function (o) {
     const congelada = o.base_congelada !== null && o.base_congelada !== undefined;
     const base = Number((congelada ? o.base_congelada : o.base_deterioro) || 0);
     const siesa = o.origen_base === 'SIESA';
-    const fuente = !congelada ? '' : '<span class="det-fuente" data-bs-toggle="tooltip" title="'
-        + (siesa
-            ? 'Operación con intereses suspendidos: la base es capital vencido más interés vencido de SIESA más prórroga vencida. Base sin suspender (factoring): '
-            : 'Operación con intereses suspendidos sin saldo atribuido en SIESA: la base es capital vencido de factoring más interés congelado más prórroga vencida. Base sin suspender: ')
-        + detMoneda.format(Number(o.base_deterioro || 0)) + '.">'
-        + (siesa ? '<b>SIESA</b> · suspendida' : 'suspendida · congelada') + '</span>';
+    const sinSuspender = ' Base sin suspender: ' + detMoneda.format(Number(o.base_deterioro || 0)) + '.';
+    const fuente = '<span class="det-fuente" data-bs-toggle="tooltip" title="'
+        + (congelada
+            ? (siesa
+                ? 'Operación con intereses suspendidos: base congelada con capital vencido más interés vencido de SIESA más prórroga vencida.'
+                : 'Operación con intereses suspendidos sin saldo atribuido en SIESA: base congelada con capital vencido de factoring (respaldo) más interés congelado más prórroga vencida.') + sinSuspender
+            : (siesa
+                ? 'Base de deterioro: capital vencido más interés vencido de SIESA más prórroga vencida.'
+                : 'Operación sin saldo atribuido en SIESA: la base usa como respaldo el capital e interés vencidos de factoring más prórroga vencida.'))
+        + '">'
+        + (siesa ? '<b>SIESA</b>' : 'factoring') + (congelada ? ' · suspendida' : (siesa ? '' : ' · respaldo')) + '</span>';
     return '<td class="num" data-order="' + base + '">' + detPesos(base) + fuente + detMarcaProrroga(o) + '</td>';
 };
 
 const detCeldaVencido = function (siesa, factoring, origen, o) {
     if (siesa === null || siesa === undefined) {
-        return '<td class="num" data-order="' + Number(factoring || 0) + '">' + detPesos(factoring) + '</td>';
+        return '<td class="num" data-order="' + Number(factoring || 0) + '">' + detPesos(factoring)
+            + '<span class="det-fuente" data-bs-toggle="tooltip" title="Operación sin saldo atribuido en SIESA: se muestra el valor de factoring, que la base usa como respaldo.">sin SIESA</span></td>';
     }
     const s = Number(siesa || 0), f = Number(factoring || 0), d = s - f;
     const texto = 'Valor vencido de SIESA' + (detOrigenSiesa[origen] ? ' (origen: ' + detOrigenSiesa[origen] + ')' : '') + '. '
@@ -296,13 +302,13 @@ const detCeldaVencido = function (siesa, factoring, origen, o) {
             ? 'Factoring: ' + detMoneda.format(f) + '. Diferencia SIESA − factoring: '
                 + (d > 0 ? '+' : '−') + detMoneda.format(Math.abs(d)) + '.'
             : 'Coincide con factoring.')
-        + (Number(o.suspendida) === 1 && o.origen_base === 'SIESA' ? ' La base usa este valor.' : ' La base se calcula con factoring.');
+        + (o.origen_base === 'SIESA' ? ' La base de deterioro usa este valor de SIESA.' : ' La base usa factoring como respaldo.');
     return '<td class="num" data-order="' + s + '">' + detPesos(s)
         + '<span class="det-fuente" data-bs-toggle="tooltip" title="' + texto + '"><b>SIESA</b>'
         + (d !== 0 ? ' · fact. ' + detMoneda.format(f) : '') + '</span></td>';
 };
 
-const verCuotas = async function (idOperacion, prorroga) {
+const verCuotas = async function (idOperacion, prorroga, origenBase) {
     const datos = new FormData();
     datos.append('idCorte', detIdCorte);
     datos.append('idOperacion', idOperacion);
@@ -320,11 +326,19 @@ const verCuotas = async function (idOperacion, prorroga) {
     // La prórroga no está en estas cuotas: sin el aviso, la suma de lo vencido
     // no da la base y el descenso parece descuadrado.
     const pr = Number(prorroga || 0);
-    const avisoProrroga = pr <= 0 ? ''
+    const baseSiesa = origenBase === 'SIESA';
+    const avisoProrroga = pr <= 0
+        ? (baseSiesa
+            ? '<div class="det-aviso info"><i class="fas fa-circle-info mt-1"></i>'
+            + '<div>La base de deterioro de esta operación se toma de lo vencido en SIESA, no de estas cuotas de factoring, que se muestran como referencia.</div></div>'
+            : '')
         : '<div class="det-aviso info"><i class="fas fa-circle-info mt-1"></i>'
         + '<div>Esta operación tiene <strong>' + detMoneda.format(pr) + ' de interés de prórroga</strong> '
-        + 'que reporta SIESA y que <strong>no está en estas cuotas</strong>: viene de otra fuente. '
-        + 'La base de deterioro es la suma de lo vencido de estas cuotas <strong>más</strong> ese valor.'
+        + (baseSiesa
+            ? 'que reporta SIESA y que <strong>no está en estas cuotas</strong>. '
+            + 'La base de deterioro se toma de lo vencido en SIESA (capital e interés) <strong>más</strong> ese valor; estas cuotas de factoring son informativas.'
+            : 'que reporta SIESA y que <strong>no está en estas cuotas</strong>: viene de otra fuente. '
+            + 'La base de deterioro es la suma de lo vencido de estas cuotas <strong>más</strong> ese valor.')
         + '</div></div>';
 
     document.getElementById('avisoCuotas').innerHTML = (detEvaluadas === false
