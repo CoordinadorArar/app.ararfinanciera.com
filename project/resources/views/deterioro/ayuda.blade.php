@@ -96,6 +96,7 @@
 
                     <h6 class="det-ayuda-sub">Base de deterioro</h6>
                     <p><code>capital vencido + interés vencido + interés de prórroga</code>. <strong>Solo la parte vencida.</strong> Excluye a propósito el saldo de administración y el interés de mora.</p>
+                    <p>El capital vencido y el interés vencido se toman de <strong>lo vencido en SIESA</strong> para todas las operaciones. Solo cuando la operación no tiene saldo atribuido en SIESA se usa como respaldo lo vencido de factoring. La columna «Origen base» del exportable indica cuál se usó; las cifras de factoring se siguen mostrando al lado para comparar.</p>
 
                     <h6 class="det-ayuda-sub">Interés de prórroga</h6>
                     <p>El saldo de prórroga <strong>vencido</strong> que reporta SIESA por operación. Por política contable se trata como interés y por eso <strong>entra a la base de deterioro</strong> y se deteriora con el porcentaje del rango de la operación, hasta el 100 % en rango F. <strong>No es la prórroga del control C-1</strong>, que es el acuerdo que traslada cuotas al final y baja la antigüedad de la mora: son dos cosas distintas con el mismo nombre. En el detalle aparece como una sublínea en la celda de la base, solo en las operaciones que lo tienen.</p>
@@ -397,10 +398,17 @@
                                 <ul>
                                     <li><strong>Qué es vencido</strong> &mdash; las facturas de SIESA con vencimiento hasta la fecha de corte.</li>
                                     <li><strong>Origen</strong> &mdash; el tooltip dice de dónde sale: saldo del tercero, operación SIESA o nota contable.</li>
-                                    <li><strong>Base</strong> &mdash; es informativo, salvo en las suspendidas con origen SIESA, donde sí forma la base.</li>
+                                    <li><strong>Base</strong> &mdash; cuando la operación tiene saldo atribuido en SIESA, ese vencido es el que forma la base; si no, la base usa lo vencido de factoring.</li>
                                 </ul>
                             </li>
-                            <li><strong>Base de suspendidas</strong> &mdash; «SIESA · suspendida» o «suspendida · congelada», según de dónde sale la base congelada. El tooltip trae la base sin suspender.</li>
+                            <li><strong>Sin SIESA</strong> &mdash; en Capital vencido e Interés vencido, «sin SIESA» indica que la operación no tiene valor en SIESA y se muestra el de factoring.</li>
+                            <li><strong>Origen de la base</strong> &mdash; la celda Base dice de dónde sale:
+                                <ul>
+                                    <li><strong>«SIESA»</strong> &mdash; la base sale de lo vencido en SIESA.</li>
+                                    <li><strong>«factoring · respaldo»</strong> &mdash; la operación no tiene saldo en SIESA y la base usa lo vencido de factoring.</li>
+                                    <li><strong>«SIESA · suspendida»</strong> o <strong>«factoring · suspendida»</strong> &mdash; operación con intereses suspendidos, según de dónde sale la base congelada. El tooltip trae la base sin suspender.</li>
+                                </ul>
+                            </li>
                             <li><strong>Cuotas repetidas</strong> &mdash; «N cuotas repetidas» bajo el número de la operación.</li>
                         </ul>
                         <h6 class="det-ayuda-sub">Ver cuotas</h6>
@@ -539,7 +547,7 @@
                                 </ul>
                             </li>
                             <li>La <strong>prórroga</strong> se identifica por el texto «PRORROGA» en la nota del documento de SIESA. La no vencida, o sin fecha de vencimiento, queda fuera de la base pero cuenta en el valor nominal que topa la deducción fiscal.</li>
-                            <li>La <strong>reducción de la base</strong> es <code>base sin suspender &minus; base congelada</code> y puede ser negativa cuando el saldo de SIESA supera lo que calcula factoring.</li>
+                            <li>La <strong>reducción de la base</strong> es <code>base sin suspender &minus; base congelada</code> y solo se da en las de origen <code>FACTORING</code>: en las de origen <code>SIESA</code> la base congelada es la misma base de SIESA y la reducción es cero.</li>
                             <li>El <strong>capital sigue deteriorándose</strong> normalmente hasta llegar al 100 % a partir de los 721 días (rango F).</li>
                             <li>En el producto FACTORING el módulo calcula aparte el <strong>interés no facturado</strong> (interés vencido menos congelado) y lo muestra en la pantalla. El anexo para revelaciones está pendiente.</li>
                         </ul>
@@ -662,7 +670,8 @@
                             </thead>
                             <tbody>
                                 <tr><td><code>C-CAPITAL</code> / <code>C-INTERES</code></td><td class="det-texto">El detalle de cuotas contra el consolidado por operación</td></tr>
-                                <tr><td><code>C-BASE</code></td><td class="det-texto">Base de deterioro = capital vencido + interés vencido + interés de prórroga</td></tr>
+                                <tr><td><code>C-BASE</code></td><td class="det-texto">En las operaciones con base de factoring (sin saldo en SIESA): base de deterioro = capital vencido + interés vencido de sus cuotas + interés de prórroga</td></tr>
+                                <tr><td><code>C-SIESA-BASE</code></td><td class="det-texto">En las operaciones con base de SIESA: base de deterioro = capital vencido + interés vencido + prórroga vencida de SIESA</td></tr>
                                 <tr><td><code>C-SIESA-PRORROGA</code></td><td class="det-texto">Que la prórroga vencida de SIESA que entró en la base coincida con la del snapshot para esas mismas operaciones</td></tr>
                                 <tr><td><code>C-SUSPENSION</code></td><td class="det-texto">Que la reducción de base por congelamiento coincida con la reducción de interés vencido de las mismas operaciones</td></tr>
                                 <tr><td><code>C-MARCAS</code></td><td class="det-texto">Base de las operaciones con marca aplicable que no se pudieron congelar. Bloquea el cierre</td></tr>
@@ -740,7 +749,7 @@
                         <p>Además de las cifras de la grilla trae PRORROGA VENCIDA SIESA, ESTADO REVERSION, FUENTE VENCIDOS, SUSPENDIDA, ORIGEN BASE y BASE SIN SUSPENDER.</p>
                         <ul>
                             <li><strong>Columnas con sufijo FACTORING</strong> &mdash; salen del sistema de factoring: CAPITAL CORRIENTE, INTERES CORRIENTE, INTERES MORA, CAPITAL VENCIDO, INTERES VENCIDO, CAPITAL MES ANTERIOR y VARIACION CAPITAL, cada una seguida de «FACTORING».</li>
-                            <li><strong>CAPITAL VENCIDO e INTERES VENCIDO</strong> &mdash; sin sufijo: son las cifras que usa la base y pueden venir de SIESA o de factoring; lo indica FUENTE VENCIDOS.</li>
+                            <li><strong>CAPITAL VENCIDO e INTERES VENCIDO</strong> &mdash; sin sufijo: son las cifras que usa la base: vienen de SIESA y solo de factoring cuando la operación no está en SIESA; lo indican FUENTE VENCIDOS y ORIGEN BASE.</li>
                         </ul>
                         <p>Al final trae un bloque de comparación para que Contabilidad filtre y compare SIESA contra factoring por operación:</p>
                         <ul>
@@ -880,7 +889,7 @@
                     </div>
                     <div class="det-ayuda-faq">
                         <p class="q">¿Por qué la base de una operación es mayor que su capital vencido más su interés vencido?</p>
-                        <p class="a">Porque la base tiene un tercer término: el <strong>interés de prórroga</strong>, el saldo de prórroga vencido que reporta SIESA. No viene de las cuotas del sistema de factoring, por eso no aparece al descender al detalle de cuotas. En el detalle por operación se muestra como una sublínea dentro de la celda de la base, y en el resumen tiene columna propia.</p>
+                        <p class="a">Porque la base tiene un tercer término: el <strong>interés de prórroga</strong>, el saldo de prórroga vencido que reporta SIESA. No viene de las cuotas del sistema de factoring, por eso no aparece al descender al detalle de cuotas. Además, cuando la operación tiene saldo en SIESA, el capital y el interés vencidos de la base son los de SIESA y pueden diferir de los de factoring. En el detalle por operación se muestra como una sublínea dentro de la celda de la base, y en el resumen tiene columna propia.</p>
                     </div>
                     <div class="det-ayuda-faq">
                         <p class="q">¿Puedo recalcular un corte si me equivoqué en un parámetro?</p>

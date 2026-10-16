@@ -125,9 +125,9 @@
                         <th>Rango</th>
                         <th class="num">Días mora</th>
                         <th class="num">Cuotas</th>
-                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido de SIESA cuando la operación tiene atribución SIESA (marcado «SIESA»); si no, de factoring. La base usa factoring, salvo en operaciones con intereses suspendidos con saldo en SIESA.">Capital vencido</th>
-                        <th class="num" data-bs-toggle="tooltip" title="Interés vencido de SIESA cuando la operación tiene atribución SIESA (marcado «SIESA»); si no, de factoring. La base usa factoring, salvo en operaciones con intereses suspendidos con saldo en SIESA.">Interés vencido</th>
-                        <th class="num" data-bs-toggle="tooltip" title="Base efectiva del deterioro. Sin suspensión: capital vencido más interés vencido de factoring más prórroga vencida de SIESA (RN-03). Con intereses suspendidos: base congelada, tomada de SIESA cuando la operación tiene saldo atribuido allí.">Base</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido de SIESA (marcado «SIESA»; debajo, el valor de factoring si difiere). Si la operación no tiene saldo en SIESA, se muestra factoring (marcado «sin SIESA»). La base usa SIESA y factoring solo como respaldo.">Capital vencido</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Interés vencido de SIESA (marcado «SIESA»; debajo, el valor de factoring si difiere). Si la operación no tiene saldo en SIESA, se muestra factoring (marcado «sin SIESA»). La base usa SIESA y factoring solo como respaldo.">Interés vencido</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Base efectiva del deterioro: capital vencido más interés vencido de SIESA más prórroga vencida (RN-03). Si la operación no está en SIESA, usa factoring como respaldo (marcado «factoring · respaldo»). Con intereses suspendidos, la base queda congelada.">Base</th>
                         <th class="num">%</th>
                         <th class="num">Deterioro</th>
                         <th class="num" data-bs-toggle="tooltip" title="Base por la tarifa anual del método individual (RN-07)">Individual 33 %</th>
