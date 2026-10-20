@@ -12,8 +12,6 @@ class RegistroClienteSiesa
         'proveedor' => 'Proveedor (0202)',
         'impuestos_cliente' => 'Impuestos y retenciones del cliente (0046/0047)',
         'impuestos_proveedor' => 'Impuestos del proveedor (0049)',
-        'pago_bancolombia' => 'Pago electrónico Bancolombia (0634, formato 41)',
-        'pago_bogota' => 'Pago electrónico Banco de Bogotá (0634, formato 7)',
     ];
 
     const DEPENDENCIAS = [
@@ -21,15 +19,9 @@ class RegistroClienteSiesa
         'proveedor' => 'tercero',
         'impuestos_cliente' => 'cliente',
         'impuestos_proveedor' => 'proveedor',
-        'pago_bancolombia' => 'proveedor',
-        'pago_bogota' => 'proveedor',
     ];
 
-    const PAGOS = ['pago_bancolombia' => '41', 'pago_bogota' => '7'];
-
     const TIPOS_IDENTIFICACION = [1 => ['C', '1', '1'], 2 => ['N', '2', '3'], 4 => ['E', '1', '2']];
-
-    const TIPOS_CUENTA = [1 => '2', 2 => '1'];
 
     const PARTICULAS = ['DE', 'DEL', 'LA', 'LAS', 'LOS', 'SAN'];
 
@@ -75,7 +67,7 @@ class RegistroClienteSiesa
         return [implode(' ', $primero), implode(' ', $partes)];
     }
 
-    public static function datos(array $c, array $cuenta = null)
+    public static function datos(array $c)
     {
         $nitDv = self::nitDv($c['IdCliente'] ?? '', $c['DigitoVerificaCli'] ?? null);
         $tipo = self::TIPOS_IDENTIFICACION[(int) ($c['TipoIdentificacionCliente'] ?? 0)] ?? [null, null, null];
@@ -89,7 +81,6 @@ class RegistroClienteSiesa
             'dv' => $nitDv['dv'],
             'tipoIdentificacion' => $tipo[0],
             'tipoTercero' => $tipo[1],
-            'tipoIdentificacionBancolombia' => $tipo[2],
             'razonSocial' => $razonSocial,
             'nombres' => $juridica ? '' : $nombres,
             'apellido1' => $juridica ? '' : $apellido1,
@@ -104,11 +95,6 @@ class RegistroClienteSiesa
             'email' => trim((string) ($c['Email'] ?? '')),
             'fechaNacimiento' => self::fecha($c['FechaNacimiento'] ?? null),
             'fechaIngreso' => self::fecha($c['FechaIngreso'] ?? null),
-            'cuenta' => $cuenta ? [
-                'banco' => trim((string) ($cuenta['Codigo'] ?? '')),
-                'numero' => preg_replace('/\D/', '', (string) ($cuenta['NumCuenta'] ?? '')),
-                'tipo' => self::TIPOS_CUENTA[(int) ($cuenta['TipoCuenta'] ?? 0)] ?? null,
-            ] : null,
         ];
     }
 
@@ -129,13 +115,6 @@ class RegistroClienteSiesa
             ] + $ubicacion;
         } elseif (in_array($clave, ['cliente', 'proveedor'])) {
             $reglas += $ubicacion + ['Falta la fecha de ingreso (apertura del cliente en FactoringManager).' => $d['fechaIngreso'] === null];
-        } elseif (isset(self::PAGOS[$clave])) {
-            $reglas += [
-                'El tipo de identificación no está homologado con SIESA.' => $d['tipoIdentificacion'] === null,
-                'La cuenta bancaria no tiene banco.' => $d['cuenta']['banco'] === '',
-                'La cuenta bancaria no tiene número.' => $d['cuenta']['numero'] === '',
-                'El tipo de cuenta bancaria no está homologado con SIESA.' => $d['cuenta']['tipo'] === null,
-            ];
         }
         return array_keys(array_filter($reglas));
     }
@@ -147,9 +126,6 @@ class RegistroClienteSiesa
             $motivos = [];
             if (!empty($siesa[$clave])) {
                 $estado = 'hecho';
-            } elseif (isset(self::PAGOS[$clave]) && !$d['cuenta']) {
-                $estado = 'omitido';
-                $motivos[] = 'El cliente no tiene una cuenta bancaria registrada en FactoringManager; no se crea el pago electrónico.';
             } else {
                 $motivos = self::motivos($clave, $d);
                 $dependencia = self::DEPENDENCIAS[$clave] ?? null;
@@ -195,18 +171,6 @@ class RegistroClienteSiesa
                 ];
             case 'impuestos_proveedor':
                 return [self::prefijo('0049', '01', '1').self::unir([$nit]).'0011  1 IV19'];
-            case 'pago_bancolombia':
-            case 'pago_bogota':
-                $cuenta = $d['cuenta'] ?: ['banco' => '', 'numero' => '', 'tipo' => ''];
-                $datos = $clave === 'pago_bancolombia'
-                    ? [$d['nit'], $d['tipoIdentificacionBancolombia'], '000000000', $cuenta['numero'], '6', '10', '', '302']
-                    : [$d['tipoIdentificacion'], $d['nit'], '1', $cuenta['numero'], '001', '1', 'N', '', '7000'];
-                return [self::prefijo('0634', '01', '0').self::unir(array_merge(
-                    [$nit, '001', '1', [$cuenta['banco'], 10], [$cuenta['numero'], 30], [$cuenta['tipo'], 1], [self::PAGOS[$clave], 8], '1', '1'],
-                    array_map(function ($valor) {
-                        return [$valor, 50];
-                    }, array_pad($datos, 15, ''))
-                ))];
         }
         return [];
     }

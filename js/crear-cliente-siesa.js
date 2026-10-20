@@ -371,7 +371,7 @@ const pintarEjecucion = function(){
 const resultadoFinal = function(filas){
     let cuenta = estado => filas.filter(f=>f.estado == estado).length, ok = cuenta('ok'), omitidos = cuenta('omitido'), bloqueados = cuenta('bloqueado');
     let texto = `${bloqueados ? 'Proceso terminado' : 'Cliente creado en SIESA'}. ${ok} ${ok == 1 ? 'paso completado' : 'pasos completados'}, ${omitidos} ${omitidos == 1 ? 'omitido' : 'omitidos'}${bloqueados ? `, ${bloqueados} ${bloqueados == 1 ? 'bloqueado' : 'bloqueados'}` : ''}.`;
-    let extra = [bloqueados ? 'Corrija los datos marcados en Validación y vuelva a ejecutar.' : '', omitidos ? 'Registre la cuenta bancaria y vuelva a ejecutar para completar el pago electrónico.' : ''].filter(Boolean).map(t=>`<p class="m-0 mt-1">${t}</p>`).join('');
+    let extra = [bloqueados ? 'Corrija los datos marcados en Validación y vuelva a ejecutar.' : ''].filter(Boolean).map(t=>`<p class="m-0 mt-1">${t}</p>`).join('');
     return `<div class="ui-alerta ui-alerta-${bloqueados ? 'adv' : 'exito'}"><i class="fas ${bloqueados ? 'fa-triangle-exclamation' : 'fa-circle-check'}" aria-hidden="true"></i><div class="ui-alerta-texto"><h3 class="h6 m-0 fw-semibold" id="finalSiesa" tabindex="-1">${texto}</h3>${extra}</div></div>`;
 }
 

@@ -14,8 +14,6 @@ class RegistroClienteSiesaTest extends TestCase
         'proveedor' => [723],
         'impuestos_cliente' => [46, 46],
         'impuestos_proveedor' => [46],
-        'pago_bancolombia' => [839],
-        'pago_bogota' => [839],
     ];
 
     private function cliente(array $cambios = [])
@@ -37,11 +35,6 @@ class RegistroClienteSiesaTest extends TestCase
         ];
     }
 
-    private function cuenta()
-    {
-        return ['Codigo' => '07', 'NumCuenta' => '12345678901', 'TipoCuenta' => 1];
-    }
-
     private function golden($paso)
     {
         return array_map(function ($linea) {
@@ -56,7 +49,7 @@ class RegistroClienteSiesaTest extends TestCase
 
     public function test_los_registros_coinciden_con_el_layout_del_codigo_anterior()
     {
-        $datos = RegistroClienteSiesa::datos($this->cliente(), $this->cuenta());
+        $datos = RegistroClienteSiesa::datos($this->cliente());
         foreach (array_keys(RegistroClienteSiesa::PASOS) as $paso) {
             $this->assertSame($this->golden($paso), RegistroClienteSiesa::lineas($paso, $datos), $paso);
         }
@@ -64,7 +57,7 @@ class RegistroClienteSiesaTest extends TestCase
 
     public function test_tildes_minusculas_y_espacios_producen_el_mismo_registro()
     {
-        $datos = RegistroClienteSiesa::datos($this->cliente(['NomCliente' => ' juan  cárlos ', 'ApeCliente' => 'Pérez   Gómez', 'Direccion' => 'calle 10 20 30']), $this->cuenta());
+        $datos = RegistroClienteSiesa::datos($this->cliente(['NomCliente' => ' juan  cárlos ', 'ApeCliente' => 'Pérez   Gómez', 'Direccion' => 'calle 10 20 30']));
         foreach (array_keys(RegistroClienteSiesa::PASOS) as $paso) {
             $this->assertSame($this->golden($paso), RegistroClienteSiesa::lineas($paso, $datos), $paso);
         }
@@ -80,7 +73,7 @@ class RegistroClienteSiesaTest extends TestCase
             $this->cliente(['ApeCliente' => null, 'NomCliente' => null, 'Direccion' => null]),
         ];
         foreach ($variantes as $cliente) {
-            $datos = RegistroClienteSiesa::datos($cliente, $this->cuenta());
+            $datos = RegistroClienteSiesa::datos($cliente);
             foreach (self::LARGOS as $paso => $largos) {
                 $lineas = RegistroClienteSiesa::lineas($paso, $datos);
                 $this->assertSame($largos, array_map('mb_strlen', $lineas), $paso);
@@ -109,30 +102,20 @@ class RegistroClienteSiesaTest extends TestCase
         $this->assertSame(str_pad('3001234567', 50), substr($linea, 855, 50));
     }
 
-    public function test_posiciones_clave_de_cliente_proveedor_y_pagos()
+    public function test_posiciones_clave_de_cliente_y_proveedor()
     {
-        $datos = RegistroClienteSiesa::datos($this->cliente(), $this->cuenta());
+        $datos = RegistroClienteSiesa::datos($this->cliente());
         $cliente = RegistroClienteSiesa::lineas('cliente', $datos)[0];
         $this->assertSame('20230301', substr($cliente, 949, 8));
         $this->assertSame(str_pad('JUAN CARLOS PEREZ GOMEZ', 40), substr($cliente, 38, 40));
         $proveedor = RegistroClienteSiesa::lineas('proveedor', $datos)[0];
         $this->assertSame('20230301', substr($proveedor, 690, 8));
         $this->assertSame(str_pad('3001234567', 20), substr($proveedor, 590, 20));
-        foreach (['pago_bancolombia' => '41', 'pago_bogota' => '7'] as $paso => $formato) {
-            $pago = RegistroClienteSiesa::lineas($paso, $datos)[0];
-            $this->assertSame(str_pad('07', 10), substr($pago, 38, 10));
-            $this->assertSame(str_pad('12345678901', 30), substr($pago, 48, 30));
-            $this->assertSame('2', substr($pago, 78, 1));
-            $this->assertSame(str_pad($formato, 8), substr($pago, 79, 8));
-            $this->assertSame(str_pad('12345678901', 50), substr($pago, 239, 50));
-        }
-        $this->assertSame(str_pad('1234567890', 50), substr(RegistroClienteSiesa::lineas('pago_bancolombia', $datos)[0], 89, 50));
-        $this->assertSame(str_pad('1234567890', 50), substr(RegistroClienteSiesa::lineas('pago_bogota', $datos)[0], 139, 50));
     }
 
     public function test_nit_sin_digito_de_verificacion_en_todos_los_registros()
     {
-        $datos = RegistroClienteSiesa::datos($this->cliente(['IdCliente' => '900508834-2', 'TipoIdentificacionCliente' => 2]), $this->cuenta());
+        $datos = RegistroClienteSiesa::datos($this->cliente(['IdCliente' => '900508834-2', 'TipoIdentificacionCliente' => 2]));
         $this->assertSame('900508834', $datos['nit']);
         $this->assertSame('2', $datos['dv']);
         foreach (array_keys(RegistroClienteSiesa::PASOS) as $paso) {
@@ -177,20 +160,20 @@ class RegistroClienteSiesaTest extends TestCase
         $this->assertContains('Falta la fecha de nacimiento.', $pasos['tercero']['motivos']);
         $this->assertSame('bloqueado', $pasos['cliente']['estado']);
         $this->assertSame(['Requiere que Tercero (0200) exista en SIESA.'], $pasos['cliente']['motivos']);
-        $this->assertSame('omitido', $pasos['pago_bancolombia']['estado']);
-        $this->assertSame('omitido', $pasos['pago_bogota']['estado']);
+        $this->assertSame(['tercero', 'cliente', 'proveedor', 'impuestos_cliente', 'impuestos_proveedor'], $pasos->keys()->all());
+        $this->assertNotContains('omitido', $pasos->pluck('estado')->all());
 
-        $datos = RegistroClienteSiesa::datos($this->cliente(), $this->cuenta());
+        $datos = RegistroClienteSiesa::datos($this->cliente());
         $pasos = collect(RegistroClienteSiesa::pasos($datos, ['tercero' => true] + $sinSiesa))->keyBy('clave');
         $this->assertSame('hecho', $pasos['tercero']['estado']);
         $this->assertSame('listo', $pasos['cliente']['estado']);
         $this->assertSame('listo', $pasos['proveedor']['estado']);
         $this->assertSame('bloqueado', $pasos['impuestos_cliente']['estado']);
-        $this->assertSame(['Requiere que Proveedor (0202) exista en SIESA.'], $pasos['pago_bancolombia']['motivos']);
+        $this->assertSame(['Requiere que Proveedor (0202) exista en SIESA.'], $pasos['impuestos_proveedor']['motivos']);
 
         $pasos = collect(RegistroClienteSiesa::pasos($datos, ['impuestos_cliente' => false] + $this->todos()))->keyBy('clave');
         $this->assertSame('listo', $pasos['impuestos_cliente']['estado']);
-        $this->assertSame('hecho', $pasos['pago_bogota']['estado']);
+        $this->assertSame('hecho', $pasos['impuestos_proveedor']['estado']);
 
         $datos = RegistroClienteSiesa::datos($this->cliente(['TipoIdentificacionCliente' => 3, 'Direccion' => '', 'IdCiudad' => null]));
         $motivos = RegistroClienteSiesa::pasos($datos, $sinSiesa)[0]['motivos'];

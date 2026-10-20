@@ -136,30 +136,17 @@ class Terceros extends Model
         return DB::select($sql, [(string) $idcliente]);
     }
 
-    public static function cuentaBancariaCliente($idCliente, $nit){
-        $sql = "SELECT TOP 1 c.NumCuenta,c.TipoCuenta,e.Codigo
-                FROM FactoringManagerDatos..CuentasTerceros c
-                LEFT JOIN FactoringManagerDatos..EntidadesFinancieras e ON e.IdEntidadF = c.IdEntidadF
-                WHERE c.IdTercero IN (?,?) AND ISNULL(c.NumCuenta,'') <> ''
-                ORDER BY c.Principal DESC, c.FecModifica DESC";
-        return DB::select($sql, [(string) $idCliente, (string) $nit]);
-    }
-
     public static function estadoSiesaCliente($nit){
         $sql = "SELECT TOP 1 1 AS tercero,
                 CASE WHEN EXISTS(SELECT 1 FROM UNOEEARAR..t201_mm_clientes WHERE f201_rowid_tercero = a.f200_rowid AND f201_id_cia = a.f200_id_cia AND f201_id_sucursal = '001') THEN 1 ELSE 0 END AS cliente,
                 CASE WHEN EXISTS(SELECT 1 FROM UNOEEARAR..t202_mm_proveedores WHERE f202_rowid_tercero = a.f200_rowid AND f202_id_cia = a.f200_id_cia AND f202_id_sucursal = '001') THEN 1 ELSE 0 END AS proveedor,
                 CASE WHEN EXISTS(SELECT 1 FROM UNOEEARAR..t046_mm_cliente_base_impuesto WHERE f046_rowid_tercero = a.f200_rowid AND f046_id_cia = a.f200_id_cia AND f046_id_sucursal = '001')
                       AND EXISTS(SELECT 1 FROM UNOEEARAR..t047_mm_cliente_base_retencion WHERE f047_rowid_tercero = a.f200_rowid AND f047_id_cia = a.f200_id_cia AND f047_id_sucursal = '001') THEN 1 ELSE 0 END AS impuestos_cliente,
-                CASE WHEN EXISTS(SELECT 1 FROM UNOEEARAR..t049_mm_prv_base_imp WHERE f049_rowid_tercero = a.f200_rowid AND f049_id_cia = a.f200_id_cia AND f049_id_sucursal = '001') THEN 1 ELSE 0 END AS impuestos_proveedor,
-                CASE WHEN EXISTS(SELECT 1 FROM UNOEEARAR..t633_pe_prov_cuenta p JOIN UNOEEARAR..t634_pe_formato_prov_cuenta f ON f.f634_rowid_pe_prov_cuenta = p.f633_rowid
-                      WHERE p.f633_rowid_proveedor = a.f200_rowid AND p.f633_id_cia = a.f200_id_cia AND f.f634_id_formato = 41) THEN 1 ELSE 0 END AS pago_bancolombia,
-                CASE WHEN EXISTS(SELECT 1 FROM UNOEEARAR..t633_pe_prov_cuenta p JOIN UNOEEARAR..t634_pe_formato_prov_cuenta f ON f.f634_rowid_pe_prov_cuenta = p.f633_rowid
-                      WHERE p.f633_rowid_proveedor = a.f200_rowid AND p.f633_id_cia = a.f200_id_cia AND f.f634_id_formato = 7) THEN 1 ELSE 0 END AS pago_bogota
+                CASE WHEN EXISTS(SELECT 1 FROM UNOEEARAR..t049_mm_prv_base_imp WHERE f049_rowid_tercero = a.f200_rowid AND f049_id_cia = a.f200_id_cia AND f049_id_sucursal = '001') THEN 1 ELSE 0 END AS impuestos_proveedor
                 FROM UNOEEARAR..t200_mm_terceros a
                 WHERE a.f200_id = ? AND a.f200_id_cia = ?";
         $fila = DB::select($sql, [(string) $nit, config('services.siesa.id_cia')]);
-        return array_map('boolval', $fila ? (array) $fila[0] : array_fill_keys(['tercero','cliente','proveedor','impuestos_cliente','impuestos_proveedor','pago_bancolombia','pago_bogota'], 0));
+        return array_map('boolval', $fila ? (array) $fila[0] : array_fill_keys(['tercero','cliente','proveedor','impuestos_cliente','impuestos_proveedor'], 0));
     }
 
     public static function listadoClientesSiesa($busqueda, $estado, $pagina, $porPagina){

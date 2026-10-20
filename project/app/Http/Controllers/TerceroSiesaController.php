@@ -126,9 +126,7 @@ class TerceroSiesaController extends Controller
             return [null,[]];
         }
         $fila = (array) $cliente[0];
-        $nit = RegistroClienteSiesa::nitDv($fila['IdCliente'],$fila['DigitoVerificaCli'])['nit'];
-        $cuenta = Terceros::cuentaBancariaCliente($fila['IdCliente'],$nit);
-        $datos = RegistroClienteSiesa::datos($fila,$cuenta ? (array) $cuenta[0] : null);
+        $datos = RegistroClienteSiesa::datos($fila);
         return [$datos,RegistroClienteSiesa::pasos($datos,Terceros::estadoSiesaCliente($datos['nit']))];
     }
 
