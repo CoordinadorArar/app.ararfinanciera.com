@@ -25,7 +25,7 @@ class ContableController extends Controller
 
         if(count($datosOperaciones) > 0){
             foreach($datosOperaciones as $data){
-                $facturas_excluidas = ['61745','61845','69723','69724','69725','69726','69727','69728','69729','69730','69731','69747','69748', '71292', '74412', '75789', '86714'];
+                $facturas_excluidas = ['61745','61845','69723','69724','69725','69726','69727','69728','69729','69730','69731','69747','69748', '71292', '74412', '75789', '86714', '98962'];
                 $notas_excluidas = ['537'];
                 if(($data->tipoDocumento == 'FEX' && in_array($data->factoring,$facturas_excluidas)) || ($data->tipoDocumento == 'NCR' && in_array($data->factoring,$notas_excluidas)) ) {
                     // Omitir esta factura exacta

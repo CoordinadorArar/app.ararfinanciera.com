@@ -6,6 +6,7 @@
 *.key
 *.pem
 *.rar
+*.bak
 
 # Dependencias
 /project/vendor/
