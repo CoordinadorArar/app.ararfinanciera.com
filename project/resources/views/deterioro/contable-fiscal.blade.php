@@ -32,6 +32,8 @@
         </div>
     </div>
 
+    <div id="avisoIncompleto"></div>
+
     <div id="avisoDiciembre"></div>
 
     <div class="det-puente" id="franjaEcuacion"></div>

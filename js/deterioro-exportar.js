@@ -123,8 +123,9 @@ const detMenuExportar = function (config) {
 
     const rotulo = '<i class="fas fa-download"></i>&nbsp; Exportar';
     if (expCorte().estado === 'ABIERTO') {
-        contenedor.innerHTML = '<span data-bs-toggle="tooltip" title="El corte todavía no se ha calculado: '
-            + 'no hay cifras que exportar">'
+        contenedor.innerHTML = '<span data-bs-toggle="tooltip" title="'
+            + (expCorte().calculo_incompleto ? 'El último cálculo no terminó: vuelve a ejecutarlo para exportar'
+                : 'El corte todavía no se ha calculado: no hay cifras que exportar') + '">'
             + '<button class="btn btn-sm det-btn-exportar dropdown-toggle" disabled>' + rotulo
             + '</button></span>';
         detTooltips('#accionesExportar');

@@ -104,6 +104,14 @@ const detAvisoSinProrroga = function (estado) {
         + 'de deterioro. Su base no lo incluye y por eso no se muestra la cifra.' + accion + '</div></div>';
 };
 
+const detAvisoIncompleto = function (corte) {
+    if (!corte || !corte.calculo_incompleto) return '';
+    return '<div class="det-aviso critico" role="alert"><i class="fas fa-circle-exclamation mt-1"></i>'
+        + '<div><strong>Cálculo incompleto.</strong> El último cálculo de este corte no terminó. '
+        + 'Los datos que ves están incompletos; vuelve a ejecutar el cálculo. '
+        + '<a href="' + globalUrl + '/deterioro-cortes">Ir a Cortes</a></div></div>';
+};
+
 /** Etiqueta de color por rango de mora. */
 const detBadgeRango = function (rango) {
     const clases = {
@@ -121,10 +129,12 @@ const detBadgeSalvedad = function () {
 };
 
 /** El segundo parámetro es opcional para no romper las llamadas existentes. */
-const detEstadoCorte = function (estado, conSalvedades) {
+const detEstadoCorte = function (estado, conSalvedades, incompleto) {
     const clases = { 'ABIERTO': 'det-estado-abierto', 'CALCULADO': 'det-estado-calculado', 'CERRADO': 'det-estado-cerrado' };
     return '<span class="det-badge ' + (clases[estado] || '') + '">' + estado + '</span>'
-        + (conSalvedades ? detBadgeSalvedad() : '');
+        + (conSalvedades ? detBadgeSalvedad() : '')
+        + (incompleto ? ' <span class="det-badge det-incompleto" data-bs-toggle="tooltip" '
+            + 'title="El último cálculo no terminó. Vuelve a ejecutarlo">Cálculo incompleto</span>' : '');
 };
 
 /* --- Fiscal --- */

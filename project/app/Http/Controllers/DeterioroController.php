@@ -122,7 +122,12 @@ class DeterioroController extends Controller
                 'text' => 'Un corte cerrado no se puede eliminar.']);
         }
 
-        Deterioro::eliminarCorte($idCorte);
+        try {
+            Deterioro::eliminarCorte($idCorte);
+        } catch (\Throwable $e) {
+            return response()->json(['res' => 'bad', 'title' => 'No se pudo eliminar',
+                'text' => $e->getMessage()]);
+        }
         Deterioro::registrarBitacora('ELIMINAR_CORTE', null, null, $corte->fecha_corte, null, auth()->id());
 
         return response()->json(['res' => 'ok', 'title' => 'Corte eliminado',

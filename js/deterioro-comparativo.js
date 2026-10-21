@@ -37,6 +37,7 @@ const cargarComparativo = async function (idCorte) {
     cfTarifa = cfNum(res.tarifaRenta) > 1 ? cfNum(res.tarifaRenta) / 100 : cfNum(res.tarifaRenta) || 0.35;
 
     document.getElementById('migaFecha').textContent = detFecha(res.corte.fecha_corte);
+    document.getElementById('avisoIncompleto').innerHTML = detAvisoIncompleto(res.corte);
     document.getElementById('badgeAlcance').innerHTML = detBadgeFiscal(res.corte.fecha_corte);
     document.getElementById('avisoDiciembre').innerHTML = detAvisoFiscal(res.corte.fecha_corte, 'diferido');
     document.querySelectorAll('.det-tarifa-renta').forEach(e => { e.textContent = cfTexTarifa(); });

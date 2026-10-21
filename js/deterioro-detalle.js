@@ -7,6 +7,7 @@ let detFechaCorte = null;
 let detCorteEstado = null;
 let detEvaluadas = null;
 let detProrrogaMedida = null;
+let detIncompleto = false;
 
 /** Columnas que alterna el conmutador de vista. La base y la identidad son fijas. */
 const detColContable = [5, 6, 7, 9, 10];
@@ -60,6 +61,8 @@ const cargarCorte = async function () {
 
     detFechaCorte = res.corte.fecha_corte;
     detCorteEstado = res.corte.estado;
+    detIncompleto = !!res.corte.calculo_incompleto;
+    document.getElementById('avisoIncompleto').innerHTML = detAvisoIncompleto(res.corte);
     detAvisoRepetidas();
     detAvisoProrroga();
     document.getElementById('tituloFecha').textContent = detFecha(detFechaCorte);
@@ -87,7 +90,7 @@ const detAvisoSinEvaluar = function () {
 
 const detAvisoRepetidas = function () {
     document.getElementById('avisoRepetidasDetalle').innerHTML =
-        detEvaluadas === false ? detAvisoSinEvaluar() : '';
+        detEvaluadas === false && !detIncompleto ? detAvisoSinEvaluar() : '';
 };
 
 /** El interruptor sólo existe si el corte trae repetidas; al ocultarse, se desmarca. */
@@ -103,7 +106,7 @@ const detUiRepetidas = function (operaciones) {
 
 const detAvisoProrroga = function () {
     document.getElementById('avisoProrrogaDetalle').innerHTML =
-        detProrrogaMedida === false ? detAvisoSinProrroga(detCorteEstado) : '';
+        detProrrogaMedida === false && !detIncompleto ? detAvisoSinProrroga(detCorteEstado) : '';
 };
 
 /**

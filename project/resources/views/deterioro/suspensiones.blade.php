@@ -32,6 +32,8 @@
         </div>
     </div>
 
+    <div id="avisoIncompleto"></div>
+
     <div class="det-panel">
         <div class="det-panel-cab">
             <div>

@@ -33,6 +33,10 @@ class Deterioro extends Model
     const ESTADO_CALCULADO = 'CALCULADO';
     const ESTADO_CERRADO = 'CERRADO';
 
+    const LOTE_OPERACIONES = 200;
+    const LOTE_BORRADO = 10000;
+    const PAUSA_LOTE_US = 200000;
+
     /** Origen con que el cierre de diciembre firma lo que escribe en det_fiscal_acumulado. */
     const ORIGEN_ACUMULADO_CIERRE = 'CIERRE_DICIEMBRE';
 
@@ -345,7 +349,10 @@ class Deterioro extends Model
                   'det_corte_param_causal_suspension',
                   'det_corte_param_causal_salida',
                   'det_corte_param_cuenta_contable'] as $tabla) {
-            DB::table($tabla)->where('id_corte', $idCorte)->delete();
+            while (DB::delete('DELETE TOP ('.self::LOTE_BORRADO.") FROM $tabla WHERE id_corte = ? OPTION (MAXDOP 2)",
+                    [$idCorte]) >= self::LOTE_BORRADO) {
+                usleep(self::PAUSA_LOTE_US);
+            }
         }
 
         // La marca acompaña a la copia congelada de cuentas: mientras el PUC
@@ -373,10 +380,15 @@ class Deterioro extends Model
             throw new \RuntimeException($abierto['mensaje']);
         }
 
-        self::limpiarCorte($idCorte);
-        DB::table('det_conciliacion_explicacion')->where('id_corte', $idCorte)->delete();
-        DB::table('det_salida_operacion')->where('id_corte', $idCorte)->delete();
-        DB::table('det_corte')->where('id_corte', $idCorte)->delete();
+        self::tomarBloqueoCorte($idCorte);
+        try {
+            self::limpiarCorte($idCorte);
+            DB::table('det_conciliacion_explicacion')->where('id_corte', $idCorte)->delete();
+            DB::table('det_salida_operacion')->where('id_corte', $idCorte)->delete();
+            DB::table('det_corte')->where('id_corte', $idCorte)->delete();
+        } finally {
+            self::liberarBloqueoCorte($idCorte);
+        }
     }
 
     /* ---------------------------------------------------------------------
@@ -547,13 +559,50 @@ class Deterioro extends Model
                     r.TipoOperacion, r.NomOperacion, r.NomModOperacion, o.TotalVrEntregarBruto
                 FROM $tablaOrigen r
                 INNER JOIN FactoringManagerDatos.dbo.Operaciones o
-                        ON o.IdOperacion = r.IdOperacion";
+                        ON o.IdOperacion = r.IdOperacion
+                WHERE r.IdOperacion BETWEEN ? AND ?
+                OPTION (MAXDOP 2)";
     }
 
     public static function extraerCartera($idCorte, $tablaOrigen = null)
     {
-        DB::insert(self::sqlExtraccion($tablaOrigen), [$idCorte]);
+        $tablaOrigen = $tablaOrigen ?: self::origenCorte();
+        $sql = self::sqlExtraccion($tablaOrigen);
+        self::porLotes(self::rangosOperacion(
+            "SELECT DISTINCT id = IdOperacion FROM $tablaOrigen WHERE IdOperacion IS NOT NULL ORDER BY id"),
+            function ($desde, $hasta) use ($sql, $idCorte) {
+                return DB::insert($sql, [$idCorte, $desde, $hasta]);
+            });
         return DB::table('det_corte_detalle_cuota')->where('id_corte', $idCorte)->count();
+    }
+
+    private static function rangosOperacion($sql, $bindings = [])
+    {
+        $ids = array_map(function ($f) {
+            return $f->id;
+        }, DB::select($sql, $bindings));
+        return array_map(function ($lote) {
+            return [reset($lote), end($lote)];
+        }, array_chunk($ids, self::LOTE_OPERACIONES));
+    }
+
+    private static function rangosOperacionCorte($idCorte)
+    {
+        return self::rangosOperacion(
+            'SELECT DISTINCT id = id_operacion FROM det_corte_detalle_cuota WHERE id_corte = ? ORDER BY id',
+            [$idCorte]);
+    }
+
+    private static function porLotes($rangos, $ejecutar)
+    {
+        $filas = 0;
+        foreach ($rangos as $i => $rango) {
+            if ($i > 0) {
+                usleep(self::PAUSA_LOTE_US);
+            }
+            $filas += (int) $ejecutar($rango[0], $rango[1]);
+        }
+        return $filas;
     }
 
     /* ---------------------------------------------------------------------
@@ -604,15 +653,19 @@ class Deterioro extends Model
                                PARTITION BY id_corte, id_operacion, fec_inicial_corriente,
                                             fec_final_corriente, saldo_capital, saldo_intereses)
                     FROM det_corte_detalle_cuota
-                    WHERE id_corte = ? AND fec_final_corriente IS NOT NULL
+                    WHERE id_corte = ? AND id_operacion BETWEEN ? AND ?
+                      AND fec_final_corriente IS NOT NULL
                 )
                 UPDATE g SET duplicada_de = superviviente
-                WHERE id_cuota <> superviviente";
+                WHERE id_cuota <> superviviente
+                OPTION (MAXDOP 2)";
     }
 
     public static function marcarDuplicadas($idCorte)
     {
-        return DB::update(self::sqlDuplicadas(), [$idCorte]);
+        return self::porLotes(self::rangosOperacionCorte($idCorte), function ($desde, $hasta) use ($idCorte) {
+            return DB::update(self::sqlDuplicadas(), [$idCorte, $desde, $hasta]);
+        });
     }
 
     /* ---------------------------------------------------------------------
@@ -660,12 +713,15 @@ class Deterioro extends Model
                 LEFT JOIN det_corte_param_rango_mora pr
                        ON pr.id_corte = d.id_corte
                       AND $diasOper BETWEEN pr.dias_desde AND pr.dias_hasta
-                WHERE d.id_corte = @idCorte";
+                WHERE d.id_corte = @idCorte AND d.id_operacion BETWEEN ? AND ?
+                OPTION (MAXDOP 2)";
     }
 
     public static function calcularDerivadas($idCorte, $fechaCorte)
     {
-        return DB::update(self::sqlDerivadas(), [$fechaCorte, $idCorte]);
+        return self::porLotes(self::rangosOperacionCorte($idCorte), function ($desde, $hasta) use ($idCorte, $fechaCorte) {
+            return DB::update(self::sqlDerivadas(), [$fechaCorte, $idCorte, $desde, $hasta]);
+        });
     }
 
     /* ---------------------------------------------------------------------
@@ -682,7 +738,8 @@ class Deterioro extends Model
                 FROM det_corte_detalle_cuota d
                 INNER JOIN det_corte_detalle_cuota a
                         ON a.id_corte = ? AND a.id_operacion = d.id_operacion AND a.id_cuota = d.id_cuota
-                WHERE d.id_corte = ?";
+                WHERE d.id_corte = ? AND d.id_operacion BETWEEN ? AND ?
+                OPTION (MAXDOP 2)";
     }
 
     public static function enlazarMesAnterior($idCorte, $idCorteAnterior)
@@ -690,7 +747,9 @@ class Deterioro extends Model
         if (!$idCorteAnterior) {
             return 0;
         }
-        return DB::update(self::sqlMesAnterior(), [$idCorteAnterior, $idCorte]);
+        return self::porLotes(self::rangosOperacionCorte($idCorte), function ($desde, $hasta) use ($idCorte, $idCorteAnterior) {
+            return DB::update(self::sqlMesAnterior(), [$idCorteAnterior, $idCorte, $desde, $hasta]);
+        });
     }
 
     /* ---------------------------------------------------------------------
@@ -2183,23 +2242,36 @@ class Deterioro extends Model
     public static function ejecutar($idCorte, $idUsuario, $tablaOrigen = null)
     {
         $tablaOrigen = $tablaOrigen ?: self::origenCorte();
-        $corte = DB::table('det_corte')->where('id_corte', $idCorte)->first();
-        if (!$corte) {
-            throw new \RuntimeException("El corte $idCorte no existe.");
-        }
-        if ($corte->estado === self::ESTADO_CERRADO) {
-            throw new \RuntimeException('El corte está cerrado y no se puede recalcular.');
-        }
+        self::tomarBloqueoCorte($idCorte);
 
-        $validacion = self::validarPeriodoOrigen($corte->fecha_corte, $tablaOrigen);
-        if (!$validacion['ok']) {
-            throw new \RuntimeException($validacion['mensaje']);
-        }
+        try {
+            $corte = DB::table('det_corte')->where('id_corte', $idCorte)->first();
+            if (!$corte) {
+                throw new \RuntimeException("El corte $idCorte no existe.");
+            }
+            if ($corte->estado === self::ESTADO_CERRADO) {
+                throw new \RuntimeException('El corte está cerrado y no se puede recalcular.');
+            }
 
-        $inicio = microtime(true);
-        $pasos = [];
+            $validacion = self::validarPeriodoOrigen($corte->fecha_corte, $tablaOrigen);
+            if (!$validacion['ok']) {
+                throw new \RuntimeException($validacion['mensaje']);
+            }
 
-        DB::transaction(function () use ($corte, $idCorte, $tablaOrigen, &$pasos) {
+            $inicio = microtime(true);
+            $pasos = [];
+
+            DB::table('det_corte')->where('id_corte', $idCorte)->update([
+                'estado' => self::ESTADO_ABIERTO,
+                'fecha_ejecucion' => self::ahora(),
+                'filas_origen' => null,
+                'suma_capital_origen' => null,
+                'suma_interes_origen' => null,
+                'hash_datos' => null,
+                'hash_parametros' => null,
+                'duracion_ms' => null,
+            ]);
+
             $t = microtime(true);
             self::limpiarCorte($idCorte);
             $pasos[] = ['paso' => 'Limpieza', 'filas' => null, 'ms' => self::ms($t)];
@@ -2284,19 +2356,43 @@ class Deterioro extends Model
                 'hash_datos' => hash('sha256', $filas . '|' . $totales->capital . '|' . $totales->interes),
                 'hash_parametros' => $hash,
             ]);
-        });
 
-        $t = microtime(true);
-        $cuadres = self::verificarCuadres($idCorte);
-        $pasos[] = ['paso' => 'Cuadres', 'filas' => count($cuadres), 'ms' => self::ms($t)];
+            $t = microtime(true);
+            $cuadres = self::verificarCuadres($idCorte);
+            $pasos[] = ['paso' => 'Cuadres', 'filas' => count($cuadres), 'ms' => self::ms($t)];
 
-        $duracion = self::ms($inicio);
-        DB::table('det_corte')->where('id_corte', $idCorte)->update(['duracion_ms' => $duracion]);
+            $duracion = self::ms($inicio);
+            DB::table('det_corte')->where('id_corte', $idCorte)->update(['duracion_ms' => $duracion]);
 
-        self::registrarBitacora('EJECUTAR_CORTE', $idCorte, null, null,
-            "duración {$duracion} ms", $idUsuario);
+            self::registrarBitacora('EJECUTAR_CORTE', $idCorte, null, null,
+                "duración {$duracion} ms", $idUsuario);
 
-        return ['duracion_ms' => $duracion, 'pasos' => $pasos, 'cuadres' => $cuadres];
+            return ['duracion_ms' => $duracion, 'pasos' => $pasos, 'cuadres' => $cuadres];
+        } finally {
+            self::liberarBloqueoCorte($idCorte);
+        }
+    }
+
+    private static function tomarBloqueoCorte($idCorte)
+    {
+        $bloqueo = DB::selectOne(
+            "SET NOCOUNT ON; DECLARE @r int;
+             EXEC @r = sp_getapplock @Resource = ?, @LockMode = 'Exclusive',
+                  @LockOwner = 'Session', @LockTimeout = 0;
+             SET NOCOUNT OFF;
+             SELECT resultado = @r", ['det_corte_calculo_'.$idCorte]);
+        if (!$bloqueo || (int) $bloqueo->resultado < 0) {
+            throw new \RuntimeException('El corte ya se está calculando.');
+        }
+    }
+
+    private static function liberarBloqueoCorte($idCorte)
+    {
+        try {
+            DB::statement("EXEC sp_releaseapplock @Resource = ?, @LockOwner = 'Session'",
+                ['det_corte_calculo_'.$idCorte]);
+        } catch (\Throwable $e) {
+        }
     }
 
     /* ---------------------------------------------------------------------
@@ -2657,27 +2753,37 @@ class Deterioro extends Model
                     deterioro = (SELECT SUM(deterioro_contable) FROM det_deterioro_operacion o WHERE o.id_corte = c.id_corte),
                     cuadres_total = (SELECT COUNT(*) FROM det_corte_cuadre q WHERE q.id_corte = c.id_corte),
                     cuadres_falla = (SELECT COUNT(*) FROM det_corte_cuadre q WHERE q.id_corte = c.id_corte AND q.estado = 'FALLA'),
-                    cuadres_na = (SELECT COUNT(*) FROM det_corte_cuadre q WHERE q.id_corte = c.id_corte AND q.estado = 'N/A')
+                    cuadres_na = (SELECT COUNT(*) FROM det_corte_cuadre q WHERE q.id_corte = c.id_corte AND q.estado = 'N/A'),
+                    calculo_incompleto = ".self::sqlCalculoIncompleto()."
              FROM det_corte c
              LEFT JOIN det_corte a ON a.id_corte = c.id_corte_anterior
              ORDER BY c.fecha_corte DESC");
         foreach ($filas as $f) {
             $f->modo_compatibilidad_excel = (bool) $f->modo_compatibilidad_excel;
             $f->cerrado_con_salvedad = (bool) $f->cerrado_con_salvedad;
+            $f->calculo_incompleto = (bool) $f->calculo_incompleto;
         }
         return $filas;
+    }
+
+    private static function sqlCalculoIncompleto()
+    {
+        return "CASE WHEN c.estado = '".self::ESTADO_ABIERTO."' AND c.fecha_ejecucion IS NOT NULL
+                THEN 1 ELSE 0 END";
     }
 
     public static function corte($idCorte)
     {
         $corte = DB::selectOne(
-            'SELECT c.*, usuario_cierre = u.nombreUsuario
+            'SELECT c.*, usuario_cierre = u.nombreUsuario,
+                    calculo_incompleto = '.self::sqlCalculoIncompleto().'
              FROM det_corte c
              LEFT JOIN users u ON u.idUsuario = c.id_usuario_cierre
              WHERE c.id_corte = ?', [$idCorte]);
         if ($corte) {
             $corte->modo_compatibilidad_excel = (bool) $corte->modo_compatibilidad_excel;
             $corte->cerrado_con_salvedad = (bool) $corte->cerrado_con_salvedad;
+            $corte->calculo_incompleto = (bool) $corte->calculo_incompleto;
             // La foto se guarda como JSON para no fabricar ocho columnas de
             // salvedad, y se devuelve decodificada para que la pantalla no
             // tenga que saber que por dentro es una cadena.

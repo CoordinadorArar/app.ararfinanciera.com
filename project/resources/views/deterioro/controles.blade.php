@@ -33,6 +33,8 @@
         </div>
     </div>
 
+    <div id="avisoIncompleto"></div>
+
     <div class="det-tarjetas" id="tarjetasControles"></div>
 
     <div class="det-panel" id="panelCierre">

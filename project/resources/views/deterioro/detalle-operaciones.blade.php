@@ -32,6 +32,8 @@
         </div>
     </div>
 
+    <div id="avisoIncompleto"></div>
+
     <div class="det-filtros">
         <div class="campo">
             <label for="filtroProducto">Producto</label>

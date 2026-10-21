@@ -256,6 +256,10 @@ table.det-tabla tr.det-total td {
     color: #35547f;
 }
 
+.det-aviso.critico { background: #fdf1ef; border-color: #f2c4b8; color: #8a2f1a; }
+.det-aviso.critico > i { color: #a3391f; }
+.det-aviso.critico a { color: #8a2f1a; font-weight: 600; text-decoration: underline; }
+
 /* --- Pasos de la corrida --- */
 
 .det-pasos { list-style: none; margin: 0; padding: 0; font-size: .82rem; }
@@ -317,6 +321,7 @@ tr.det-sin-fiscal td { color: #8593a7; background: #fcfdfe; }
 .det-topado,
 .det-sin-congelar,
 tr.det-atencion > td:first-child { box-shadow: inset 2px 0 0 #d9a520; }
+tr.det-incompleto > td:first-child { box-shadow: inset 2px 0 0 #d34848; }
 
 /* La cuota repetida no exige gestión: existe en el origen y se muestra igual de
    legible que las demás. El filo gris sólo la localiza al desplazar la tabla. */
@@ -764,6 +769,7 @@ table.det-tabla td.det-texto { white-space: normal; max-width: 28rem; }
 /* La salvedad es un atributo del cierre, no un cuarto estado del corte: va en
    badge propio contiguo al estado, nunca fundido con él. */
 .det-badge.det-salvedad { background: #fbdcd6; color: #a3391f; }
+.det-badge.det-incompleto { background: #fff; color: #a3391f; border: 1px solid #f0b8aa; }
 
 /* Misma métrica que .det-cuadre más la acción de resolución: .det-cuadre .dif
    toma margin-left:auto y no deja sitio para el enlace. */

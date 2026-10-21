@@ -51,10 +51,11 @@ const cargarResumen = async function (idCorte) {
 
     document.getElementById('tituloFecha').textContent = detFecha(res.corte.fecha_corte);
     document.getElementById('migaFecha').textContent = detFecha(res.corte.fecha_corte);
+    document.getElementById('avisoIncompleto').innerHTML = detAvisoIncompleto(res.corte);
     detProrrogaMedida = res.resumen.some(r => r.interes_prorroga_siesa !== null
         && r.interes_prorroga_siesa !== undefined);
     document.getElementById('avisoProrroga').innerHTML =
-        res.resumen.length && !detProrrogaMedida ? detAvisoSinProrroga(res.corte.estado) : '';
+        res.resumen.length && !detProrrogaMedida && !res.corte.calculo_incompleto ? detAvisoSinProrroga(res.corte.estado) : '';
     pintarTarjetas(res);
     pintarGrafico(res.resumen);
     pintarMatriz(res.resumen);
