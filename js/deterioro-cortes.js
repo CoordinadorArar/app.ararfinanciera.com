@@ -43,9 +43,10 @@ const cargarCortes = async function () {
             cuadres = '<span class="det-badge det-rango-a">' + enCero + ' en cero</span>' + naTexto;
         }
 
+        const inc = !!c.calculo_incompleto;
         let acciones = '';
         if (c.estado !== 'CERRADO') {
-            acciones += '<button class="btn btn-primary btn-sm py-0 px-2 me-1" title="Calcular" onclick="ejecutarCorte(' + c.id_corte + ')"><i class="fas fa-play"></i></button>';
+            acciones += '<button class="btn btn-primary btn-sm py-0 px-2 me-1" title="' + (inc ? 'Volver a calcular' : 'Calcular') + '" onclick="ejecutarCorte(' + c.id_corte + ')"><i class="fas ' + (inc ? 'fa-rotate-right' : 'fa-play') + '"></i></button>';
             acciones += '<button class="btn btn-outline-danger btn-sm py-0 px-2 me-1" title="Eliminar" onclick="eliminarCorte(' + c.id_corte + ",'" + c.fecha_corte.substring(0, 10) + '\')"><i class="fas fa-trash"></i></button>';
         }
         if (c.estado !== 'ABIERTO') {
@@ -54,18 +55,17 @@ const cargarCortes = async function () {
             acciones += '<a class="btn btn-light btn-sm py-0 px-2" title="Controles y cierre" href="' + globalUrl + '/deterioro-controles?corte=' + c.id_corte + '"><i class="fas fa-lock"></i></a>';
         }
 
-        // El badge por sí solo se pierde al escanear la grilla: la fila se
-        // marca sobre su primera celda, que es donde el navegador la pinta.
-        html += '<tr' + (c.cerrado_con_salvedad ? ' class="det-atencion"' : '') + '>'
+        const ausente = detAusente('El último cálculo no terminó: la cifra está incompleta');
+        html += '<tr' + (inc ? ' class="det-incompleto"' : (c.cerrado_con_salvedad ? ' class="det-atencion"' : '')) + '>'
             + '<td><strong>' + detFecha(c.fecha_corte) + '</strong></td>'
-            + '<td>' + detEstadoCorte(c.estado, c.cerrado_con_salvedad) + '</td>'
-            + '<td class="num">' + detPesos(c.filas_origen) + '</td>'
-            + '<td class="num">' + detPesos(c.operaciones) + '</td>'
-            + '<td class="num">' + detPesos(c.suma_capital_origen) + '</td>'
-            + '<td class="num">' + detPesos(c.deterioro) + '</td>'
-            + '<td>' + cuadres + '</td>'
+            + '<td>' + detEstadoCorte(c.estado, c.cerrado_con_salvedad, inc) + '</td>'
+            + '<td class="num">' + (inc ? ausente : detPesos(c.filas_origen)) + '</td>'
+            + '<td class="num">' + (inc ? ausente : detPesos(c.operaciones)) + '</td>'
+            + '<td class="num">' + (inc ? ausente : detPesos(c.suma_capital_origen)) + '</td>'
+            + '<td class="num">' + (inc ? ausente : detPesos(c.deterioro)) + '</td>'
+            + '<td>' + (inc ? ausente : cuadres) + '</td>'
             + '<td>' + (c.fecha_ejecucion ? String(c.fecha_ejecucion).substring(0, 16).replace('T', ' ') : '<span class="text-muted">—</span>') + '</td>'
-            + '<td class="num">' + (c.duracion_ms ? (c.duracion_ms / 1000).toFixed(1) + ' s' : '') + '</td>'
+            + '<td class="num">' + (inc ? '<span class="text-muted">—</span>' : (c.duracion_ms ? (c.duracion_ms / 1000).toFixed(1) + ' s' : '')) + '</td>'
             + '<td class="text-end">' + acciones + '</td>'
             + '</tr>';
     });
@@ -104,7 +104,7 @@ const ejecutarCorte = async function (idCorte) {
     const res = await makeOptionsFetch(`${globalUrl}/deterioro-ejecutar-corte`, datos, 'post', detToken());
     $('#divCortes').preloader('remove');
 
-    if (res.res !== 'ok') { detError(res.title || 'Error', res.text); return; }
+    if (res.res !== 'ok') { detError(res.title || 'Error', res.text); cargarCortes(); return; }
 
     let pasos = '';
     res.pasos.forEach(p => {

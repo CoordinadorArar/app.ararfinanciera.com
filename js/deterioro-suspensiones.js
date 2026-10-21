@@ -57,7 +57,9 @@ const cargarSuspensiones = async function () {
     susCausales = resLista.causales || [];
 
     document.getElementById('migaFecha').textContent = detFecha(resCorte.corte.fecha_corte);
-    document.getElementById('badgeEstado').innerHTML = detEstadoCorte(resCorte.corte.estado);
+    document.getElementById('badgeEstado').innerHTML = detEstadoCorte(resCorte.corte.estado, false, resCorte.corte.calculo_incompleto);
+    document.getElementById('avisoIncompleto').innerHTML = detAvisoIncompleto(resCorte.corte);
+    detTooltips('#badgeEstado');
 
     poblarCausales();
     pintarTarjetasEfecto();

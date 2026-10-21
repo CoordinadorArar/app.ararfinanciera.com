@@ -35,7 +35,9 @@ const cargarEvolucion = async function (idCorte) {
 
     evDatos = res;
     document.getElementById('migaFecha').textContent = detFecha(res.corte.fecha_corte);
-    document.getElementById('badgeEstado').innerHTML = detEstadoCorte(res.corte.estado);
+    document.getElementById('badgeEstado').innerHTML = detEstadoCorte(res.corte.estado, false, res.corte.calculo_incompleto);
+    document.getElementById('avisoIncompleto').innerHTML = detAvisoIncompleto(res.corte);
+    detTooltips('#badgeEstado');
     document.getElementById('avisoFiscalEvolucion').innerHTML = detAvisoFiscal(res.corte.fecha_corte);
 
     pintarFranjaGasto();

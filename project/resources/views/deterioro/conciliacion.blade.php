@@ -33,6 +33,8 @@
         </div>
     </div>
 
+    <div id="avisoIncompleto"></div>
+
     <div id="avisoConciliacion"></div>
 
     <div class="det-tarjetas" id="tarjetasConciliacion"></div>

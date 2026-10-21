@@ -51,7 +51,8 @@ const cargarControles = async function () {
     ctrlDatos = res;
     document.getElementById('migaFecha').textContent = detFecha(res.corte.fecha_corte);
     document.getElementById('badgeEstado').innerHTML =
-        detEstadoCorte(res.corte.estado, res.corte.cerrado_con_salvedad);
+        detEstadoCorte(res.corte.estado, res.corte.cerrado_con_salvedad, res.corte.calculo_incompleto);
+    document.getElementById('avisoIncompleto').innerHTML = detAvisoIncompleto(res.corte);
 
     pintarTarjetasControles();
     pintarAnclasControles();
@@ -263,7 +264,8 @@ const pintarCierre = function () {
 
     if (corte.estado === 'ABIERTO') {
         aviso.innerHTML = '<div class="det-aviso"><i class="fas fa-triangle-exclamation mt-1"></i><div>'
-            + 'Hay que calcular el corte antes de cerrarlo. '
+            + (corte.calculo_incompleto ? 'El último cálculo no terminó: hay que volver a ejecutarlo antes de cerrar. '
+                : 'Hay que calcular el corte antes de cerrarlo. ')
             + '<a href="' + globalUrl + '/deterioro-cortes">Ir a Cortes</a></div></div>';
         lista.innerHTML = '';
         document.getElementById('accionesCierre').innerHTML = '';

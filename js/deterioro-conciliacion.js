@@ -70,7 +70,9 @@ const cargarConciliacion = async function () {
     concPuedeExplicar = !!(res.permisos && res.permisos.conciliar);
 
     document.getElementById('migaFecha').textContent = detFecha(res.corte.fecha_corte);
-    document.getElementById('badgeEstado').innerHTML = detEstadoCorte(res.corte.estado);
+    document.getElementById('badgeEstado').innerHTML = detEstadoCorte(res.corte.estado, false, res.corte.calculo_incompleto);
+    document.getElementById('avisoIncompleto').innerHTML = detAvisoIncompleto(res.corte);
+    detTooltips('#badgeEstado');
 
     pintarAvisoConciliacion();
     pintarTarjetasConciliacion();

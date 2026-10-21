@@ -251,8 +251,9 @@
                         <ul>
                             <li><strong>Columnas</strong> &mdash; Corte, Estado, Cuotas, Operaciones, Capital, Deterioro contable, Cuadres, Ejecutado y Duración.</li>
                             <li><strong>Cuadres</strong> &mdash; «N de M con diferencia» o «N en cero», más los que están en n/a.</li>
-                            <li><strong>Acciones</strong> &mdash; <strong>Calcular</strong> y <strong>Eliminar</strong> mientras el corte no esté cerrado; <strong>Resumen</strong>, <strong>Detalle</strong> y <strong>Controles y cierre</strong> una vez calculado.</li>
+                            <li><strong>Acciones</strong> &mdash; <strong>Calcular</strong> (o <strong>Volver a calcular</strong> si el último cálculo no terminó) y <strong>Eliminar</strong> mientras el corte no esté cerrado; <strong>Resumen</strong>, <strong>Detalle</strong> y <strong>Controles y cierre</strong> una vez calculado.</li>
                             <li><strong>Distintivo</strong> &mdash; un corte cerrado con salvedad lleva <span class="det-badge det-salvedad">Con salvedades</span>.</li>
+                            <li><span class="det-badge det-incompleto">Cálculo incompleto</span> &mdash; el último cálculo de un corte ABIERTO no terminó; sus cifras están incompletas y hay que volver a calcularlo.</li>
                         </ul>
                         <p>Después de calcular aparece el panel «Última corrida», con los pasos del cálculo, sus filas y tiempos, y el resultado de cada control de cuadre.</p>
                     </div>
@@ -263,7 +264,7 @@
                     <div class="det-ayuda-texto mt-3">
                         <h6 class="det-ayuda-sub">Los tres estados de un corte</h6>
                         <ul>
-                            <li><span class="det-badge det-estado-abierto">ABIERTO</span> &mdash; creado, todavía sin calcular; se puede calcular o eliminar.</li>
+                            <li><span class="det-badge det-estado-abierto">ABIERTO</span> &mdash; creado, todavía sin calcular; se puede calcular o eliminar. Si además lleva «Cálculo incompleto», el cálculo empezó y no terminó.</li>
                             <li><span class="det-badge det-estado-calculado">CALCULADO</span> &mdash; el motor corrió. Las cifras están, los cuadres están medidos, y todo se puede volver a correr si cambia un parámetro o se corrige una marca.</li>
                             <li><span class="det-badge det-estado-cerrado">CERRADO</span> &mdash; la foto queda inmutable. No se recalcula. Reabrir es una acción con permiso propio y queda en bitácora.</li>
                         </ul>

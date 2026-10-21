@@ -30,6 +30,8 @@
         </div>
     </div>
 
+    <div id="avisoIncompleto"></div>
+
     <div class="det-tarjetas" id="tarjetas"></div>
     <div id="avisoProrroga"></div>
 

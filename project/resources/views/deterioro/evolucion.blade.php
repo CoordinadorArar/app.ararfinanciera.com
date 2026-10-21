@@ -32,6 +32,8 @@
         </div>
     </div>
 
+    <div id="avisoIncompleto"></div>
+
     <div class="det-puente tres" id="franjaGasto"></div>
     <div id="sinAnterior"></div>
 
