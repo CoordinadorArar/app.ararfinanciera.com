@@ -14,7 +14,7 @@
                 <span class="actual">Controles</span>
             </nav>
             <h4 class="det-titulo">Controles del corte <span id="badgeEstado"></span></h4>
-            <p class="det-subtitulo">Los cinco controles del corte, con la revisión de las prórrogas que reducen la mora y la clasificación de las bajas del período</p>
+            <p class="det-subtitulo">Los seis controles del corte, con la revisión de las prórrogas, la clasificación de las bajas y las cuotas recreadas a mano en SIESA</p>
             <div class="det-anclas" id="anclasControles"></div>
         </div>
         <div>
@@ -59,7 +59,7 @@
         <div class="det-panel-cab">
             <div>
                 <h6>Tablero de controles</h6>
-                <p class="det-subtitulo">C-1 y C-2 se gestionan en esta pantalla. C-3, C-4 y C-5 tienen pantalla propia y aquí sólo muestran su estado.</p>
+                <p class="det-subtitulo">C-1, C-2 y C-6 se gestionan en esta pantalla. C-3, C-4 y C-5 tienen pantalla propia y aquí sólo muestran su estado.</p>
             </div>
         </div>
         <div id="listaTablero"></div>
@@ -131,6 +131,36 @@
                     <tbody id="tbodyBajasCtrl"></tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <div class="det-panel" id="panelCuotasManuales">
+        <div class="det-panel-cab">
+            <div>
+                <h6>C-6 &middot; Cuotas recreadas a mano en SIESA</h6>
+                <p class="det-subtitulo" id="subtituloCuotasManuales">Operaciones con cuotas de capital creadas a mano en SIESA, cuyo vencimiento se toma del plan de pagos de factoring</p>
+            </div>
+            <div class="d-flex gap-4" id="cifrasCuotasManuales"></div>
+        </div>
+        <div id="vacioCuotasManuales"></div>
+        <div class="det-scroll" id="scrollCuotasManuales">
+            <table class="det-tabla" id="tablaCuotasManuales">
+                <thead>
+                    <tr>
+                        <th>Operación</th>
+                        <th>Cliente</th>
+                        <th>Producto</th>
+                        <th>Rango</th>
+                        <th class="num">Días de mora</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Cuotas de capital con saldo que se crearon a mano en SIESA">Cuotas</th>
+                        <th class="num">Capital</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido con la fecha que SIESA registra para estas cuotas: el día en que se crearon">Vencido en SIESA</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Capital vencido con la fecha del plan de pagos de factoring. Las cuotas sin cruce conservan la fecha de SIESA">Vencido aplicado</th>
+                        <th class="num" data-bs-toggle="tooltip" title="Vencido en SIESA menos vencido aplicado: capital que SIESA muestra vencido y el módulo no">Diferencia</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyCuotasManuales"></tbody>
+            </table>
         </div>
     </div>
 

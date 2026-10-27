@@ -514,6 +514,7 @@ class DeterioroController extends Controller
             'res' => 'ok',
             'corte' => $corte,
             'prorrogas' => Deterioro::prorrogasQueReducenMora($idCorte),
+            'reliquidadas' => Deterioro::cuotasReliquidadas($idCorte),
             'bajas' => Deterioro::bajasDelPeriodo($idCorte),
             'descomposicionBajas' => Deterioro::descomposicionBajas($idCorte),
             'causales' => Deterioro::causalesSalida($idCorte),
