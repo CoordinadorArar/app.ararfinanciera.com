@@ -916,12 +916,15 @@ class Deterioro extends Model
      * daba por capital, y nada más: cero `FAT`, y en sentido contrario ninguna
      * fila fuera de esa cuenta que la heurística llamara interés.
      *
-     * Las `FEX` quedan fuera por decisión de Contabilidad, no por descuido: hay
-     * 154 en la cuenta de interés por 12.057.279,00 y siguen siendo capital.
-     * Sus notas no son cartera del cliente —una dice 'PAGO NOMINA SOLDADOS
-     * AGOSTO 2026 FABIAN ANDRES'— y ninguna cruza contra una operación del
-     * corte, así que ponerlas de un lado o del otro no mueve un peso de
-     * `saldo_siesa`.
+     * Las `FEX` de la cuenta `13451001` son interés, igual que las `FAT` y `CC`
+     * de esa cuenta. SIESA las crea con cada pago —nómina o recibo— con
+     * vencimiento igual a su fecha, y por definición de Contabilidad del 27 de
+     * octubre de 2026 el módulo les asigna como vencimiento el último día del
+     * mes siguiente a su fecha (`EOMONTH(f353_fecha, 1)`), el mismo que SIESA
+     * da a las `FAT`. Medido sobre el corte de septiembre de 2026 en PRUEBAS,
+     * 127 de las 154 `FEX` de interés abiertas son del propio septiembre y
+     * dejan de contar como vencidas: el vencido de `FEX` pasa de 12.275.827 a
+     * 2.354.265, en 86 operaciones, 5 de ellas con mora.
      *
      * De las 8 `CC` sólo dos llevan una operación que exista en el corte:
      * `SALDO FAT 8165 OPE 3090` por 120.266,00 y `SALDO CUOTA 11 OPE 2589` por
@@ -1018,7 +1021,10 @@ class Deterioro extends Model
                            nit = t.f200_nit,
                            razon_social = t.f200_razon_social,
                            saldo = m.saldo,
-                           fecha_vcto = s.f353_fecha_vcto,
+                           fecha_vcto = CASE
+                               WHEN s.f353_id_tipo_docto_cruce = 'FEX' AND aux.f253_id = '{$cuentaInteres}'
+                               THEN EOMONTH(s.f353_fecha, 1)
+                               ELSE s.f353_fecha_vcto END,
                            movimientos = m.f354_rowid_sa,
                            operacion = CASE
                                WHEN u.id_operacion IS NOT NULL THEN u.id_operacion

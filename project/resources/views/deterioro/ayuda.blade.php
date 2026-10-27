@@ -397,7 +397,7 @@
                         <ul>
                             <li><strong>Vencido SIESA</strong> &mdash; si la operación tiene saldo atribuido en SIESA, Capital vencido e Interés vencido muestran el valor de SIESA con el rótulo «SIESA», o «SIESA · fact. X» cuando difiere de factoring.
                                 <ul>
-                                    <li><strong>Qué es vencido</strong> &mdash; las facturas de SIESA con vencimiento hasta la fecha de corte.</li>
+                                    <li><strong>Qué es vencido</strong> &mdash; las facturas de SIESA con vencimiento hasta la fecha de corte cuentan como vencidas. Las <code>FEX</code> de interés, que SIESA crea con cada pago con vencimiento el mismo día, se toman con vencimiento al último día del mes siguiente a su fecha, igual que las <code>FAT</code>.</li>
                                     <li><strong>Origen</strong> &mdash; el tooltip dice de dónde sale: saldo del tercero, operación SIESA o nota contable.</li>
                                     <li><strong>Base</strong> &mdash; cuando la operación tiene saldo atribuido en SIESA, ese vencido es el que forma la base; si no, la base usa lo vencido de factoring.</li>
                                 </ul>
