@@ -640,9 +640,9 @@
                             <li><strong>Cuatro tarjetas</strong> &mdash; «Requisitos pendientes» (N de 3), «Prórrogas que reducen mora», «Bajas por clasificar» y «Controles en falla».</li>
                             <li><strong>Cierre del corte</strong> &mdash; los requisitos pendientes, cada uno con su enlace para resolverlo («Ver controles», «Explicar partidas» o «Clasificar bajas»), y los botones de cierre.</li>
                             <li><strong>Cierre con salvedades</strong> &mdash; aparece en un corte cerrado con salvedad: muestra el motivo y los requisitos que estaban sin resolver.</li>
-                            <li><strong>Tablero de controles</strong> &mdash; el estado de C-1 a C-5; debajo, los paneles de C-1 y C-2, los controles de cuadre y la bitácora.</li>
+                            <li><strong>Tablero de controles</strong> &mdash; el estado de C-1 a C-6; debajo, los paneles de C-1, C-2 y C-6, los controles de cuadre y la bitácora.</li>
                         </ul>
-                        <h6 class="det-ayuda-sub">Dos controles se gestionan aquí</h6>
+                        <h6 class="det-ayuda-sub">Tres controles se gestionan aquí</h6>
                         <ul>
                             <li><strong>C-1 · Prórrogas que reducen la antigüedad de la mora.</strong> La prórroga traslada las cuotas al final, con lo cual la operación puede bajar de rango y <strong>liberar deterioro</strong>. La pantalla lista cada mes las operaciones cuya antigüedad bajó, con el deterioro que eso liberó, para validación. La lista incluye también las caídas de mora por pagos, no solo por prórrogas.
                                 <ul>
@@ -659,6 +659,7 @@
                                     <li><strong>Otra causa, explicada en la observación</strong>.</li>
                                 </ul>
                             </li>
+                            <li><strong>C-6 · Cuotas recreadas a mano en SIESA.</strong> Algunas operaciones tienen sus cuotas de capital creadas a mano en SIESA, documento por documento, y a todas les quedó como vencimiento el día en que se crearon. Por definición de Contabilidad, el módulo toma para esas cuotas la fecha de vencimiento del plan de pagos de factoring, cruzando operación y número de cuota; las que no cruzan conservan la fecha de SIESA y se señalan con <span class="det-badge det-ambar">N sin cruce</span>. El panel lista las operaciones con el capital vencido según SIESA, el aplicado y la diferencia.</li>
                         </ul>
                         <p>Sin la etiqueta, una reapertura se vería igual que un recaudo en la descomposición del movimiento del mes.</p>
                         <p>El tablero muestra además <strong>C-4</strong> y <strong>C-5</strong> como pendientes: todavía no están implementados.</p>

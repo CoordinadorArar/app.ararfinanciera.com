@@ -179,6 +179,32 @@ class Deterioro extends Model
         return "TRY_CONVERT(int, LEFT({$resto}, NULLIF(PATINDEX('%[^0-9]%', {$resto} + 'x'), 0) - 1))";
     }
 
+    public static function esCuotaManualSiesa($alias)
+    {
+        return "({$alias}.f353_id_tipo_docto_cruce = 'OPE'
+                 AND {$alias}.f353_notas NOT LIKE '%-- OPE-%'
+                 AND PATINDEX('%OP%', {$alias}.f353_notas) > 0
+                 AND PATINDEX('%C[UT][OA]%', {$alias}.f353_notas) > 0)";
+    }
+
+    public static function primerEnteroDe($resto)
+    {
+        $inicio = "PATINDEX('%[0-9]%', {$resto} + '0')";
+
+        return "NULLIF(TRY_CAST(SUBSTRING({$resto}, {$inicio},
+                    PATINDEX('%[^0-9]%', SUBSTRING({$resto}, {$inicio}, 40) + ' ') - 1) AS int), 0)";
+    }
+
+    public static function cuotaDeNotaManual($notas)
+    {
+        return self::primerEnteroDe("SUBSTRING({$notas}, PATINDEX('%C[UT][OA]%', {$notas}), 40)");
+    }
+
+    public static function operacionDeNotaManual($notas)
+    {
+        return self::primerEnteroDe("SUBSTRING({$notas}, PATINDEX('%OP%', {$notas}) + 2, 40)");
+    }
+
     /** Los prefijos de PREFIJOS_SALDO_SIESA como lista literal para un IN de SQL. */
     public static function prefijosSaldoSiesa()
     {
@@ -926,6 +952,26 @@ class Deterioro extends Model
      * dejan de contar como vencidas: el vencido de `FEX` pasa de 12.275.827 a
      * 2.354.265, en 86 operaciones, 5 de ellas con mora.
      *
+     * Hay cuotas de capital recreadas a mano en SIESA: documentos `OPE` cuyo
+     * consecutivo **no** es la operación —800310, por ejemplo— y cuya nota
+     * nombra la cuota y la operación: 'ACUOTA 10 OP 8003', 'CUOTA 023 OP 5500',
+     * 'CTA 01 OPE 7906', 'CUOA 18 OP 7037', 'OPE 4167 CUOTA 11'. Las notas
+     * estándar de un `OPE` ('8003-- OPE-OPERACION FINANCIERA …') no son de este
+     * tipo y se excluyen por el literal `-- OPE-`. A todas les quedó
+     * `f353_fecha_vcto` igual a su fecha de creación, de modo que el módulo las
+     * veía vencidas. Por definición de Contabilidad del 27 de octubre de 2026 su
+     * vencimiento se toma del plan de factoring —`fec_final_corriente` de
+     * `det_corte_detalle_cuota` del mismo corte, cruzando por (operación,
+     * cuota)— y la fecha de SIESA se conserva cuando no hay cuota que cruce.
+     * Se atribuyen a la operación que dice la nota y no al consecutivo, que no
+     * es una operación y fabricaba partidas `SOLO_SIESA`. Medido en el corte de
+     * septiembre de 2026 en PRUEBAS: 1.085 documentos cumplen la condición, 342
+     * con saldo por 91.796.165 en 25 operaciones del corte; 338 cruzan contra
+     * el plan por (operación, cuota) y 332 coinciden al peso en saldo; con la
+     * fecha de factoring el vencido de esas cuotas pasa de 91.796.165 a
+     * 4.727.089. Ningún consecutivo de esos documentos coincide con una
+     * operación real del corte.
+     *
      * De las 8 `CC` sólo dos llevan una operación que exista en el corte:
      * `SALDO FAT 8165 OPE 3090` por 120.266,00 y `SALDO CUOTA 11 OPE 2589` por
      * 16.956,00. Esos 137.222,00 son todo el efecto de la regla sobre
@@ -999,6 +1045,9 @@ class Deterioro extends Model
         $operacionNota = self::operacionDeRestoOpe('a.resto');
         $operacionOpe = self::operacionDeConsecutivoOpe('s.f353_consec_docto_cruce');
         $unicas = self::sqlOperacionesUnicasPorTercero();
+        $manual = self::esCuotaManualSiesa('s');
+        $cuotaManual = self::cuotaDeNotaManual('s.f353_notas');
+        $operacionManual = self::operacionDeNotaManual('s.f353_notas');
 
         return "DECLARE @corte date = ?;
                 DECLARE @idCorte int = ?;
@@ -1008,12 +1057,17 @@ class Deterioro extends Model
                 INSERT INTO det_corte_saldo_siesa (
                     id_corte, tipo_docto_cruce, consec_docto_cruce,
                     id_operacion_nota, componente,
-                    nit, razon_social, saldo, saldo_vencido, fecha_extraccion)
+                    nit, razon_social, saldo, saldo_vencido, fecha_extraccion,
+                    cuota_manual, vencimiento_factoring, saldo_vencido_siesa)
                 SELECT @idCorte, z.tipo, z.consec,
                     z.operacion, z.componente,
                     MIN(z.nit), MIN(z.razon_social),
                     SUM(ISNULL(z.saldo, 0)),
-                    SUM(CASE WHEN z.fecha_vcto <= @corte THEN ISNULL(z.saldo, 0) ELSE 0 END), @ahora
+                    SUM(CASE WHEN z.fecha_vcto <= @corte THEN ISNULL(z.saldo, 0) ELSE 0 END), @ahora,
+                    MAX(z.cuota_manual),
+                    MIN(z.vencimiento_factoring),
+                    CASE WHEN MAX(z.cuota_manual) IS NOT NULL
+                         THEN SUM(CASE WHEN z.fecha_vcto_siesa <= @corte THEN ISNULL(z.saldo, 0) ELSE 0 END) END
                 FROM (
                     SELECT tipo = s.f353_id_tipo_docto_cruce,
                            consec = s.f353_consec_docto_cruce,
@@ -1022,12 +1076,18 @@ class Deterioro extends Model
                            razon_social = t.f200_razon_social,
                            saldo = m.saldo,
                            fecha_vcto = CASE
+                               WHEN f.vcto IS NOT NULL THEN f.vcto
                                WHEN s.f353_id_tipo_docto_cruce = 'FEX' AND aux.f253_id = '{$cuentaInteres}'
                                THEN EOMONTH(s.f353_fecha, 1)
                                ELSE s.f353_fecha_vcto END,
+                           fecha_vcto_siesa = s.f353_fecha_vcto,
+                           cuota_manual = CASE WHEN {$manual} THEN {$cuotaManual} END,
+                           vencimiento_factoring = CASE WHEN {$manual}
+                               THEN CASE WHEN f.vcto IS NOT NULL THEN 1 ELSE 0 END END,
                            movimientos = m.f354_rowid_sa,
                            operacion = CASE
                                WHEN u.id_operacion IS NOT NULL THEN u.id_operacion
+                               WHEN {$manual} AND {$operacionManual} IS NOT NULL THEN {$operacionManual}
                                WHEN s.f353_id_tipo_docto_cruce = 'OPE' THEN {$operacionOpe}
                                ELSE {$operacionNota} END,
                            componente = CASE
@@ -1053,6 +1113,13 @@ class Deterioro extends Model
                     CROSS APPLY (SELECT resto = CASE
                         WHEN s.f353_id_tipo_docto_cruce = 'OPE' THEN NULL
                         ELSE ({$restoNota}) END) a
+                    OUTER APPLY (SELECT TOP 1 vcto = d.fec_final_corriente
+                        FROM det_corte_detalle_cuota d
+                        WHERE {$manual}
+                          AND d.id_corte = @idCorte
+                          AND d.id_operacion = ISNULL(u.id_operacion, {$operacionManual})
+                          AND d.id_cuota = {$cuotaManual}
+                          AND d.duplicada_de IS NULL) f
                     WHERE s.f353_id_cia = @cia
                       AND s.f353_id_tipo_docto_cruce IN ({$prefijos})
                       AND aux.f253_id IN ('{$cuentaCapital}', '{$cuentaInteres}')) z
@@ -3301,6 +3368,31 @@ class Deterioro extends Model
              WHERE o.id_corte = ? AND a.dias_mora_operacion > o.dias_mora_operacion
              ORDER BY a.deterioro_contable - o.deterioro_contable DESC, o.id_operacion",
             [$idCorteAnterior, $idCorte]);
+    }
+
+    public static function cuotasReliquidadas($idCorte)
+    {
+        return DB::select(
+            "SELECT o.id_operacion, o.nom_operacion, o.id_cliente, o.cliente, o.producto,
+                    cuotas = COUNT(*),
+                    cuotas_con_cruce = SUM(CASE WHEN z.vencimiento_factoring = 1 THEN 1 ELSE 0 END),
+                    cuotas_sin_cruce = SUM(CASE WHEN z.vencimiento_factoring = 1 THEN 0 ELSE 1 END),
+                    saldo = SUM(z.saldo),
+                    vencido_siesa = SUM(ISNULL(z.saldo_vencido_siesa, 0)),
+                    vencido_aplicado = SUM(ISNULL(z.saldo_vencido, 0)),
+                    diferencia = SUM(ISNULL(z.saldo_vencido_siesa, 0)) - SUM(ISNULL(z.saldo_vencido, 0)),
+                    dias_mora = o.dias_mora_operacion,
+                    rango = ISNULL(o.calificacion_abc, 'Corriente'),
+                    o.origen_base
+             FROM det_corte_saldo_siesa z
+             INNER JOIN det_deterioro_operacion o
+                     ON o.id_corte = z.id_corte AND o.id_operacion = z.id_operacion_nota
+             WHERE z.id_corte = ? AND z.cuota_manual IS NOT NULL
+               AND z.componente = 'CAPITAL' AND z.saldo <> 0
+             GROUP BY o.id_operacion, o.nom_operacion, o.id_cliente, o.cliente, o.producto,
+                      o.dias_mora_operacion, o.calificacion_abc, o.origen_base
+             ORDER BY diferencia DESC, o.id_operacion",
+            [$idCorte]);
     }
 
     /**
